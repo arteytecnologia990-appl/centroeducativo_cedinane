@@ -16,7 +16,7 @@ tags:
 
 **Última actualización:** 2026-10-03 (sesión 4: primera migración aplicada)
 **Fase del producto:** 1 — base, RBAC, personas, horarios, asistencia, horas pagables.
-**Momento:** esquema de la fase 1 **aplicado en la base** ✅ — falta la capa de aplicación (auth + clientes).
+**Momento:** base de la aplicación **aplicada** (clientes Supabase, sesión en proxy, login, layouts) ✅ — falta el primer usuario administrador.
 
 ## Hecho
 
