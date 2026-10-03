@@ -1,4 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+﻿# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -41,7 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Obsidian (bóveda en la raíz del repo)
+# Obsidian (bÃ³veda en la raÃ­z del repo)
 boveda/.obsidian/workspace.json
 boveda/.trash/
 
