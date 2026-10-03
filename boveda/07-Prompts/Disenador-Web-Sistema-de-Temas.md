@@ -110,5 +110,6 @@ Español de Paraguay: fechas `dd/mm/aaaa`, hora 24 h, montos `Gs. 150.000` (sin 
 
 ## Estado
 
-- ✅ Punto 1 entregado el 2026-10-03 (ver [[Estado-Actual]] y bitácora).
-- ⏳ Pendiente confirmación para continuar con el punto 2.
+- ✅ **Puntos 1–6 completados el 2026-10-03**: tokens (8 combinaciones oklch), provider de estilo, ThemeSwitcher, cookie + `preferencias_usuario`, componentes y página `/design-system`.
+- Guía de uso y cómo añadir un 5.º estilo → [[Guia-Estilos]].
+- Generador de tokens (fuente de verdad) → `scripts/generar-tema.mjs`.
