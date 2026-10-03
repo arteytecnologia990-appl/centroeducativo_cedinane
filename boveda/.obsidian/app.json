@@ -1,0 +1,15 @@
+{
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "90-Archivo/adjuntos",
+  "newFileLocation": "root",
+  "useMarkdownLinks": false,
+  "showUnsupportedFiles": false,
+  "promptDelete": false,
+  "trashOption": "local",
+  "readableLineLength": true,
+  "strictLineBreaks": false,
+  "livePreview": true,
+  "defaultViewMode": "source",
+  "showLineNumber": true,
+  "userIgnoreFilters": []
+}

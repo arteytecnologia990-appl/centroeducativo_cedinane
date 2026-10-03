@@ -1,0 +1,3 @@
+﻿-- Datos de arranque (ficticios) para desarrollo.
+-- Sedes, modulos_pantallas, roles y permisos mínimos para arrancar.
+-- NUNCA datos reales. Ver boveda/04-Operacion/Seguridad-y-Datos.md.
