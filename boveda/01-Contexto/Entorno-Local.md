@@ -61,3 +61,7 @@ corepack pnpm dlx vercel <cmd>
 **E-005 · La bóveda de Obsidian cambió de ruta.** Ahora está en `boveda/`. Hay que reabrir Obsidian apuntando a esa carpeta (no a la raíz del repo). `Ctrl+R` recarga la bóveda.
 
 **E-006 · Next.js 16 tiene cambios de ruptura.** Antes de escribir código, leer la guía en `node_modules/next/dist/docs/` (lo exige `AGENTS.md`). Ejemplo ya visto: `next lint` fue retirado; el script usa `eslint` directo.
+
+**E-007 · El CLI de Supabase ignora los `.md` dentro de `supabase/migrations/`.** Síntoma: *"Skipping migration README.md... (file name must match pattern)"*. Solución: la documentación de migraciones vive en `supabase/README.md`, no dentro de `migrations/`.
+
+**E-008 · Contar filas de la API con `@(...).Count` da un falso 1.** `@(Invoke-RestMethod ...).Count` devuelve 1 aunque haya N filas. Solución: `($resp | Measure-Object).Count`.
