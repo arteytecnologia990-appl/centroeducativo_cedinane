@@ -7,44 +7,47 @@ tags:
 
 # Estado actual y preguntas abiertas
 
-> [!note] Regla de oro
-> Se actualiza **al final de cada sesión**. Si está desactualizado, la siguiente sesión empieza ciega.
+> [!danger] Regla vigente · Coste cero obligatorio
+> **Solo planes gratuitos durante el desarrollo** (Supabase Free, GitHub Free, Vercel **Hobby**) → [[ADR-0005-Coste-cero-obligatorio-durante-el-desarrollo]].
+> Prohibido activar planes de pago o añadir métodos de pago. Si algo amenaza con costar, se detiene y se consulta.
 
-**Última actualización:** 2026-10-03 (fin de sesión 3: servicios conectados)
+> [!note] Regla de oro
+> Este archivo se actualiza **al final de cada sesión**. Si está desactualizado, la siguiente sesión empieza ciega.
+
+**Última actualización:** 2026-10-03 (sesión 3: servicios conectados + regla de coste cero)
 **Fase del producto:** 1 — base, RBAC, personas, horarios, asistencia, horas pagables.
-**Momento:** repositorio materializado **y conectado** ✅ — listo para la primera migración.
+**Momento:** repositorio materializado y **todo conectado** ✅ — listo para la primera migración.
 
 ## Hecho
 
-- **Bóveda** migrada a `boveda/` (58 notas, enlaces resueltos); legado en `90-Archivo/`.
-- **Scaffold Next.js 16.3.8** (App Router, TS estricto, Tailwind v4) + shadcn/ui (23 componentes) + Supabase/TanStack/Zod/Vitest.
+- **Bóveda** migrada a `boveda/` (59 notas, enlaces resueltos); legado en `90-Archivo/`.
+- **Scaffold Next.js 16.3.8** + shadcn/ui (23 componentes) + Supabase/TanStack/Zod/Vitest.
 - **Verificado**: `typecheck` ✅, `lint` ✅, `test` ✅, `build` ✅.
-- **GitHub**: 3 commits en `main`, sincronizado con `origin` (`fff4a70`, `7b4a8df`, `3d754c0`). Push funcionando.
-- **Supabase**: sesión iniciada, proyecto **enlazado** (`znknfjujmhbgwywpuzyq`) y `src/types/database.ts` **generado** (sin Docker).
-- **`.env.local`** completo: URL + anon + service_role (gitignorado).
-- **Vercel**: proyecto `centroeducativo` (team `centroeducativo-cedinane`) enlazado localmente (`.vercel/project.json`).
+- **GitHub**: repositorio sincronizado, push funcionando.
+- **Supabase**: proyecto enlazado, `src/types/database.ts` generado, `.env.local` completo (sin Docker).
+- **Vercel**: proyecto `centroeducativo` enlazado **y Git conectado** (`> Connected`), team en plan **Hobby**.
+
+## Servicios y costo (verificado 2026-10-03)
+
+| Servicio | Plan | Costo | Uso |
+| --- | --- | --- | --- |
+| Supabase | Free | 0 | ✅ Base de datos, Auth, RLS (se pausa por inactividad; se reactiva) |
+| GitHub | Free | 0 | ✅ Repositorio |
+| GitHub Actions | Free (cupo) | 0 | ✅ CI (lint/typecheck/test) |
+| Vercel | Team `centroeducativo-cedinane` → **hobby** | 0 | ✅ Permitido (previews). ⚠️ Hobby es *no comercial*: al publicar habrá que revisar licencia |
+| Vercel Pro / Supabase Pro | — | 💰 | 🚫 Prohibido ([[ADR-0005-Coste-cero-obligatorio-durante-el-desarrollo]]) |
 
 ## Pendiente
 
-| Qué | Estado | Cómo se resuelve |
+| Qué | Estado | Nota |
 | --- | --- | --- |
-| Vercel ↔ GitHub (auto-deploy) | ❌ falló la conexión | Ver "Arreglo de Vercel" abajo |
-| Claves de Supabase en Vercel | ⏳ pendiente | Cargarlas en el dashboard (Production/Preview) |
 | Primera migración + auth | ⏳ siguiente paso | Ver abajo |
-| `VERCEL_OIDC_TOKEN` en `.env.local` | perdido (lo sobrescribió el `Copy-Item`) | opcional: `vercel env pull` |
-
-### Arreglo de Vercel ↔ GitHub
-
-Vercel no pudo conectar `arteytecnologia990-appl/centroeducativo_cedinane`. Causa típica: la **app de GitHub de Vercel** no tiene permiso sobre ese repositorio/organización. Solución:
-
-1. Autorizar la app: <https://github.com/apps/vercel> → *Configure* → dar acceso a `arteytecnologia990-appl/centroeducativo_cedinane` (o a la organización).
-2. Luego, en Vercel: proyecto `centroeducativo` → **Settings → Git → Connect Git Repository** → elegir el repo.
-3. Cargar en Vercel (Settings → Environment Variables) las mismas claves de `.env.local` (URL, anon, service_role) para Production y Preview.
+| Revisar licencia Hobby al publicar | 🔮 futuro | Solo si se explota comercialmente |
 
 ## Siguiente paso (próxima sesión)
 
 1. Primera migración en `supabase/migrations/`: `sedes`, `personas`, `persona_roles`, `persona_relaciones`, `usuarios`, `roles`, `modulos_pantallas`, `permisos_rol` + RLS por sede → [[Modelo-de-Datos]], [[RBAC-y-RLS]].
-2. Aplicarla y regenerar tipos: `pnpm db:push` + `pnpm db:types` (o `db:reset` cuando haya Docker).
+2. Aplicarla (`pnpm db:push`) y regenerar tipos (`pnpm db:types`).
 3. Autenticación + clientes Supabase (`src/lib/supabase/*`) → prompt [[Fase-1-Base]].
 4. `seed.sql` con datos ficticios: 2 sedes, módulos/pantallas, roles y permisos.
 
@@ -54,7 +57,7 @@ Vercel no pudo conectar `arteytecnologia990-appl/centroeducativo_cedinane`. Caus
 - 🟡 **Q-03** ¿El reloj ZKTime existe ya o es a futuro?
 - 🟡 **Q-04** ¿Facturación Ekuatia'i/DNIT-SET en fase 2 o 3?
 - 🟡 **Q-05** ¿Modalidades de pago del personal: solo fijo + por hora, o mixtas/por paciente?
-- ✅ **Q-01** Token/Docker para Supabase → resuelto (login + link + gen types funcionan sin Docker).
+- ✅ **Q-01** Supabase sin Docker → resuelto (login + link + gen types funcionan).
 
 ## Nota para quien retome
 
