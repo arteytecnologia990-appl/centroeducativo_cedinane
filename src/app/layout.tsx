@@ -10,6 +10,7 @@ import {
   Nunito,
   Source_Sans_3,
 } from "next/font/google"
+import { Providers } from "@/components/providers"
 import { EstiloProvider } from "@/lib/tema/estilo-provider"
 import { ESTILO_COOKIE, ESTILO_DEFAULT } from "@/lib/tema/cookie"
 import { esEstiloId } from "@/lib/tema/estilos"
@@ -47,7 +48,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          <EstiloProvider estiloInicial={estilo}>{children}</EstiloProvider>
+          <EstiloProvider estiloInicial={estilo}>
+            <Providers>{children}</Providers>
+          </EstiloProvider>
         </ThemeProvider>
       </body>
     </html>

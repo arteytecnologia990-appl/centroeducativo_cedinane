@@ -1,13 +1,10 @@
-import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
 // Proxy de Next.js 16 (sustituye al antiguo "middleware.ts").
-// Corre antes de renderizar la ruta. Aquí irá el refresco de sesión de Supabase
-// y el control de acceso por rol.
-// Ver: boveda/03-Tecnico/RBAC-y-RLS.md y node_modules/next/dist/docs (proxy).
-
-export function proxy() {
-  // TODO(fase-1-base): refrescar sesión Supabase y redirigir según rol.
-  return NextResponse.next()
+// Refresca la sesión de Supabase en cada petición.
+export async function proxy(request: NextRequest) {
+  return updateSession(request)
 }
 
 export const config = {
