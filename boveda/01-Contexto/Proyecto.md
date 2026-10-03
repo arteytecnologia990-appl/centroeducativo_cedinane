@@ -1,4 +1,4 @@
-﻿---
+---
 tipo: contexto
 actualizado: 2026-10-03
 tags:
@@ -64,6 +64,12 @@ tags:
 - Toda tabla de negocio lleva **`sede_id`**; los permisos se acotan por sede.
 - **Nada de parÃ¡metros hardcodeados**: tolerancias, redondeos, reglas de pago y tarifas en tablas con vigencia.
 - Datos sensibles (historia clÃ­nica en fases futuras, datos de menores): privacidad y auditorÃ­a desde el inicio â†’ [[Seguridad-y-Datos]].
+
+## Flujo por etapas con puertas de seguridad
+
+Ninguna etapa se cierra sin el veredicto del agente de seguridad (APROBADO, APROBADO CON CONDICIONES o BLOQUEADO). Un hallazgo Crítico o Alto abierto bloquea el avance. Antes de cerrar una etapa se entrega un paquete de revisión.
+
+Veredictos y matriz → [[Gates]] · [[Matriz-Capas]].
 
 ## Entorno de desarrollo
 

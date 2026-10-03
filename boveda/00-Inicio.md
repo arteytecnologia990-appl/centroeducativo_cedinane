@@ -33,6 +33,7 @@ Segundo cerebro del proyecto. **Regla de oro: cargar poco contexto por tarea.** 
 | Configurar entorno o arreglar un fallo | [[Entorno-Local]] |
 | Desplegar | [[Entornos-y-Despliegue]] |
 | Añadir un módulo nuevo | [[Estructura-Carpetas]] + [[Convenciones-Codigo]] |
+| Revisar seguridad de una etapa (gate) | [[Seguridad]] + [[Proyecto]] + `Seguridad/` + paquete de revisión |
 
 ## Mapa
 
@@ -46,8 +47,19 @@ Segundo cerebro del proyecto. **Regla de oro: cargar poco contexto por tarea.** 
 | `06-Bitacora/` | Diario de sesiones |
 | `07-Prompts/` | Prompts por fase, listos para pegar |
 | `08-Plantillas/` | Plantillas reutilizables |
+| `Seguridad/` | Registros del agente de seguridad (matriz, riesgos, amenazas, gates) |
 | `90-Archivo/` | Material anterior al proyecto actual (legado, revisar en fases 2+) |
 | `99-Inbox.md` | Captura rápida |
+
+## Agente de seguridad (puerta entre etapas)
+
+Cada etapa se cierra solo con el veredicto del [[Seguridad|agente de seguridad]] (APROBADO / APROBADO CON CONDICIONES / BLOQUEADO). Un hallazgo Crítico o Alto abierto bloquea el avance.
+
+**Regla de carga — lee solo:**
+1. [[Proyecto]] (contexto mínimo).
+2. [[Seguridad]] (su prompt: `07-Prompts/Seguridad.md`).
+3. `Seguridad/`: [[Matriz-Capas]] · [[Registro-Riesgos]] · [[Modelo-Amenazas]] · [[Gates]].
+4. El paquete de revisión de la etapa ([[Plantilla-Paquete-Revision]]).
 
 ## Estado en una línea
 
