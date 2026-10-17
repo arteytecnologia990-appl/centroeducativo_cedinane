@@ -43,6 +43,7 @@ type PersonaEditable = {
   direccion?: string | null
   observaciones?: string | null
   personal?: PersonalEditable | null
+  persona_roles?: { rol_negocio: string }[] | null
 }
 
 const claseSelect =
@@ -78,6 +79,15 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
   const p = persona?.personal ?? null
   const [fechaIngreso, setFechaIngreso] = useState(p?.fecha_ingreso ?? '')
   const antiguedad = calcularAntiguedad(fechaIngreso)
+  const [rolSeleccionado, setRolSeleccionado] = useState(rolInicial ?? '')
+
+  // Los datos laborales solo aplican a personal (empleado/profesional).
+  const rolesActuales = (persona?.persona_roles ?? []).map((r) => r.rol_negocio)
+  const esPersonal =
+    rolesActuales.includes('empleado') ||
+    rolesActuales.includes('profesional') ||
+    rolSeleccionado === 'empleado' ||
+    rolSeleccionado === 'profesional'
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -129,7 +139,13 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
         {!esEdicion ? (
           <div className="space-y-1.5">
             <Label htmlFor="rol_negocio">Rol</Label>
-            <select id="rol_negocio" name="rol_negocio" defaultValue={rolInicial ?? ''} className={claseSelect}>
+            <select
+              id="rol_negocio"
+              name="rol_negocio"
+              value={rolSeleccionado}
+              onChange={(e) => setRolSeleccionado(e.target.value)}
+              className={claseSelect}
+            >
               <option value="">Sin rol</option>
               {ROLES_NEGOCIO.map((r) => (
                 <option key={r} value={r}>
@@ -158,6 +174,7 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
         <Textarea id="observaciones" name="observaciones" rows={3} defaultValue={persona?.observaciones ?? ''} />
       </div>
 
+      {esPersonal ? (
       <fieldset className="space-y-4 rounded-lg border border-border p-4">
         <legend className="px-1 text-sm font-medium text-foreground">Datos laborales</legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -246,6 +263,7 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
           <span className="text-xs text-muted-foreground">Documentos presentados</span>
         </div>
       </fieldset>
+      ) : null}
 
       {error ? (
         <div role="alert" className="rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive">
