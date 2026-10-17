@@ -41,14 +41,22 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
       <PersonaForm key={persona.updated_at} persona={persona} />
 
       <section className="max-w-2xl space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="font-heading text-lg font-semibold text-foreground">Horarios</h2>
-          <Link
-            href={`/dashboard/horarios?persona_id=${persona.id}`}
-            className="text-sm text-primary hover:underline"
-          >
-            Gestionar horarios
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/dashboard/horarios?persona_id=${persona.id}`}
+              className="text-sm text-primary hover:underline"
+            >
+              Gestionar horarios
+            </Link>
+            <Link
+              href={`/imprimir/asistencia/${persona.id}`}
+              className="text-sm text-primary hover:underline"
+            >
+              Imprimir asistencia
+            </Link>
+          </div>
         </div>
         {horarios.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sin horarios cargados.</p>
