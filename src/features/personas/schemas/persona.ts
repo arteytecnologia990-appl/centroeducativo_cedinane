@@ -25,6 +25,18 @@ export const ETIQUETA_ROL: Record<RolNegocio, string> = {
   cliente: 'Cliente',
 }
 
+export const FORMACION_ACADEMICA = [
+  'Grado Concluido',
+  'Estudiante Universitario',
+  'Posgrado',
+  'Formación Técnica',
+  'Educación Media',
+] as const
+
+export const TURNOS = ['M', 'T', 'M/T'] as const
+
+export const SECTORES = ['privado', 'publico'] as const
+
 export const personaSchema = z.object({
   nombres: z.string().trim().min(1, 'Ingresá el nombre.').max(120),
   apellidos: z.string().trim().min(1, 'Ingresá el apellido.').max(120),
@@ -36,6 +48,18 @@ export const personaSchema = z.object({
   direccion: z.string().trim().max(200),
   observaciones: z.string().trim().max(500),
   rol_negocio: z.string().trim(),
+  // Datos laborales (tabla personal)
+  cargo: z.string().trim().max(120),
+  programa: z.string().trim().max(120),
+  formacion_academica: z.string().trim(),
+  turno: z.string().trim(),
+  sector: z.string().trim(),
+  experiencia_cargo: z.string().trim().max(60),
+  antiguedad_institucion: z.string().trim().max(60),
+  registro_profesional: z.string().trim().max(60),
+  tiene_ci: z.boolean(),
+  tiene_cv: z.boolean(),
+  tiene_cd: z.boolean(),
 })
 
 export type PersonaInput = z.infer<typeof personaSchema>

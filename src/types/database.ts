@@ -244,6 +244,84 @@ export type Database = {
           },
         ]
       }
+      personal: {
+        Row: {
+          antiguedad_institucion: string | null
+          cargo: string | null
+          created_at: string
+          deleted_at: string | null
+          experiencia_cargo: string | null
+          fecha_ingreso: string | null
+          formacion_academica: string | null
+          id: string
+          persona_id: string
+          programa: string | null
+          registro_profesional: string | null
+          sector: string | null
+          sede_id: string | null
+          tiene_cd: boolean
+          tiene_ci: boolean
+          tiene_cv: boolean
+          turno: string | null
+          updated_at: string
+        }
+        Insert: {
+          antiguedad_institucion?: string | null
+          cargo?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          experiencia_cargo?: string | null
+          fecha_ingreso?: string | null
+          formacion_academica?: string | null
+          id?: string
+          persona_id: string
+          programa?: string | null
+          registro_profesional?: string | null
+          sector?: string | null
+          sede_id?: string | null
+          tiene_cd?: boolean
+          tiene_ci?: boolean
+          tiene_cv?: boolean
+          turno?: string | null
+          updated_at?: string
+        }
+        Update: {
+          antiguedad_institucion?: string | null
+          cargo?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          experiencia_cargo?: string | null
+          fecha_ingreso?: string | null
+          formacion_academica?: string | null
+          id?: string
+          persona_id?: string
+          programa?: string | null
+          registro_profesional?: string | null
+          sector?: string | null
+          sede_id?: string | null
+          tiene_cd?: boolean
+          tiene_ci?: boolean
+          tiene_cv?: boolean
+          turno?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: true
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sedes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personas: {
         Row: {
           apellidos: string

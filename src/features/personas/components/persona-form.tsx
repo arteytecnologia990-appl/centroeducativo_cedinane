@@ -4,11 +4,31 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import { actualizarPersona, crearPersona } from '@/features/personas/actions/persona'
-import { ETIQUETA_ROL, ROLES_NEGOCIO } from '@/features/personas/schemas/persona'
+import {
+  ETIQUETA_ROL,
+  FORMACION_ACADEMICA,
+  ROLES_NEGOCIO,
+  SECTORES,
+  TURNOS,
+} from '@/features/personas/schemas/persona'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+
+type PersonalEditable = {
+  cargo?: string | null
+  programa?: string | null
+  formacion_academica?: string | null
+  turno?: string | null
+  sector?: string | null
+  experiencia_cargo?: string | null
+  antiguedad_institucion?: string | null
+  registro_profesional?: string | null
+  tiene_ci?: boolean | null
+  tiene_cv?: boolean | null
+  tiene_cd?: boolean | null
+}
 
 type PersonaEditable = {
   id?: string
@@ -21,6 +41,7 @@ type PersonaEditable = {
   telefono?: string | null
   direccion?: string | null
   observaciones?: string | null
+  personal?: PersonalEditable | null
 }
 
 const claseSelect =
@@ -30,6 +51,7 @@ export function PersonaForm({ persona }: { persona?: PersonaEditable }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const esEdicion = Boolean(persona?.id)
+  const p = persona?.personal ?? null
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -109,6 +131,82 @@ export function PersonaForm({ persona }: { persona?: PersonaEditable }) {
         <Label htmlFor="observaciones">Observaciones</Label>
         <Textarea id="observaciones" name="observaciones" rows={3} defaultValue={persona?.observaciones ?? ''} />
       </div>
+
+      <fieldset className="space-y-4 rounded-lg border border-border p-4">
+        <legend className="px-1 text-sm font-medium text-foreground">Datos laborales</legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="cargo">Cargo</Label>
+            <Input id="cargo" name="cargo" defaultValue={p?.cargo ?? ''} placeholder="Ej.: Docente Titular - Sede 1" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="programa">Programa</Label>
+            <Input id="programa" name="programa" defaultValue={p?.programa ?? ''} placeholder="Ej.: TOI, HPA…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="formacion_academica">Formación académica</Label>
+            <select
+              id="formacion_academica"
+              name="formacion_academica"
+              defaultValue={p?.formacion_academica ?? ''}
+              className={claseSelect}
+            >
+              <option value="">Sin especificar</option>
+              {FORMACION_ACADEMICA.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="turno">Turno</Label>
+            <select id="turno" name="turno" defaultValue={p?.turno ?? ''} className={claseSelect}>
+              <option value="">Sin especificar</option>
+              {TURNOS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sector">Sector</Label>
+            <select id="sector" name="sector" defaultValue={p?.sector ?? ''} className={claseSelect}>
+              <option value="">Sin especificar</option>
+              {SECTORES.map((s) => (
+                <option key={s} value={s}>
+                  {s === 'privado' ? 'Privado' : 'Público'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="experiencia_cargo">Experiencia en cargo</Label>
+            <Input id="experiencia_cargo" name="experiencia_cargo" defaultValue={p?.experiencia_cargo ?? ''} placeholder="Ej.: 5 años" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="antiguedad_institucion">Antigüedad en la institución</Label>
+            <Input id="antiguedad_institucion" name="antiguedad_institucion" defaultValue={p?.antiguedad_institucion ?? ''} placeholder="Ej.: 11 años" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="registro_profesional">Registro / Matrícula</Label>
+            <Input id="registro_profesional" name="registro_profesional" defaultValue={p?.registro_profesional ?? ''} />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="tiene_ci" defaultChecked={Boolean(p?.tiene_ci)} className="size-4 rounded border-input accent-primary" /> CI
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="tiene_cv" defaultChecked={Boolean(p?.tiene_cv)} className="size-4 rounded border-input accent-primary" /> CV
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="tiene_cd" defaultChecked={Boolean(p?.tiene_cd)} className="size-4 rounded border-input accent-primary" /> CD
+          </label>
+          <span className="text-xs text-muted-foreground">Documentos presentados</span>
+        </div>
+      </fieldset>
 
       {error ? (
         <div role="alert" className="rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive">

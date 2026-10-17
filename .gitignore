@@ -54,3 +54,6 @@ supabase/.temp
 *.sqlite
 *.sqlite3
 backups/
+
+# Datos de entrada con informacion real del plantel (no versionar)
+docs/
