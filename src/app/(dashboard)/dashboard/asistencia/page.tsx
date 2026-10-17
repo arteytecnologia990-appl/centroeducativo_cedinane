@@ -28,11 +28,21 @@ export default async function AsistenciaPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">Asistencia</h1>
-        <p className="text-sm text-muted-foreground">
-          Marcaciones del día (kiosco y manual). El kiosco está en <code>/kiosco-asistencia</code>.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold text-foreground">Asistencia</h1>
+          <p className="text-sm text-muted-foreground">
+            Marcaciones del día (kiosco y manual).
+          </p>
+        </div>
+        <a
+          href="/kiosco-asistencia"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Abrir kiosco ↗
+        </a>
       </div>
 
       <form method="get" action="/dashboard/asistencia" className="flex items-end gap-2">
