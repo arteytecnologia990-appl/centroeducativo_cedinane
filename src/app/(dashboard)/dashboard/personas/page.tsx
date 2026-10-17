@@ -56,7 +56,7 @@ export default async function PersonasPage({
           <p className="text-sm text-muted-foreground tabular-nums">{total} en total</p>
         </div>
         <Link
-          href="/dashboard/personas/nueva"
+          href={rol ? `/dashboard/personas/nueva?rol=${rol}` : '/dashboard/personas/nueva'}
           className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Nueva persona

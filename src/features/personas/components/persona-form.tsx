@@ -48,7 +48,7 @@ type PersonaEditable = {
 const claseSelect =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
-export function PersonaForm({ persona }: { persona?: PersonaEditable }) {
+export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable; rolInicial?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const esEdicion = Boolean(persona?.id)
@@ -104,7 +104,7 @@ export function PersonaForm({ persona }: { persona?: PersonaEditable }) {
         {!esEdicion ? (
           <div className="space-y-1.5">
             <Label htmlFor="rol_negocio">Rol</Label>
-            <select id="rol_negocio" name="rol_negocio" defaultValue="" className={claseSelect}>
+            <select id="rol_negocio" name="rol_negocio" defaultValue={rolInicial ?? ''} className={claseSelect}>
               <option value="">Sin rol</option>
               {ROLES_NEGOCIO.map((r) => (
                 <option key={r} value={r}>
