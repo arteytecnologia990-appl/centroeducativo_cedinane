@@ -443,6 +443,7 @@ export type Database = {
           registro_profesional: string | null
           sector: string | null
           sede_id: string | null
+          sueldo: number | null
           tiene_cd: boolean
           tiene_ci: boolean
           tiene_cv: boolean
@@ -464,6 +465,7 @@ export type Database = {
           registro_profesional?: string | null
           sector?: string | null
           sede_id?: string | null
+          sueldo?: number | null
           tiene_cd?: boolean
           tiene_ci?: boolean
           tiene_cv?: boolean
@@ -485,6 +487,7 @@ export type Database = {
           registro_profesional?: string | null
           sector?: string | null
           sede_id?: string | null
+          sueldo?: number | null
           tiene_cd?: boolean
           tiene_ci?: boolean
           tiene_cv?: boolean

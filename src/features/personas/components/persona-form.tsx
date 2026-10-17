@@ -27,6 +27,7 @@ type PersonalEditable = {
   fecha_ingreso?: string | null
   registro_profesional?: string | null
   logo?: string | null
+  sueldo?: number | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
   tiene_cd?: boolean | null
@@ -278,6 +279,18 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
               type="date"
               value={fechaIngreso}
               onChange={(e) => setFechaIngreso(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sueldo">Sueldo mensual</Label>
+            <Input
+              id="sueldo"
+              name="sueldo"
+              type="number"
+              min="0"
+              step="1"
+              defaultValue={p?.sueldo != null ? String(p.sueldo) : ''}
+              placeholder="Ej.: 3.000.000"
             />
           </div>
           <div className="space-y-1.5">

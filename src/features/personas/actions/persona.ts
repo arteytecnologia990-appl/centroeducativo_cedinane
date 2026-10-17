@@ -37,6 +37,7 @@ function datosDesdeFormData(formData: FormData): PersonaInput {
     fecha_ingreso: String(formData.get('fecha_ingreso') ?? ''),
     registro_profesional: String(formData.get('registro_profesional') ?? ''),
     logo: String(formData.get('logo') ?? ''),
+    sueldo: String(formData.get('sueldo') ?? ''),
     pin: String(formData.get('pin') ?? ''),
     nacionalidad: String(formData.get('nacionalidad') ?? ''),
     turno_alumno: String(formData.get('turno_alumno') ?? ''),
@@ -58,6 +59,8 @@ function mensajeDeError(error: { code?: string; message?: string }): string {
 
 /** Inserta o actualiza los datos laborales (1:1 con la persona). */
 async function guardarPersonal(supabase: Cliente, personaId: string, v: PersonaInput) {
+  const sueldo = v.sueldo === '' ? null : Number(v.sueldo)
+
   const datos = {
     cargo: aNull(v.cargo),
     programa: aNull(v.programa),
@@ -69,6 +72,7 @@ async function guardarPersonal(supabase: Cliente, personaId: string, v: PersonaI
     fecha_ingreso: aNull(v.fecha_ingreso),
     registro_profesional: aNull(v.registro_profesional),
     logo: aNull(v.logo),
+    sueldo: Number.isFinite(sueldo) ? sueldo : null,
     tiene_ci: v.tiene_ci,
     tiene_cv: v.tiene_cv,
     tiene_cd: v.tiene_cd,
@@ -84,6 +88,7 @@ async function guardarPersonal(supabase: Cliente, personaId: string, v: PersonaI
       datos.experiencia_cargo,
       datos.antiguedad_institucion,
       datos.registro_profesional,
+      datos.sueldo,
     ].some((x) => x !== null) ||
     datos.tiene_ci ||
     datos.tiene_cv ||
