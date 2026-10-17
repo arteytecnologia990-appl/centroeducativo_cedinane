@@ -50,6 +50,28 @@ type PersonaEditable = {
 const claseSelect =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
+/** Edad en años y meses desde una fecha de nacimiento (YYYY-MM-DD). */
+function calcularEdad(fecha: string): string {
+  if (!fecha) return '—'
+  const nace = new Date(`${fecha}T00:00:00`)
+  if (Number.isNaN(nace.getTime())) return '—'
+
+  const hoy = new Date()
+  let anios = hoy.getFullYear() - nace.getFullYear()
+  let meses = hoy.getMonth() - nace.getMonth()
+  if (hoy.getDate() < nace.getDate()) meses -= 1
+  if (meses < 0) {
+    anios -= 1
+    meses += 12
+  }
+  if (anios < 0) return '—'
+  if (anios === 0) {
+    if (meses === 0) return 'Menos de 1 mes'
+    return `${meses} ${meses === 1 ? 'mes' : 'meses'}`
+  }
+  return `${anios} ${anios === 1 ? 'año' : 'años'}${meses > 0 ? `, ${meses} ${meses === 1 ? 'mes' : 'meses'}` : ''}`
+}
+
 /** Antigüedad en años y meses desde una fecha (YYYY-MM-DD). */
 function calcularAntiguedad(fecha: string): string {
   if (!fecha) return '—'
@@ -80,6 +102,8 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
   const p = persona?.personal ?? null
   const [fechaIngreso, setFechaIngreso] = useState(p?.fecha_ingreso ?? '')
   const antiguedad = calcularAntiguedad(fechaIngreso)
+  const [fechaNacimiento, setFechaNacimiento] = useState(persona?.fecha_nacimiento ?? '')
+  const edad = calcularEdad(fechaNacimiento)
   const [rolSeleccionado, setRolSeleccionado] = useState(rolInicial ?? '')
 
   // Los datos laborales solo aplican a personal (empleado/profesional).
@@ -125,8 +149,10 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
             id="fecha_nacimiento"
             name="fecha_nacimiento"
             type="date"
-            defaultValue={persona?.fecha_nacimiento ?? ''}
+            value={fechaNacimiento}
+            onChange={(e) => setFechaNacimiento(e.target.value)}
           />
+          <p className="text-xs text-muted-foreground">Edad: {edad}</p>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="sexo">Sexo</Label>
