@@ -26,6 +26,7 @@ type PersonalEditable = {
   antiguedad_institucion?: string | null
   fecha_ingreso?: string | null
   registro_profesional?: string | null
+  logo?: string | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
   tiene_cd?: boolean | null
@@ -248,6 +249,13 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
           <div className="space-y-1.5">
             <Label htmlFor="registro_profesional">Registro / Matrícula</Label>
             <Input id="registro_profesional" name="registro_profesional" defaultValue={p?.registro_profesional ?? ''} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="logo">Logo del reporte</Label>
+            <select id="logo" name="logo" defaultValue={p?.logo ?? 'aso'} className={claseSelect}>
+              <option value="aso">ASO CEDINANE</option>
+              <option value="incluyeme">INCLÚYEME</option>
+            </select>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-sm">

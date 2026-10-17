@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { obtenerPersona } from '@/features/personas/queries/personas'
 import { listarHorarios } from '@/features/horarios/queries'
@@ -63,8 +64,9 @@ export default async function ImprimirAsistenciaPage({
     }
   })
 
-  const personal = (persona as { personal?: { cargo?: string | null; turno?: string | null } | null })
+  const personal = (persona as { personal?: { cargo?: string | null; turno?: string | null; logo?: string | null } | null })
     .personal
+  const logo = personal?.logo === 'incluyeme' ? 'incluyeme' : 'aso'
   const horarioTexto = horarios.length
     ? horarios
         .map((h) => `${h.hora_inicio.slice(0, 5)} a ${h.hora_fin.slice(0, 5)} - ${DIAS_LARGOS[h.dia_semana - 1]}`)
@@ -94,6 +96,16 @@ export default async function ImprimirAsistenciaPage({
           </button>
         </form>
         <BotonImprimir />
+      </div>
+
+      <div className="mb-3 flex justify-center">
+        <Image
+          src={`/logos/${logo}.jpg`}
+          alt={logo === 'incluyeme' ? 'INCLÚYEME' : 'ASO CEDINANE'}
+          width={80}
+          height={78}
+          className="h-auto w-20"
+        />
       </div>
 
       <h1 className="mb-4 text-center text-lg font-bold uppercase tracking-wide">

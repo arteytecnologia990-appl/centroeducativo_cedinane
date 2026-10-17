@@ -320,6 +320,7 @@ export type Database = {
           fecha_ingreso: string | null
           formacion_academica: string | null
           id: string
+          logo: string | null
           persona_id: string
           programa: string | null
           registro_profesional: string | null
@@ -340,6 +341,7 @@ export type Database = {
           fecha_ingreso?: string | null
           formacion_academica?: string | null
           id?: string
+          logo?: string | null
           persona_id: string
           programa?: string | null
           registro_profesional?: string | null
@@ -360,6 +362,7 @@ export type Database = {
           fecha_ingreso?: string | null
           formacion_academica?: string | null
           id?: string
+          logo?: string | null
           persona_id?: string
           programa?: string | null
           registro_profesional?: string | null
