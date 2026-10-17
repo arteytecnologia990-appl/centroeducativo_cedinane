@@ -59,3 +59,37 @@ export async function obtenerPersona(id: string) {
   if (error) return null
   return data
 }
+
+export type PersonaReporte = {
+  id: string
+  nombres: string
+  apellidos: string
+  ci: string | null
+  fecha_nacimiento: string | null
+  email: string | null
+  telefono: string | null
+  personal: { cargo: string | null; turno: string | null; sector: string | null; programa: string | null } | null
+  persona_roles: { rol_negocio: string }[] | null
+}
+
+export async function listarPersonasReporte({ rol }: { rol?: string }): Promise<PersonaReporte[]> {
+  const supabase = await createClient()
+  let query = supabase
+    .from('personas')
+    .select(
+      'id, nombres, apellidos, ci, fecha_nacimiento, email, telefono, personal(cargo, turno, sector, programa), persona_roles(rol_negocio)'
+    )
+    .is('deleted_at', null)
+    .order('apellidos', { ascending: true })
+
+  if (rol) {
+    const { data: roles } = await supabase.from('persona_roles').select('persona_id').eq('rol_negocio', rol)
+    const ids = [...new Set((roles ?? []).map((r) => r.persona_id))]
+    if (ids.length === 0) return []
+    query = query.in('id', ids)
+  }
+
+  const { data, error } = await query
+  if (error) throw new Error(error.message)
+  return (data ?? []) as PersonaReporte[]
+}

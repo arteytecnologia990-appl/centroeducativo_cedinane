@@ -55,12 +55,20 @@ export default async function PersonasPage({
           <h1 className="font-heading text-2xl font-semibold text-foreground">Personas</h1>
           <p className="text-sm text-muted-foreground tabular-nums">{total} en total</p>
         </div>
-        <Link
-          href={rol ? `/dashboard/personas/nueva?rol=${rol}` : '/dashboard/personas/nueva'}
-          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Nueva persona
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={rol ? `/imprimir/personas?rol=${rol}` : '/imprimir/personas'}
+            className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Imprimir listado
+          </Link>
+          <Link
+            href={rol ? `/dashboard/personas/nueva?rol=${rol}` : '/dashboard/personas/nueva'}
+            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Nueva persona
+          </Link>
+        </div>
       </div>
 
       {/* Filtros por rol (Empleados, Alumnos, Pacientes…) */}
