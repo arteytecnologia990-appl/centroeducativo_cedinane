@@ -14,9 +14,9 @@ tags:
 > [!note] Regla de oro
 > Este archivo se actualiza **al final de cada sesión**. Si está desactualizado, la siguiente sesión empieza ciega.
 
-**Última actualización:** 2026-10-03 (sesión 4: primera migración aplicada)
+**Última actualización:** 2026-10-17 (plantel real importado; tabla `personal`)
 **Fase del producto:** 1 — base, RBAC, personas, horarios, asistencia, horas pagables.
-**Momento:** login verificado con el administrador real (`arteytecnologia990@gmail.com`) ✅ — siguiente: módulo **Personas**.
+**Momento:** login verificado; módulo **Personas** con el plantel real importado (30 empleados + datos laborales en `personal`) ✅.
 
 ## Hecho
 
