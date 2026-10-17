@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation'
 import { obtenerPersona } from '@/features/personas/queries/personas'
 import { PersonaForm } from '@/features/personas/components/persona-form'
+import { RolesEditor } from '@/features/personas/components/roles-editor'
 import { archivarPersona } from '@/features/personas/actions/persona'
-import { ETIQUETA_ROL, type RolNegocio } from '@/features/personas/schemas/persona'
-import { Badge } from '@/components/ui/badge'
 
 export default async function PersonaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -20,16 +19,8 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
           <h1 className="font-heading text-2xl font-semibold text-foreground">
             {persona.apellidos}, {persona.nombres}
           </h1>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {roles.length > 0 ? (
-              roles.map((r) => (
-                <Badge key={r.id} variant="secondary">
-                  {ETIQUETA_ROL[r.rol_negocio as RolNegocio] ?? r.rol_negocio}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-sm text-muted-foreground">Sin roles asignados</span>
-            )}
+          <div className="mt-2">
+            <RolesEditor personaId={persona.id} roles={roles} />
           </div>
         </div>
         <form action={archivarPersona}>

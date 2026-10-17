@@ -176,3 +176,36 @@ export async function archivarPersona(formData: FormData) {
   revalidatePath('/dashboard/personas')
   redirect('/dashboard/personas')
 }
+
+export async function agregarRol(formData: FormData) {
+  const personaId = String(formData.get('persona_id') ?? '')
+  const rolNegocio = String(formData.get('rol_negocio') ?? '')
+  if (!personaId || !rolNegocio) return
+
+  const supabase = await createClient()
+  const { data: existente } = await supabase
+    .from('persona_roles')
+    .select('id')
+    .eq('persona_id', personaId)
+    .eq('rol_negocio', rolNegocio)
+    .maybeSingle()
+
+  if (existente) return
+
+  await supabase.from('persona_roles').insert({ persona_id: personaId, rol_negocio: rolNegocio })
+
+  revalidatePath(`/dashboard/personas/${personaId}`)
+  revalidatePath('/dashboard/personas')
+}
+
+export async function quitarRol(formData: FormData) {
+  const id = String(formData.get('id') ?? '')
+  const personaId = String(formData.get('persona_id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  await supabase.from('persona_roles').delete().eq('id', id)
+
+  if (personaId) revalidatePath(`/dashboard/personas/${personaId}`)
+  revalidatePath('/dashboard/personas')
+}
