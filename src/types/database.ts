@@ -39,6 +39,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      horarios: {
+        Row: {
+          actividad: string | null
+          activo: boolean
+          aula: string | null
+          created_at: string
+          deleted_at: string | null
+          dia_semana: number
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          persona_id: string
+          sede_id: string
+          updated_at: string
+          vigente_desde: string | null
+          vigente_hasta: string | null
+        }
+        Insert: {
+          actividad?: string | null
+          activo?: boolean
+          aula?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          dia_semana: number
+          hora_fin: string
+          hora_inicio: string
+          id?: string
+          persona_id: string
+          sede_id: string
+          updated_at?: string
+          vigente_desde?: string | null
+          vigente_hasta?: string | null
+        }
+        Update: {
+          actividad?: string | null
+          activo?: boolean
+          aula?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          dia_semana?: number
+          hora_fin?: string
+          hora_inicio?: string
+          id?: string
+          persona_id?: string
+          sede_id?: string
+          updated_at?: string
+          vigente_desde?: string | null
+          vigente_hasta?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horarios_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horarios_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sedes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modulos_pantallas: {
         Row: {
           activo: boolean
