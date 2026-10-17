@@ -31,7 +31,7 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
         <form action={archivarPersona}>
           <input type="hidden" name="id" value={persona.id} />
           <button type="submit" className="text-sm text-muted-foreground transition-colors hover:text-destructive">
-            Archivar
+            Inactivar
           </button>
         </form>
       </div>
