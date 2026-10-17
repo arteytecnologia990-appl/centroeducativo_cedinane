@@ -77,6 +77,18 @@
   --chart-5: var(--muted-foreground);
 }
 
+/* Controles nativos (select) coherentes con el tema claro/oscuro */
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+select option {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+
 [data-estilo="a"] {
   --background: oklch(0.9737 0.005 228.82);
   --card: oklch(1 0 89.88);
