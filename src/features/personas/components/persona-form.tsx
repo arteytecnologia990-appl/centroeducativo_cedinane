@@ -129,7 +129,7 @@ export function PersonaForm({ persona }: { persona?: PersonaEditable }) {
           )}
         </Button>
         <Link
-          href="/personas"
+          href="/dashboard/personas"
           className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
         >
           Cancelar

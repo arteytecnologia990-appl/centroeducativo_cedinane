@@ -20,7 +20,7 @@ export function PersonasTabla({ personas }: { personas: PersonaListado[] }) {
           {personas.map((p) => (
             <TableRow key={p.id}>
               <TableCell className="font-medium">
-                <Link href={`/personas/${p.id}`} className="hover:underline">
+                <Link href={`/dashboard/personas/${p.id}`} className="hover:underline">
                   {p.apellidos}, {p.nombres}
                 </Link>
               </TableCell>

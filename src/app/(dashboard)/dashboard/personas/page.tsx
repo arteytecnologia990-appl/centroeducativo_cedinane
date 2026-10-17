@@ -25,7 +25,7 @@ export default async function PersonasPage({
     const sp = new URLSearchParams()
     if (q) sp.set('q', q)
     sp.set('page', String(p))
-    return `/personas?${sp.toString()}`
+    return `/dashboard/personas?${sp.toString()}`
   }
 
   return (
@@ -36,14 +36,14 @@ export default async function PersonasPage({
           <p className="text-sm text-muted-foreground tabular-nums">{total} en total</p>
         </div>
         <Link
-          href="/personas/nueva"
+          href="/dashboard/personas/nueva"
           className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Nueva persona
         </Link>
       </div>
 
-      <form method="get" action="/personas" className="max-w-sm">
+      <form method="get" action="/dashboard/personas" className="max-w-sm">
         <input
           name="q"
           defaultValue={q}

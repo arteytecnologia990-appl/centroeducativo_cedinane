@@ -66,8 +66,8 @@ export async function crearPersona(formData: FormData): Promise<PersonaResult> {
     })
   }
 
-  revalidatePath('/personas')
-  redirect('/personas')
+  revalidatePath('/dashboard/personas')
+  redirect('/dashboard/personas')
 }
 
 export async function actualizarPersona(formData: FormData): Promise<PersonaResult> {
@@ -99,8 +99,8 @@ export async function actualizarPersona(formData: FormData): Promise<PersonaResu
   if (error) return { error: mensajeDeError(error) }
 
   revalidatePath('/personas')
-  revalidatePath(`/personas/${id}`)
-  redirect(`/personas/${id}`)
+  revalidatePath(`/dashboard/personas/${id}`)
+  redirect(`/dashboard/personas/${id}`)
 }
 
 export async function archivarPersona(formData: FormData) {
@@ -110,6 +110,6 @@ export async function archivarPersona(formData: FormData) {
   const supabase = await createClient()
   await supabase.from('personas').update({ deleted_at: new Date().toISOString() }).eq('id', id)
 
-  revalidatePath('/personas')
-  redirect('/personas')
+  revalidatePath('/dashboard/personas')
+  redirect('/dashboard/personas')
 }
