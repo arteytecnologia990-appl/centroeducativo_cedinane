@@ -12,10 +12,12 @@ export type PersonaListado = {
 
 export async function listarPersonas({
   q,
+  rol,
   page = 1,
   porPagina = 10,
 }: {
   q?: string
+  rol?: string
   page?: number
   porPagina?: number
 }) {
@@ -25,6 +27,13 @@ export async function listarPersonas({
     .select('id, nombres, apellidos, ci, email, telefono, persona_roles(rol_negocio)', { count: 'exact' })
     .is('deleted_at', null)
     .order('apellidos', { ascending: true })
+
+  if (rol) {
+    const { data: roles } = await supabase.from('persona_roles').select('persona_id').eq('rol_negocio', rol)
+    const ids = (roles ?? []).map((r) => r.persona_id)
+    if (ids.length === 0) return { personas: [], total: 0 }
+    query = query.in('id', ids)
+  }
 
   if (q) {
     query = query.or(`nombres.ilike.%${q}%,apellidos.ilike.%${q}%,ci.ilike.%${q}%`)

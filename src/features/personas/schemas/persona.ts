@@ -56,6 +56,7 @@ export const personaSchema = z.object({
   sector: z.string().trim(),
   experiencia_cargo: z.string().trim().max(60),
   antiguedad_institucion: z.string().trim().max(60),
+  fecha_ingreso: z.string().trim(),
   registro_profesional: z.string().trim().max(60),
   tiene_ci: z.boolean(),
   tiene_cv: z.boolean(),

@@ -24,6 +24,7 @@ type PersonalEditable = {
   sector?: string | null
   experiencia_cargo?: string | null
   antiguedad_institucion?: string | null
+  fecha_ingreso?: string | null
   registro_profesional?: string | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
@@ -188,6 +189,10 @@ export function PersonaForm({ persona }: { persona?: PersonaEditable }) {
           <div className="space-y-1.5">
             <Label htmlFor="antiguedad_institucion">Antigüedad en la institución</Label>
             <Input id="antiguedad_institucion" name="antiguedad_institucion" defaultValue={p?.antiguedad_institucion ?? ''} placeholder="Ej.: 11 años" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="fecha_ingreso">Fecha de ingreso</Label>
+            <Input id="fecha_ingreso" name="fecha_ingreso" type="date" defaultValue={p?.fecha_ingreso ?? ''} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="registro_profesional">Registro / Matrícula</Label>

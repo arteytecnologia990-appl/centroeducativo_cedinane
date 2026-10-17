@@ -4,6 +4,16 @@ import { PersonasTabla } from '@/features/personas/components/personas-tabla'
 
 const POR_PAGINA = 10
 
+const FILTROS = [
+  { valor: '', etiqueta: 'Todos' },
+  { valor: 'empleado', etiqueta: 'Empleados' },
+  { valor: 'alumno', etiqueta: 'Alumnos' },
+  { valor: 'paciente', etiqueta: 'Pacientes' },
+  { valor: 'tutor', etiqueta: 'Tutores' },
+  { valor: 'proveedor', etiqueta: 'Proveedores' },
+  { valor: 'cliente', etiqueta: 'Clientes' },
+]
+
 const claseBoton =
   'inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent'
 const claseBotonInactivo =
@@ -12,20 +22,30 @@ const claseBotonInactivo =
 export default async function PersonasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>
+  searchParams: Promise<{ q?: string; rol?: string; page?: string }>
 }) {
   const params = await searchParams
   const q = params.q?.trim() ?? ''
+  const rol = params.rol?.trim() ?? ''
   const page = Math.max(1, Number(params.page) || 1)
 
-  const { personas, total } = await listarPersonas({ q, page, porPagina: POR_PAGINA })
+  const { personas, total } = await listarPersonas({ q, rol, page, porPagina: POR_PAGINA })
   const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA))
 
-  const href = (p: number) => {
+  const hrefPagina = (p: number) => {
     const sp = new URLSearchParams()
     if (q) sp.set('q', q)
+    if (rol) sp.set('rol', rol)
     sp.set('page', String(p))
     return `/dashboard/personas?${sp.toString()}`
+  }
+
+  const hrefFiltro = (valor: string) => {
+    const sp = new URLSearchParams()
+    if (q) sp.set('q', q)
+    if (valor) sp.set('rol', valor)
+    const s = sp.toString()
+    return s ? `/dashboard/personas?${s}` : '/dashboard/personas'
   }
 
   return (
@@ -43,7 +63,28 @@ export default async function PersonasPage({
         </Link>
       </div>
 
+      {/* Filtros por rol (Empleados, Alumnos, Pacientes…) */}
+      <div className="flex flex-wrap gap-1.5">
+        {FILTROS.map((f) => {
+          const activo = rol === f.valor
+          return (
+            <Link
+              key={f.valor || 'todos'}
+              href={hrefFiltro(f.valor)}
+              className={
+                activo
+                  ? 'inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground'
+                  : claseBoton
+              }
+            >
+              {f.etiqueta}
+            </Link>
+          )
+        })}
+      </div>
+
       <form method="get" action="/dashboard/personas" className="max-w-sm">
+        {rol ? <input type="hidden" name="rol" value={rol} /> : null}
         <input
           name="q"
           defaultValue={q}
@@ -60,14 +101,14 @@ export default async function PersonasPage({
         </span>
         <div className="flex gap-2">
           {page > 1 ? (
-            <Link href={href(page - 1)} className={claseBoton}>
+            <Link href={hrefPagina(page - 1)} className={claseBoton}>
               Anterior
             </Link>
           ) : (
             <span className={claseBotonInactivo}>Anterior</span>
           )}
           {page < totalPaginas ? (
-            <Link href={href(page + 1)} className={claseBoton}>
+            <Link href={hrefPagina(page + 1)} className={claseBoton}>
               Siguiente
             </Link>
           ) : (
