@@ -40,7 +40,9 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
         </form>
       </div>
 
-      <PersonaForm persona={persona} />
+      {/* key: remonta el formulario cuando cambian los datos, para que los inputs
+          no controlados reciban su defaultValue una sola vez (evita el warning de Base UI). */}
+      <PersonaForm key={persona.updated_at} persona={persona} />
     </div>
   )
 }
