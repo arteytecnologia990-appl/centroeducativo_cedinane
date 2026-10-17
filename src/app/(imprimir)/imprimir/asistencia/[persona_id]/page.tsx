@@ -32,6 +32,32 @@ const COLUMNAS = [
   'OBSERVACIÓN',
 ]
 
+function comprimirDias(dias: number[]): string {
+  const unicos = [...new Set(dias)].sort((a, b) => a - b)
+  if (unicos.length === 0) return ''
+  if (unicos.length === 1) return DIAS_LARGOS[unicos[0] - 1]
+  const consecutivos = unicos.every((d, i) => i === 0 || d === unicos[i - 1] + 1)
+  if (consecutivos) {
+    return `${DIAS_LARGOS[unicos[0] - 1]} a ${DIAS_LARGOS[unicos[unicos.length - 1] - 1]}`
+  }
+  return unicos.map((d) => DIAS_LARGOS[d - 1]).join(', ')
+}
+
+/** Resumen: "Lunes a Viernes 07:00 a 16:00 y Sábado 08:00 a 12:00". */
+function resumirHorario(horarios: { dia_semana: number; hora_inicio: string; hora_fin: string }[]): string {
+  if (horarios.length === 0) return '—'
+
+  const porRango = new Map<string, number[]>()
+  for (const h of horarios) {
+    const rango = `${h.hora_inicio.slice(0, 5)} a ${h.hora_fin.slice(0, 5)}`
+    const dias = porRango.get(rango) ?? []
+    dias.push(h.dia_semana)
+    porRango.set(rango, dias)
+  }
+
+  return [...porRango.entries()].map(([rango, dias]) => `${comprimirDias(dias)} ${rango}`).join(' y ')
+}
+
 export default async function ImprimirAsistenciaPage({
   params,
   searchParams,
@@ -61,6 +87,7 @@ export default async function ImprimirAsistenciaPage({
     return {
       dia: `${fmtDia.format(fecha).replace('.', '').toUpperCase()}.`,
       fechaTexto: fmtFecha.format(fecha),
+      finDeSemana: fecha.getDay() === 0 || fecha.getDay() === 6,
     }
   })
 
@@ -68,9 +95,7 @@ export default async function ImprimirAsistenciaPage({
     .personal
   const logo = personal?.logo === 'incluyeme' ? 'incluyeme' : 'aso'
   const horarioTexto = horarios.length
-    ? horarios
-        .map((h) => `${h.hora_inicio.slice(0, 5)} a ${h.hora_fin.slice(0, 5)} - ${DIAS_LARGOS[h.dia_semana - 1]}`)
-        .join(' · ')
+    ? resumirHorario(horarios)
     : personal?.turno
       ? `Turno ${personal.turno}`
       : '—'
@@ -129,7 +154,7 @@ export default async function ImprimirAsistenciaPage({
             <td className="border border-black px-2 py-1">{horarioTexto}</td>
           </tr>
           <tr>
-            <th className="border border-black px-2 py-1 text-left">Departamento</th>
+            <th className="border border-black px-2 py-1 text-left">Cargo</th>
             <td className="border border-black px-2 py-1">{personal?.cargo ?? '—'}</td>
           </tr>
         </tbody>
@@ -147,7 +172,7 @@ export default async function ImprimirAsistenciaPage({
         </thead>
         <tbody>
           {dias.map((d) => (
-            <tr key={d.fechaTexto}>
+            <tr key={d.fechaTexto} className={d.finDeSemana ? 'bg-neutral-100' : undefined}>
               <td className="border border-black px-1 py-[3px] text-center">{d.dia}</td>
               <td className="border border-black px-1 py-[3px] text-center tabular-nums">{d.fechaTexto}</td>
               <td className="h-6 border border-black px-1" />

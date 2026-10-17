@@ -292,3 +292,10 @@ select option {
     margin: 15mm;
   }
 }
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
