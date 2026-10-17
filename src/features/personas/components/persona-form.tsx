@@ -48,11 +48,36 @@ type PersonaEditable = {
 const claseSelect =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
+/** Antigüedad en años y meses desde una fecha (YYYY-MM-DD). */
+function calcularAntiguedad(fecha: string): string {
+  if (!fecha) return '—'
+  const desde = new Date(`${fecha}T00:00:00`)
+  if (Number.isNaN(desde.getTime())) return '—'
+
+  const hoy = new Date()
+  let anios = hoy.getFullYear() - desde.getFullYear()
+  let meses = hoy.getMonth() - desde.getMonth()
+  if (hoy.getDate() < desde.getDate()) meses -= 1
+  if (meses < 0) {
+    anios -= 1
+    meses += 12
+  }
+  if (anios < 0) return '—'
+  if (anios === 0 && meses === 0) return 'Menos de 1 mes'
+
+  const partes: string[] = []
+  if (anios > 0) partes.push(`${anios} ${anios === 1 ? 'año' : 'años'}`)
+  if (meses > 0) partes.push(`${meses} ${meses === 1 ? 'mes' : 'meses'}`)
+  return partes.join(', ')
+}
+
 export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable; rolInicial?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const esEdicion = Boolean(persona?.id)
   const p = persona?.personal ?? null
+  const [fechaIngreso, setFechaIngreso] = useState(p?.fecha_ingreso ?? '')
+  const antiguedad = calcularAntiguedad(fechaIngreso)
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -187,12 +212,21 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
             <Input id="experiencia_cargo" name="experiencia_cargo" defaultValue={p?.experiencia_cargo ?? ''} placeholder="Ej.: 5 años" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="antiguedad_institucion">Antigüedad en la institución</Label>
-            <Input id="antiguedad_institucion" name="antiguedad_institucion" defaultValue={p?.antiguedad_institucion ?? ''} placeholder="Ej.: 11 años" />
+            <Label htmlFor="fecha_ingreso">Fecha de ingreso</Label>
+            <Input
+              id="fecha_ingreso"
+              name="fecha_ingreso"
+              type="date"
+              value={fechaIngreso}
+              onChange={(e) => setFechaIngreso(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="fecha_ingreso">Fecha de ingreso</Label>
-            <Input id="fecha_ingreso" name="fecha_ingreso" type="date" defaultValue={p?.fecha_ingreso ?? ''} />
+            <Label>Antigüedad en la institución</Label>
+            <div className="flex h-8 items-center rounded-lg border border-input bg-muted/40 px-2.5 text-sm text-muted-foreground">
+              {antiguedad}
+            </div>
+            <input type="hidden" name="antiguedad_institucion" value={antiguedad === '—' ? '' : antiguedad} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="registro_profesional">Registro / Matrícula</Label>
