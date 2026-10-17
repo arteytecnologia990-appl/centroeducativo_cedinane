@@ -6,6 +6,7 @@ import { DIAS } from '@/features/horarios/schemas'
 import { PersonaForm } from '@/features/personas/components/persona-form'
 import { RolesEditor } from '@/features/personas/components/roles-editor'
 import { archivarPersona } from '@/features/personas/actions/persona'
+import { Volver } from '@/components/layout/volver'
 
 export default async function PersonaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -19,6 +20,8 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="space-y-6">
+      <Volver href="/dashboard/personas" label="Personas" />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-semibold text-foreground">

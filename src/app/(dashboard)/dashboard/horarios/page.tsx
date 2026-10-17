@@ -1,5 +1,6 @@
 import { listarHorarios, listarPersonasParaHorario, listarSedes } from '@/features/horarios/queries'
 import { HorariosPanel } from '@/features/horarios/components/horarios-panel'
+import { Volver } from '@/components/layout/volver'
 
 export default async function HorariosPage({
   searchParams,
@@ -17,6 +18,8 @@ export default async function HorariosPage({
 
   return (
     <div className="space-y-6">
+      <Volver href="/dashboard" label="Inicio" />
+
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">Horarios</h1>
         <p className="text-sm text-muted-foreground">

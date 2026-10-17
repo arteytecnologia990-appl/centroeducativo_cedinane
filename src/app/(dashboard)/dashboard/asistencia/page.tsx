@@ -1,6 +1,7 @@
 import { listarAsistenciasDia, listarPersonasParaAsistencia } from '@/features/asistencia/queries'
 import { AsistenciaManualForm } from '@/features/asistencia/components/asistencia-manual-form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Volver } from '@/components/layout/volver'
 
 const claseInput =
   'h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
@@ -28,6 +29,8 @@ export default async function AsistenciaPage({
 
   return (
     <div className="space-y-6">
+      <Volver href="/dashboard" label="Inicio" />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-semibold text-foreground">Asistencia</h1>

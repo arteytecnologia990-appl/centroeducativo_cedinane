@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listarPersonas } from '@/features/personas/queries/personas'
 import { PersonasTabla } from '@/features/personas/components/personas-tabla'
+import { Volver } from '@/components/layout/volver'
 
 const POR_PAGINA = 10
 
@@ -50,6 +51,8 @@ export default async function PersonasPage({
 
   return (
     <div className="space-y-6">
+      <Volver href="/dashboard" label="Inicio" />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-semibold text-foreground">Personas</h1>
