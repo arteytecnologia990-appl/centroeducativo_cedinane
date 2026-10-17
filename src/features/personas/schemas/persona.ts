@@ -60,6 +60,13 @@ export const personaSchema = z.object({
   registro_profesional: z.string().trim().max(60),
   logo: z.string().trim(),
   pin: z.string().trim(),
+  // Datos del alumno (tabla alumnos)
+  nacionalidad: z.string().trim().max(60),
+  turno_alumno: z.string().trim().max(40),
+  rue: z.boolean(),
+  beca: z.string().trim(),
+  presupuesto_ingreso: z.string().trim(),
+  matricula: z.string().trim(),
   tiene_ci: z.boolean(),
   tiene_cv: z.boolean(),
   tiene_cd: z.boolean(),

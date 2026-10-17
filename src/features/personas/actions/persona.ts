@@ -38,6 +38,12 @@ function datosDesdeFormData(formData: FormData): PersonaInput {
     registro_profesional: String(formData.get('registro_profesional') ?? ''),
     logo: String(formData.get('logo') ?? ''),
     pin: String(formData.get('pin') ?? ''),
+    nacionalidad: String(formData.get('nacionalidad') ?? ''),
+    turno_alumno: String(formData.get('turno_alumno') ?? ''),
+    rue: formData.get('rue') === 'on',
+    beca: String(formData.get('beca') ?? ''),
+    presupuesto_ingreso: String(formData.get('presupuesto_ingreso') ?? ''),
+    matricula: String(formData.get('matricula') ?? ''),
     tiene_ci: formData.get('tiene_ci') === 'on',
     tiene_cv: formData.get('tiene_cv') === 'on',
     tiene_cd: formData.get('tiene_cd') === 'on',
@@ -96,6 +102,42 @@ async function guardarPersonal(supabase: Cliente, personaId: string, v: PersonaI
   }
 }
 
+/** Inserta o actualiza los datos del alumno (1:1 con la persona). */
+async function guardarAlumno(supabase: Cliente, personaId: string, v: PersonaInput) {
+  const beca = v.beca === '' ? null : Number(v.beca) / 100
+  const presupuesto = v.presupuesto_ingreso === '' ? null : Number(v.presupuesto_ingreso)
+  const matricula = v.matricula === '' ? null : Number(v.matricula)
+
+  const datos = {
+    nacionalidad: aNull(v.nacionalidad),
+    turno: aNull(v.turno_alumno),
+    rue: v.rue,
+    beca: Number.isFinite(beca) ? beca : null,
+    presupuesto_ingreso: Number.isFinite(presupuesto) ? presupuesto : null,
+    matricula: Number.isFinite(matricula) ? matricula : null,
+  }
+
+  const hayDatos =
+    datos.nacionalidad !== null ||
+    datos.turno !== null ||
+    datos.rue ||
+    datos.beca !== null ||
+    datos.presupuesto_ingreso !== null ||
+    datos.matricula !== null
+
+  const { data: existente } = await supabase
+    .from('alumnos')
+    .select('id')
+    .eq('persona_id', personaId)
+    .maybeSingle()
+
+  if (existente) {
+    await supabase.from('alumnos').update(datos).eq('id', existente.id)
+  } else if (hayDatos) {
+    await supabase.from('alumnos').insert({ persona_id: personaId, ...datos })
+  }
+}
+
 export async function crearPersona(formData: FormData): Promise<PersonaResult> {
   const parsed = personaSchema.safeParse(datosDesdeFormData(formData))
   if (!parsed.success) {
@@ -134,6 +176,7 @@ export async function crearPersona(formData: FormData): Promise<PersonaResult> {
   }
 
   await guardarPersonal(supabase, persona.id, v)
+  await guardarAlumno(supabase, persona.id, v)
 
   revalidatePath('/dashboard/personas')
   redirect('/dashboard/personas')
@@ -167,6 +210,7 @@ export async function actualizarPersona(formData: FormData): Promise<PersonaResu
   if (error) return { error: mensajeDeError(error) }
 
   await guardarPersonal(supabase, id, v)
+  await guardarAlumno(supabase, id, v)
 
   revalidatePath('/dashboard/personas')
   revalidatePath(`/dashboard/personas/${id}`)

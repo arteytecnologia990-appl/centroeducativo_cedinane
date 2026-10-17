@@ -39,6 +39,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      alumnos: {
+        Row: {
+          beca: number | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          matricula: number | null
+          nacionalidad: string | null
+          persona_id: string
+          presupuesto_ingreso: number | null
+          rue: boolean
+          sede_id: string | null
+          turno: string | null
+          updated_at: string
+        }
+        Insert: {
+          beca?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          matricula?: number | null
+          nacionalidad?: string | null
+          persona_id: string
+          presupuesto_ingreso?: number | null
+          rue?: boolean
+          sede_id?: string | null
+          turno?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beca?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          matricula?: number | null
+          nacionalidad?: string | null
+          persona_id?: string
+          presupuesto_ingreso?: number | null
+          rue?: boolean
+          sede_id?: string | null
+          turno?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alumnos_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: true
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alumnos_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sedes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asistencias: {
         Row: {
           created_at: string

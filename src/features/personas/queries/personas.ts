@@ -51,7 +51,7 @@ export async function obtenerPersona(id: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('personas')
-    .select('*, personal(*), persona_roles(id, rol_negocio, sede_id)')
+    .select('*, personal(*), alumnos(*), persona_roles(id, rol_negocio, sede_id)')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle()

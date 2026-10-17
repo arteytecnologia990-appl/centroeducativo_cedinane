@@ -44,6 +44,14 @@ type PersonaEditable = {
   direccion?: string | null
   observaciones?: string | null
   personal?: PersonalEditable | null
+  alumnos?: {
+    nacionalidad?: string | null
+    turno?: string | null
+    rue?: boolean | null
+    beca?: number | null
+    presupuesto_ingreso?: number | null
+    matricula?: number | null
+  } | null
   persona_roles?: { rol_negocio: string }[] | null
 }
 
@@ -100,6 +108,7 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
   const [pending, setPending] = useState(false)
   const esEdicion = Boolean(persona?.id)
   const p = persona?.personal ?? null
+  const al = persona?.alumnos ?? null
   const [fechaIngreso, setFechaIngreso] = useState(p?.fecha_ingreso ?? '')
   const antiguedad = calcularAntiguedad(fechaIngreso)
   const [fechaNacimiento, setFechaNacimiento] = useState(persona?.fecha_nacimiento ?? '')
@@ -113,6 +122,8 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
     rolesActuales.includes('profesional') ||
     rolSeleccionado === 'empleado' ||
     rolSeleccionado === 'profesional'
+
+  const esAlumno = rolesActuales.includes('alumno') || rolSeleccionado === 'alumno'
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -301,6 +312,63 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
           <span className="text-xs text-muted-foreground">Documentos presentados</span>
         </div>
       </fieldset>
+      ) : null}
+
+      {esAlumno ? (
+        <fieldset className="space-y-4 rounded-lg border border-border p-4">
+          <legend className="px-1 text-sm font-medium text-foreground">Datos del alumno</legend>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="nacionalidad">Nacionalidad</Label>
+              <Input id="nacionalidad" name="nacionalidad" defaultValue={al?.nacionalidad ?? ''} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="turno_alumno">Turno</Label>
+              <Input id="turno_alumno" name="turno_alumno" defaultValue={al?.turno ?? ''} placeholder="Ej.: TM, TC, TT" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="beca">Beca (%)</Label>
+              <Input
+                id="beca"
+                name="beca"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                defaultValue={al?.beca != null ? String(al.beca * 100) : ''}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="presupuesto_ingreso">Presupuesto ingreso</Label>
+              <Input
+                id="presupuesto_ingreso"
+                name="presupuesto_ingreso"
+                type="number"
+                step="1"
+                defaultValue={al?.presupuesto_ingreso != null ? String(al.presupuesto_ingreso) : ''}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="matricula">Matrícula</Label>
+              <Input
+                id="matricula"
+                name="matricula"
+                type="number"
+                step="1"
+                defaultValue={al?.matricula != null ? String(al.matricula) : ''}
+              />
+            </div>
+            <div className="flex items-center gap-2 self-end pb-1">
+              <input
+                type="checkbox"
+                name="rue"
+                defaultChecked={Boolean(al?.rue)}
+                className="size-4 rounded border-input accent-primary"
+              />
+              <Label htmlFor="rue">Tiene RUE</Label>
+            </div>
+          </div>
+        </fieldset>
       ) : null}
 
       {error ? (
