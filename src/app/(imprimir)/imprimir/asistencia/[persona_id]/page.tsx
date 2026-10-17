@@ -126,8 +126,8 @@ export default async function ImprimirAsistenciaPage({
       <table className="mt-3 w-full border-collapse text-[11px]">
         <thead>
           <tr>
-            {COLUMNAS.map((h) => (
-              <th key={h} className="border border-black px-1 py-1 text-center font-bold uppercase">
+            {COLUMNAS.map((h, i) => (
+              <th key={`${h}-${i}`} className="border border-black px-1 py-1 text-center font-bold uppercase">
                 {h}
               </th>
             ))}
