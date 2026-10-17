@@ -16,7 +16,7 @@ tags:
 
 **Última actualización:** 2026-10-03 (sesión 4: primera migración aplicada)
 **Fase del producto:** 1 — base, RBAC, personas, horarios, asistencia, horas pagables.
-**Momento:** base de la aplicación **aplicada** (clientes Supabase, sesión en proxy, login, layouts) ✅ — falta el primer usuario administrador.
+**Momento:** login verificado con el administrador real (`arteytecnologia990@gmail.com`) ✅ — siguiente: módulo **Personas**.
 
 ## Hecho
 
