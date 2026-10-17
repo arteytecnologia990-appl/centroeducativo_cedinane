@@ -39,6 +39,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      asistencias: {
+        Row: {
+          created_at: string
+          fecha: string
+          hora_entrada: string | null
+          hora_salida: string | null
+          id: string
+          observacion: string | null
+          origen: string
+          persona_id: string
+          registrado_por: string | null
+          sede_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fecha?: string
+          hora_entrada?: string | null
+          hora_salida?: string | null
+          id?: string
+          observacion?: string | null
+          origen?: string
+          persona_id: string
+          registrado_por?: string | null
+          sede_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fecha?: string
+          hora_entrada?: string | null
+          hora_salida?: string | null
+          id?: string
+          observacion?: string | null
+          origen?: string
+          persona_id?: string
+          registrado_por?: string | null
+          sede_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asistencias_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asistencias_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sedes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       horarios: {
         Row: {
           actividad: string | null
@@ -404,6 +461,7 @@ export type Database = {
           id: string
           nombres: string
           observaciones: string | null
+          pin_hash: string | null
           sexo: string | null
           telefono: string | null
           updated_at: string
@@ -421,6 +479,7 @@ export type Database = {
           id?: string
           nombres: string
           observaciones?: string | null
+          pin_hash?: string | null
           sexo?: string | null
           telefono?: string | null
           updated_at?: string
@@ -438,6 +497,7 @@ export type Database = {
           id?: string
           nombres?: string
           observaciones?: string | null
+          pin_hash?: string | null
           sexo?: string | null
           telefono?: string | null
           updated_at?: string

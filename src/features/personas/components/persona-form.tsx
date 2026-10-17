@@ -190,6 +190,10 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
           <Label htmlFor="telefono">Teléfono</Label>
           <Input id="telefono" name="telefono" defaultValue={persona?.telefono ?? ''} />
         </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="pin">PIN de kiosco</Label>
+          <Input id="pin" name="pin" inputMode="numeric" placeholder="4-6 dígitos (vacío = no cambiar)" />
+        </div>
       </div>
 
       <div className="space-y-1.5">

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { personaSchema, type PersonaInput } from '../schemas/persona'
+import { hashearPin } from '@/features/asistencia/pin'
 
 export type PersonaResult = { error?: string }
 
@@ -36,6 +37,7 @@ function datosDesdeFormData(formData: FormData): PersonaInput {
     fecha_ingreso: String(formData.get('fecha_ingreso') ?? ''),
     registro_profesional: String(formData.get('registro_profesional') ?? ''),
     logo: String(formData.get('logo') ?? ''),
+    pin: String(formData.get('pin') ?? ''),
     tiene_ci: formData.get('tiene_ci') === 'on',
     tiene_cv: formData.get('tiene_cv') === 'on',
     tiene_cd: formData.get('tiene_cd') === 'on',
@@ -127,6 +129,10 @@ export async function crearPersona(formData: FormData): Promise<PersonaResult> {
     })
   }
 
+  if (v.pin) {
+    await supabase.from('personas').update({ pin_hash: hashearPin(v.pin) }).eq('id', persona.id)
+  }
+
   await guardarPersonal(supabase, persona.id, v)
 
   revalidatePath('/dashboard/personas')
@@ -144,20 +150,19 @@ export async function actualizarPersona(formData: FormData): Promise<PersonaResu
   const v = parsed.data
 
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('personas')
-    .update({
-      nombres: v.nombres,
-      apellidos: v.apellidos,
-      ci: aNull(v.ci),
-      fecha_nacimiento: aNull(v.fecha_nacimiento),
-      sexo: aNull(v.sexo),
-      email: aNull(v.email),
-      telefono: aNull(v.telefono),
-      direccion: aNull(v.direccion),
-      observaciones: aNull(v.observaciones),
-    })
-    .eq('id', id)
+  const base = {
+    nombres: v.nombres,
+    apellidos: v.apellidos,
+    ci: aNull(v.ci),
+    fecha_nacimiento: aNull(v.fecha_nacimiento),
+    sexo: aNull(v.sexo),
+    email: aNull(v.email),
+    telefono: aNull(v.telefono),
+    direccion: aNull(v.direccion),
+    observaciones: aNull(v.observaciones),
+  }
+  const cambios = v.pin ? { ...base, pin_hash: hashearPin(v.pin) } : base
+  const { error } = await supabase.from('personas').update(cambios).eq('id', id)
 
   if (error) return { error: mensajeDeError(error) }
 
