@@ -57,7 +57,13 @@ export default async function PersonasPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            href={rol ? `/imprimir/personas?rol=${rol}` : '/imprimir/personas'}
+            href={
+              rol === 'empleado' || rol === 'profesional'
+                ? '/imprimir/personal'
+                : rol
+                  ? `/imprimir/personas?rol=${rol}`
+                  : '/imprimir/personas'
+            }
             className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Imprimir listado
