@@ -102,6 +102,7 @@ export type Database = {
       asistencias: {
         Row: {
           created_at: string
+          estado: string | null
           fecha: string
           hora_entrada: string | null
           hora_salida: string | null
@@ -115,6 +116,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          estado?: string | null
           fecha?: string
           hora_entrada?: string | null
           hora_salida?: string | null
@@ -128,6 +130,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          estado?: string | null
           fecha?: string
           hora_entrada?: string | null
           hora_salida?: string | null

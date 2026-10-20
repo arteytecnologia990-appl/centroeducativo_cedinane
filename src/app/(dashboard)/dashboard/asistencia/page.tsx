@@ -38,14 +38,22 @@ export default async function AsistenciaPage({
             Marcaciones del día (kiosco y manual).
           </p>
         </div>
-        <a
-          href="/kiosco-asistencia"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Abrir kiosco ↗
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/dashboard/asistencia/calendario"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Calendario
+          </a>
+          <a
+            href="/kiosco-asistencia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Abrir kiosco ↗
+          </a>
+        </div>
       </div>
 
       <form method="get" action="/dashboard/asistencia" className="flex items-end gap-2">

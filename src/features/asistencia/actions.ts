@@ -126,3 +126,49 @@ export async function registrarManual(formData: FormData): Promise<ManualResult>
   revalidatePath('/dashboard/asistencia')
   return { ok: true }
 }
+
+export async function guardarCalendario(formData: FormData): Promise<{ ok?: boolean; error?: string }> {
+  const personaId = String(formData.get('persona_id') ?? '')
+  if (!personaId) return { error: 'Falta la persona.' }
+
+  let marcas: { fecha: string; estado: string | null }[]
+  try {
+    marcas = JSON.parse(String(formData.get('marcas') ?? '[]'))
+  } catch {
+    return { error: 'Datos inválidos.' }
+  }
+
+  const supabase = await createClient()
+
+  for (const m of marcas) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(m.fecha)) continue
+    const estado = m.estado === 'presente' || m.estado === 'ausente' ? m.estado : null
+
+    const { data: existente } = await supabase
+      .from('asistencias')
+      .select('id, hora_entrada, hora_salida')
+      .eq('persona_id', personaId)
+      .eq('fecha', m.fecha)
+      .maybeSingle()
+
+    if (existente) {
+      const sinHoras = !existente.hora_entrada && !existente.hora_salida
+      if (estado === null && sinHoras) {
+        await supabase.from('asistencias').delete().eq('id', existente.id)
+      } else {
+        await supabase.from('asistencias').update({ estado }).eq('id', existente.id)
+      }
+    } else if (estado) {
+      await supabase.from('asistencias').insert({
+        persona_id: personaId,
+        fecha: m.fecha,
+        estado,
+        origen: 'manual',
+      })
+    }
+  }
+
+  revalidatePath('/dashboard/asistencia/calendario')
+  revalidatePath('/dashboard/asistencia')
+  return { ok: true }
+}

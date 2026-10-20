@@ -51,3 +51,21 @@ export async function listarPersonasParaAsistencia() {
 
   return data ?? []
 }
+
+export type MarcaMes = { fecha: string; estado: string | null }
+
+export async function listarAsistenciasMes(
+  personaId: string,
+  desde: string,
+  hasta: string
+): Promise<MarcaMes[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('asistencias')
+    .select('fecha, estado')
+    .eq('persona_id', personaId)
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+
+  return (data ?? []) as MarcaMes[]
+}
