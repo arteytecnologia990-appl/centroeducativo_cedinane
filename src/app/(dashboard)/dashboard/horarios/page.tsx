@@ -1,6 +1,7 @@
 import { listarHorarios, listarPersonasParaHorario, listarSedes } from '@/features/horarios/queries'
 import { HorariosPanel } from '@/features/horarios/components/horarios-panel'
 import { Volver } from '@/components/layout/volver'
+import { BotonesReporte } from '@/components/reportes/botones-reporte'
 
 export default async function HorariosPage({
   searchParams,
@@ -20,11 +21,14 @@ export default async function HorariosPage({
     <div className="space-y-6">
       <Volver href="/dashboard" label="Inicio" />
 
-      <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">Horarios</h1>
-        <p className="text-sm text-muted-foreground">
-          Cargá bloques por persona y varios días a la vez. Se agregan al instante.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold text-foreground">Horarios</h1>
+          <p className="text-sm text-muted-foreground">
+            Cargá bloques por persona y varios días a la vez. Se agregan al instante.
+          </p>
+        </div>
+        <BotonesReporte excelHref="/api/reportes/horarios" imprimirHref="/imprimir/horarios" />
       </div>
 
       <HorariosPanel

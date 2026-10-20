@@ -120,7 +120,15 @@ export default async function ImprimirAsistenciaPage({
             Ver
           </button>
         </form>
-        <BotonImprimir />
+        <div className="flex items-center gap-2">
+          <a
+            href={`/api/reportes/asistencia?persona_id=${persona_id}&mes=${mes}`}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent print:hidden"
+          >
+            Descargar Excel
+          </a>
+          <BotonImprimir />
+        </div>
       </div>
 
       <div className="mb-3 flex justify-center">

@@ -1,6 +1,7 @@
 import { listarHorasPagables } from '@/features/horas-pagables/queries'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Volver } from '@/components/layout/volver'
+import { BotonesReporte } from '@/components/reportes/botones-reporte'
 
 const claseInput =
   'h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
@@ -52,20 +53,26 @@ export default async function HorasPagablesPage({
             {MESES[mesNum - 1]} {anio} · horas trabajadas (asistencia) y sueldo por empleado.
           </p>
         </div>
-        <form method="get" action="/dashboard/horas-pagables" className="flex items-end gap-2">
-          <div className="space-y-1.5">
-            <label htmlFor="mes" className="text-sm font-medium text-foreground">
-              Período
-            </label>
-            <input id="mes" type="month" name="mes" defaultValue={mes} className={claseInput} />
-          </div>
-          <button
-            type="submit"
-            className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Ver
-          </button>
-        </form>
+        <div className="flex flex-wrap items-end gap-3">
+          <form method="get" action="/dashboard/horas-pagables" className="flex items-end gap-2">
+            <div className="space-y-1.5">
+              <label htmlFor="mes" className="text-sm font-medium text-foreground">
+                Período
+              </label>
+              <input id="mes" type="month" name="mes" defaultValue={mes} className={claseInput} />
+            </div>
+            <button
+              type="submit"
+              className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Ver
+            </button>
+          </form>
+          <BotonesReporte
+            excelHref={`/api/reportes/horas-pagables?mes=${mes}`}
+            imprimirHref={`/imprimir/horas-pagables?mes=${mes}`}
+          />
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">

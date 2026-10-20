@@ -56,3 +56,43 @@ export async function listarHorarios(personaId?: string): Promise<Horario[]> {
 
   return (data ?? []) as Horario[]
 }
+
+export type HorarioReporte = {
+  id: string
+  persona: string
+  sede: string
+  dia_semana: number
+  hora_inicio: string
+  hora_fin: string
+  actividad: string | null
+  aula: string | null
+}
+
+export async function listarHorariosReporte(): Promise<HorarioReporte[]> {
+  const supabase = await createClient()
+
+  const { data: horarios } = await supabase
+    .from('horarios')
+    .select('id, persona_id, sede_id, dia_semana, hora_inicio, hora_fin, actividad, aula')
+    .eq('activo', true)
+    .is('deleted_at', null)
+    .order('dia_semana', { ascending: true })
+    .order('hora_inicio', { ascending: true })
+
+  const { data: personas } = await supabase.from('personas').select('id, nombres, apellidos')
+  const { data: sedes } = await supabase.from('sedes').select('id, codigo')
+
+  const nombre = new Map((personas ?? []).map((p) => [p.id, `${p.apellidos}, ${p.nombres}`]))
+  const sede = new Map((sedes ?? []).map((s) => [s.id, s.codigo]))
+
+  return (horarios ?? []).map((h) => ({
+    id: h.id,
+    persona: nombre.get(h.persona_id) ?? '—',
+    sede: sede.get(h.sede_id) ?? '—',
+    dia_semana: h.dia_semana,
+    hora_inicio: h.hora_inicio,
+    hora_fin: h.hora_fin,
+    actividad: h.actividad,
+    aula: h.aula,
+  }))
+}
