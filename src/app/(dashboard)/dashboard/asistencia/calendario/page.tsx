@@ -56,6 +56,7 @@ export default async function CalendarioAsistenciaPage({
       </div>
 
       <CalendarioAsistencia
+        key={`${personaId}-${mes}`}
         personas={personas}
         personaId={personaId}
         mes={mes}
