@@ -28,6 +28,8 @@ type PersonalEditable = {
   registro_profesional?: string | null
   logo?: string | null
   sueldo?: number | null
+  modalidad_salarial?: string | null
+  jornada_tipo?: string | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
   tiene_cd?: boolean | null
@@ -292,6 +294,32 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
               defaultValue={p?.sueldo != null ? String(p.sueldo) : ''}
               placeholder="Ej.: 3.000.000"
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="modalidad_salarial">Modalidad salarial</Label>
+            <select
+              id="modalidad_salarial"
+              name="modalidad_salarial"
+              defaultValue={p?.modalidad_salarial ?? 'mensual'}
+              className={claseSelect}
+            >
+              <option value="mensual">Mensual</option>
+              <option value="jornal">Jornal</option>
+              <option value="hora">Por hora</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="jornada_tipo">Jornada</Label>
+            <select
+              id="jornada_tipo"
+              name="jornada_tipo"
+              defaultValue={p?.jornada_tipo ?? 'diurna'}
+              className={claseSelect}
+            >
+              <option value="diurna">Diurna (8 h / 48 h)</option>
+              <option value="nocturna">Nocturna (7 h / 42 h)</option>
+              <option value="mixta">Mixta (7,5 h / 45 h)</option>
+            </select>
           </div>
           <div className="space-y-1.5">
             <Label>Antigüedad en la institución</Label>
