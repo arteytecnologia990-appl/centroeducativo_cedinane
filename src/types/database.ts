@@ -233,6 +233,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feriados: {
+        Row: {
+          created_at: string
+          fecha: string
+          fuente: string | null
+          nombre: string
+          nota: string | null
+          tipo: string
+          trasladado_de: string | null
+          validado: boolean
+        }
+        Insert: {
+          created_at?: string
+          fecha: string
+          fuente?: string | null
+          nombre: string
+          nota?: string | null
+          tipo?: string
+          trasladado_de?: string | null
+          validado?: boolean
+        }
+        Update: {
+          created_at?: string
+          fecha?: string
+          fuente?: string | null
+          nombre?: string
+          nota?: string | null
+          tipo?: string
+          trasladado_de?: string | null
+          validado?: boolean
+        }
+        Relationships: []
+      }
       horarios: {
         Row: {
           actividad: string | null

@@ -151,3 +151,19 @@ export async function listarAusenciasAsistencia(periodo: string): Promise<Record
   for (const a of data ?? []) acc[a.persona_id] = (acc[a.persona_id] ?? 0) + 1
   return acc
 }
+
+export async function listarParametrosLegales() {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('parametros_legales')
+    .select('*')
+    .order('codigo', { ascending: true })
+    .order('vigencia_desde', { ascending: false })
+  return data ?? []
+}
+
+export async function listarFeriados() {
+  const supabase = await createClient()
+  const { data } = await supabase.from('feriados').select('*').order('fecha', { ascending: true })
+  return data ?? []
+}
