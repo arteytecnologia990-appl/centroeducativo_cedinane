@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { listarAsistenciasMes, listarPersonasParaAsistencia } from '@/features/asistencia/queries'
+import { listarFeriadosMes } from '@/features/salarios/queries'
 import { listarHorarios } from '@/features/horarios/queries'
 import { CalendarioAsistencia } from '@/features/asistencia/components/calendario-asistencia'
 import { Volver } from '@/components/layout/volver'
@@ -44,6 +45,10 @@ export default async function CalendarioAsistenciaPage({
     }
   }
 
+  const feriadosMes = await listarFeriadosMes(desde, hasta)
+  const feriados: Record<string, string> = {}
+  for (const f of feriadosMes) feriados[f.fecha] = f.nombre
+
   return (
     <div className="space-y-6">
       <Volver href="/dashboard/asistencia" label="Asistencia" />
@@ -62,6 +67,7 @@ export default async function CalendarioAsistenciaPage({
         mes={mes}
         inicial={inicial}
         horariosPorDia={horariosPorDia}
+        feriados={feriados}
       />
     </div>
   )

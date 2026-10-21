@@ -4,7 +4,13 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { calcularLiquidacion, type EmpleadoSalario, type NovedadesSalario } from './engine'
-import { listarAusenciasAsistencia, listarEmpleadosSalario, listarNovedades, obtenerParametros } from './queries'
+import {
+  horasFeriadoPorAsistencia,
+  listarAusenciasAsistencia,
+  listarEmpleadosSalario,
+  listarNovedades,
+  obtenerParametros,
+} from './queries'
 
 export async function calcularPeriodo(formData: FormData): Promise<void> {
   const periodo = String(formData.get('periodo') ?? '')
@@ -38,6 +44,16 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
       porPersona.get(personaId) ??
       ({ horasExtra: 0, horasNocturnas: 0, horasFeriado: 0, ausenciasDias: 0, adelanto: 0 } as NovedadesSalario)
     acc.ausenciasDias += dias
+    porPersona.set(personaId, acc)
+  }
+
+  // Horas trabajadas en feriados (asistencia presente) → se pagan ×2.
+  const horasFeriado = await horasFeriadoPorAsistencia(periodo)
+  for (const [personaId, horas] of Object.entries(horasFeriado)) {
+    const acc =
+      porPersona.get(personaId) ??
+      ({ horasExtra: 0, horasNocturnas: 0, horasFeriado: 0, ausenciasDias: 0, adelanto: 0 } as NovedadesSalario)
+    acc.horasFeriado += horas
     porPersona.set(personaId, acc)
   }
 

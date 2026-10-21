@@ -22,12 +22,14 @@ export function CalendarioAsistencia({
   mes,
   inicial,
   horariosPorDia,
+  feriados,
 }: {
   personas: Persona[]
   personaId: string
   mes: string
   inicial: Record<string, Estado>
   horariosPorDia: Record<number, { inicio: string; fin: string }>
+  feriados: Record<string, string>
 }) {
   const router = useRouter()
   const [estados, setEstados] = useState<Record<string, Estado>>(inicial)
@@ -208,18 +210,20 @@ export function CalendarioAsistencia({
             const estado = estados[fechaDe(dia)]
             const iso = ((new Date(anio, mesNum - 1, dia).getDay() + 6) % 7) + 1
             const span = horariosPorDia[iso]
+            const feriado = feriados[fechaDe(dia)]
             return (
               <button
                 key={dia}
                 type="button"
                 onClick={() => toggle(dia)}
-                aria-label={`Día ${dia}: ${estado ?? 'sin marcar'}${span ? `, horario ${span.inicio.slice(0, 5)} a ${span.fin.slice(0, 5)}` : ', sin horario'}`}
-                title={span ? `Horario: ${span.inicio.slice(0, 5)} a ${span.fin.slice(0, 5)}` : 'Sin horario asignado'}
+                aria-label={`Día ${dia}: ${estado ?? 'sin marcar'}${span ? `, horario ${span.inicio.slice(0, 5)} a ${span.fin.slice(0, 5)}` : ', sin horario'}${feriado ? `, feriado: ${feriado}` : ''}`}
+                title={`${span ? `Horario: ${span.inicio.slice(0, 5)} a ${span.fin.slice(0, 5)}` : 'Sin horario asignado'}${feriado ? ` · FERIADO: ${feriado}` : ''}`}
                 className={cn(
                   'flex h-12 flex-col items-center justify-center rounded-md text-sm font-medium leading-tight transition-colors',
                   estado === 'presente' && 'bg-success text-white',
                   estado === 'ausente' && 'bg-destructive text-white',
-                  !estado && 'bg-muted text-muted-foreground hover:bg-accent'
+                  !estado && 'bg-muted text-muted-foreground hover:bg-accent',
+                  feriado && 'ring-2 ring-warning'
                 )}
               >
                 <span>{dia}</span>
@@ -228,6 +232,14 @@ export function CalendarioAsistencia({
             )
           })}
         </div>
+        {Object.keys(feriados).length > 0 ? (
+          <p className="mt-2 text-xs text-warning">
+            Feriados del mes:{' '}
+            {Object.entries(feriados)
+              .map(([f, nombre]) => `${f.slice(8)}/${f.slice(5, 7)} ${nombre}`)
+              .join(' · ')}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

@@ -167,3 +167,74 @@ export async function listarFeriados() {
   const { data } = await supabase.from('feriados').select('*').order('fecha', { ascending: true })
   return data ?? []
 }
+
+export async function listarFeriadosMes(desde: string, hasta: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('feriados')
+    .select('fecha, nombre')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+    .order('fecha', { ascending: true })
+  return data ?? []
+}
+
+/** Horas trabajadas en feriado (según asistencia presente + horario asignado). */
+export async function horasFeriadoPorAsistencia(periodo: string): Promise<Record<string, number>> {
+  const supabase = await createClient()
+  const [anio, mes] = periodo.split('-').map(Number)
+  const desde = `${periodo}-01`
+  const hasta = `${periodo}-${String(new Date(anio, mes, 0).getDate()).padStart(2, '0')}`
+
+  const { data: feriados } = await supabase
+    .from('feriados')
+    .select('fecha')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+  const fechasFeriado = new Set((feriados ?? []).map((f) => f.fecha))
+  if (fechasFeriado.size === 0) return {}
+
+  const { data: presentes } = await supabase
+    .from('asistencias')
+    .select('persona_id, fecha')
+    .eq('estado', 'presente')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+
+  const { data: horarios } = await supabase
+    .from('horarios')
+    .select('persona_id, dia_semana, hora_inicio, hora_fin')
+    .eq('activo', true)
+    .is('deleted_at', null)
+
+  const span = new Map<string, Map<number, { inicio: string; fin: string }>>()
+  for (const h of horarios ?? []) {
+    const m = span.get(h.persona_id) ?? new Map<number, { inicio: string; fin: string }>()
+    const prev = m.get(h.dia_semana)
+    if (!prev) {
+      m.set(h.dia_semana, { inicio: h.hora_inicio, fin: h.hora_fin })
+    } else {
+      m.set(h.dia_semana, {
+        inicio: prev.inicio < h.hora_inicio ? prev.inicio : h.hora_inicio,
+        fin: prev.fin > h.hora_fin ? prev.fin : h.hora_fin,
+      })
+    }
+    span.set(h.persona_id, m)
+  }
+
+  const horas: Record<string, number> = {}
+  for (const p of presentes ?? []) {
+    if (!fechasFeriado.has(p.fecha)) continue
+    const iso = ((new Date(`${p.fecha}T00:00:00`).getDay() + 6) % 7) + 1
+    const s = span.get(p.persona_id)?.get(iso)
+    let h = 8
+    if (s) {
+      const [hi, mi] = s.inicio.split(':').map(Number)
+      const [hf, mf] = s.fin.split(':').map(Number)
+      const calc = (hf * 60 + mf - (hi * 60 + mi)) / 60
+      if (calc > 0) h = calc
+    }
+    horas[p.persona_id] = (horas[p.persona_id] ?? 0) + h
+  }
+  return horas
+}
