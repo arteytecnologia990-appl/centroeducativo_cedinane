@@ -236,32 +236,50 @@ export type Database = {
       feriados: {
         Row: {
           created_at: string
+          estado_validacion: string
           fecha: string
+          fecha_original: string | null
           fuente: string | null
+          movilidad: string
           nombre: string
+          norma: string | null
           nota: string | null
+          pais: string
           tipo: string
           trasladado_de: string | null
+          updated_at: string
           validado: boolean
         }
         Insert: {
           created_at?: string
+          estado_validacion?: string
           fecha: string
+          fecha_original?: string | null
           fuente?: string | null
+          movilidad?: string
           nombre: string
+          norma?: string | null
           nota?: string | null
+          pais?: string
           tipo?: string
           trasladado_de?: string | null
+          updated_at?: string
           validado?: boolean
         }
         Update: {
           created_at?: string
+          estado_validacion?: string
           fecha?: string
+          fecha_original?: string | null
           fuente?: string | null
+          movilidad?: string
           nombre?: string
+          norma?: string | null
           nota?: string | null
+          pais?: string
           tipo?: string
           trasladado_de?: string | null
+          updated_at?: string
           validado?: boolean
         }
         Relationships: []

@@ -232,14 +232,24 @@ export async function crearFeriado(formData: FormData): Promise<void> {
   const nombre = String(formData.get('nombre') ?? '').trim()
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !nombre) return
 
+  const fechaOriginal = String(formData.get('fecha_original') ?? '')
+  const movilidad = String(formData.get('movilidad') ?? 'fijo')
+  const estado = String(formData.get('estado_validacion') ?? 'pendiente')
+
   const supabase = await createClient()
   await supabase.from('feriados').upsert(
     {
       fecha,
       nombre,
       tipo: String(formData.get('tipo') ?? 'nacional'),
+      pais: 'PY',
+      fecha_original: /^\d{4}-\d{2}-\d{2}$/.test(fechaOriginal) ? fechaOriginal : fecha,
+      movilidad: movilidad === 'movil' ? 'movil' : 'fijo',
+      estado_validacion: ['pendiente', 'verificado', 'revisar'].includes(estado) ? estado : 'pendiente',
+      norma: String(formData.get('norma') ?? '').trim() || null,
       nota: String(formData.get('nota') ?? '').trim() || null,
-      validado: false,
+      validado: estado === 'verificado',
+      updated_at: new Date().toISOString(),
     },
     { onConflict: 'fecha' }
   )
