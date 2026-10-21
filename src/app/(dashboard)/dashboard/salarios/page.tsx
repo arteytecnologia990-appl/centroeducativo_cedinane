@@ -68,6 +68,12 @@ export default async function SalariosPage({
           >
             Parámetros
           </Link>
+          <Link
+            href="/dashboard/salarios/feriados"
+            className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Feriados
+          </Link>
 
           <form action={calcularPeriodo}>
             <input type="hidden" name="periodo" value={periodo} />

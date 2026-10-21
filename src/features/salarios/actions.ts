@@ -174,3 +174,68 @@ export async function eliminarLiquidacion(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/salarios')
   redirect('/dashboard/salarios')
 }
+
+export async function crearParametro(formData: FormData): Promise<void> {
+  const codigo = String(formData.get('codigo') ?? '').trim()
+  const nombre = String(formData.get('nombre') ?? '').trim()
+  const valor = Number(formData.get('valor') ?? 0)
+  const unidad = String(formData.get('unidad') ?? 'gs')
+  const vigencia = String(formData.get('vigencia_desde') ?? '')
+
+  if (!codigo || !nombre || !Number.isFinite(valor) || !/^\d{4}-\d{2}-\d{2}$/.test(vigencia)) return
+
+  const supabase = await createClient()
+  await supabase.from('parametros_legales').upsert(
+    {
+      codigo,
+      nombre,
+      valor,
+      unidad,
+      vigencia_desde: vigencia,
+      norma: String(formData.get('norma') ?? '').trim() || null,
+      fuente: String(formData.get('fuente') ?? '').trim() || null,
+      validado: false,
+    },
+    { onConflict: 'codigo,vigencia_desde' }
+  )
+
+  revalidatePath('/dashboard/salarios/parametros')
+}
+
+export async function eliminarParametro(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  await supabase.from('parametros_legales').delete().eq('id', id)
+  revalidatePath('/dashboard/salarios/parametros')
+}
+
+export async function crearFeriado(formData: FormData): Promise<void> {
+  const fecha = String(formData.get('fecha') ?? '')
+  const nombre = String(formData.get('nombre') ?? '').trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !nombre) return
+
+  const supabase = await createClient()
+  await supabase.from('feriados').upsert(
+    {
+      fecha,
+      nombre,
+      tipo: String(formData.get('tipo') ?? 'nacional'),
+      nota: String(formData.get('nota') ?? '').trim() || null,
+      validado: false,
+    },
+    { onConflict: 'fecha' }
+  )
+
+  revalidatePath('/dashboard/salarios/feriados')
+}
+
+export async function eliminarFeriado(formData: FormData): Promise<void> {
+  const fecha = String(formData.get('fecha') ?? '')
+  if (!fecha) return
+
+  const supabase = await createClient()
+  await supabase.from('feriados').delete().eq('fecha', fecha)
+  revalidatePath('/dashboard/salarios/feriados')
+}

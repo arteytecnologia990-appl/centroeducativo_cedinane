@@ -1,6 +1,12 @@
-import { listarFeriados, listarParametrosLegales } from '@/features/salarios/queries'
+import { listarParametrosLegales } from '@/features/salarios/queries'
+import { crearParametro, eliminarParametro } from '@/features/salarios/actions'
 import { Volver } from '@/components/layout/volver'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+const claseInput =
+  'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
 const numero = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
@@ -12,97 +18,110 @@ const fmtFecha = (f: string) => {
 }
 
 export default async function ParametrosPage() {
-  const [parametros, feriados] = await Promise.all([listarParametrosLegales(), listarFeriados()])
+  const parametros = await listarParametrosLegales()
 
   return (
     <div className="space-y-8">
       <Volver href="/dashboard/salarios" label="Liquidaciones" />
 
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">Parámetros legales y feriados</h1>
+        <h1 className="font-heading text-2xl font-semibold text-foreground">Parámetros legales</h1>
         <p className="text-sm text-muted-foreground">
-          Lo que hay cargado en la base (`parametros_legales` y `feriados`). Valores **pendientes de validación
-          legal/contable**.
+          Valores de la base (`parametros_legales`). Podés cargar o actualizar uno nuevo por vigencia.
         </p>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">Parámetros</h2>
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                <TableHead>Unidad</TableHead>
-                <TableHead>Vigencia</TableHead>
-                <TableHead>Norma</TableHead>
-                <TableHead>Validado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {parametros.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-mono text-xs">{p.codigo}</TableCell>
-                  <TableCell>{p.nombre}</TableCell>
-                  <TableCell className="text-right tabular-nums">{numero(Number(p.valor))}</TableCell>
-                  <TableCell className="text-muted-foreground">{p.unidad}</TableCell>
-                  <TableCell className="tabular-nums">{fmtFecha(p.vigencia_desde)}</TableCell>
-                  <TableCell className="text-muted-foreground">{p.norma ?? '—'}</TableCell>
-                  <TableCell>{p.validado ? 'Sí' : 'Pendiente'}</TableCell>
-                </TableRow>
-              ))}
-              {parametros.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
-                    Sin parámetros.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
+      <form action={crearParametro} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="codigo">Código</Label>
+          <Input id="codigo" name="codigo" required placeholder="ej.: salario_minimo_mensual" />
         </div>
-      </section>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="nombre">Nombre</Label>
+          <Input id="nombre" name="nombre" required placeholder="Salario mínimo mensual" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="valor">Valor</Label>
+          <Input id="valor" name="valor" type="number" step="0.0001" required />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="unidad">Unidad</Label>
+          <select id="unidad" name="unidad" className={claseInput}>
+            <option value="gs">Gs</option>
+            <option value="porcentaje">%</option>
+            <option value="horas">Horas</option>
+            <option value="dias">Días</option>
+          </select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="vigencia_desde">Vigencia desde</Label>
+          <Input id="vigencia_desde" name="vigencia_desde" type="date" required />
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="norma">Norma</Label>
+          <Input id="norma" name="norma" placeholder="Res. MTESS 670/2026" />
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="fuente">Fuente</Label>
+          <Input id="fuente" name="fuente" placeholder="MTESS / IPS / DNIT" />
+        </div>
+        <div className="sm:col-span-6">
+          <button
+            type="submit"
+            className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Agregar / actualizar parámetro
+          </button>
+        </div>
+      </form>
 
-      <section className="space-y-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">Feriados 2026</h2>
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Nota</TableHead>
-                <TableHead>Validado</TableHead>
+      <div className="overflow-hidden rounded-lg border border-border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Código</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead className="text-right">Valor</TableHead>
+              <TableHead>Unidad</TableHead>
+              <TableHead>Vigencia</TableHead>
+              <TableHead>Norma</TableHead>
+              <TableHead>Validado</TableHead>
+              <TableHead className="w-16" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {parametros.map((p) => (
+              <TableRow key={p.id}>
+                <TableCell className="font-mono text-xs">{p.codigo}</TableCell>
+                <TableCell>{p.nombre}</TableCell>
+                <TableCell className="text-right tabular-nums">{numero(Number(p.valor))}</TableCell>
+                <TableCell className="text-muted-foreground">{p.unidad}</TableCell>
+                <TableCell className="tabular-nums">{fmtFecha(p.vigencia_desde)}</TableCell>
+                <TableCell className="text-muted-foreground">{p.norma ?? '—'}</TableCell>
+                <TableCell>{p.validado ? 'Sí' : 'Pendiente'}</TableCell>
+                <TableCell>
+                  <form action={eliminarParametro}>
+                    <input type="hidden" name="id" value={p.id} />
+                    <button
+                      type="submit"
+                      className="text-xs text-muted-foreground transition-colors hover:text-destructive"
+                    >
+                      Eliminar
+                    </button>
+                  </form>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {feriados.map((f) => (
-                <TableRow key={f.fecha}>
-                  <TableCell className="tabular-nums">{fmtFecha(f.fecha)}</TableCell>
-                  <TableCell className="font-medium">{f.nombre}</TableCell>
-                  <TableCell className="text-muted-foreground">{f.tipo}</TableCell>
-                  <TableCell className="text-muted-foreground">{f.nota ?? '—'}</TableCell>
-                  <TableCell>{f.validado ? 'Sí' : 'Pendiente'}</TableCell>
-                </TableRow>
-              ))}
-              {feriados.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
-                    Sin feriados.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Fuente: La Nación (02/01/2026) y calendario oficial. Los traslados pueden variar por decreto; verificá
-          antes de liquidar.
-        </p>
-      </section>
+            ))}
+            {parametros.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-16 text-center text-sm text-muted-foreground">
+                  Sin parámetros.
+                </TableCell>
+              </TableRow>
+            ) : null}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }
