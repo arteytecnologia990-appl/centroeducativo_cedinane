@@ -131,3 +131,23 @@ export async function listarNovedadesPeriodo(periodo: string): Promise<NovedadDe
     }
   })
 }
+
+/** Días ausentes por persona según la asistencia (calendario) del período. */
+export async function listarAusenciasAsistencia(periodo: string): Promise<Record<string, number>> {
+  const supabase = await createClient()
+  const [anio, mes] = periodo.split('-').map(Number)
+  const desde = `${periodo}-01`
+  const ultimo = new Date(anio, mes, 0).getDate()
+  const hasta = `${periodo}-${String(ultimo).padStart(2, '0')}`
+
+  const { data } = await supabase
+    .from('asistencias')
+    .select('persona_id')
+    .eq('estado', 'ausente')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+
+  const acc: Record<string, number> = {}
+  for (const a of data ?? []) acc[a.persona_id] = (acc[a.persona_id] ?? 0) + 1
+  return acc
+}

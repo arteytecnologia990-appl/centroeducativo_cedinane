@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { calcularLiquidacion, type EmpleadoSalario, type NovedadesSalario } from './engine'
-import { listarEmpleadosSalario, listarNovedades, obtenerParametros } from './queries'
+import { listarAusenciasAsistencia, listarEmpleadosSalario, listarNovedades, obtenerParametros } from './queries'
 
 export async function calcularPeriodo(formData: FormData): Promise<void> {
   const periodo = String(formData.get('periodo') ?? '')
@@ -29,6 +29,16 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
     else if (n.tipo === 'ausencia') acc.ausenciasDias += cant
     else if (n.tipo === 'adelanto') acc.adelanto += cant
     porPersona.set(n.persona_id, acc)
+  }
+
+  // Ausencias marcadas en Asistencia (calendario) también cuentan.
+  const ausenciasAsistencia = await listarAusenciasAsistencia(periodo)
+  for (const [personaId, dias] of Object.entries(ausenciasAsistencia)) {
+    const acc =
+      porPersona.get(personaId) ??
+      ({ horasExtra: 0, horasNocturnas: 0, horasFeriado: 0, ausenciasDias: 0, adelanto: 0 } as NovedadesSalario)
+    acc.ausenciasDias += dias
+    porPersona.set(personaId, acc)
   }
 
   for (const e of empleados) {
