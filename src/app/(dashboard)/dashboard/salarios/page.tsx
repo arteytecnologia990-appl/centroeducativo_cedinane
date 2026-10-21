@@ -56,6 +56,13 @@ export default async function SalariosPage({
             </button>
           </form>
 
+          <Link
+            href={`/dashboard/salarios/novedades?periodo=${periodo}`}
+            className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Novedades
+          </Link>
+
           <form action={calcularPeriodo}>
             <input type="hidden" name="periodo" value={periodo} />
             <button

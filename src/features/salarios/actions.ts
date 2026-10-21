@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { calcularLiquidacion, type EmpleadoSalario, type NovedadesSalario } from './engine'
 import { listarEmpleadosSalario, listarNovedades, obtenerParametros } from './queries'
@@ -109,4 +110,57 @@ export async function anularLiquidacion(formData: FormData) {
 
   revalidatePath('/dashboard/salarios')
   revalidatePath(`/dashboard/salarios/${id}`)
+}
+
+const UNIDAD_POR_TIPO: Record<string, string> = {
+  horas_extra: 'horas',
+  horas_nocturnas: 'horas',
+  horas_feriado: 'horas',
+  ausencia: 'dias',
+  adelanto: 'gs',
+}
+
+export async function crearNovedad(formData: FormData): Promise<void> {
+  const personaId = String(formData.get('persona_id') ?? '')
+  const periodo = String(formData.get('periodo') ?? '')
+  const tipo = String(formData.get('tipo') ?? '')
+  const cantidad = Number(formData.get('cantidad') ?? 0)
+
+  if (!personaId || !/^\d{4}-\d{2}$/.test(periodo) || !tipo || !Number.isFinite(cantidad) || cantidad <= 0) return
+
+  const supabase = await createClient()
+  await supabase.from('novedades').insert({
+    persona_id: personaId,
+    periodo,
+    tipo,
+    cantidad,
+    unidad: UNIDAD_POR_TIPO[tipo] ?? 'horas',
+    justificacion: String(formData.get('justificacion') ?? '').trim() || null,
+    estado: 'aprobada',
+  })
+
+  revalidatePath('/dashboard/salarios/novedades')
+  revalidatePath('/dashboard/salarios')
+}
+
+export async function eliminarNovedad(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  await supabase.from('novedades').delete().eq('id', id)
+
+  revalidatePath('/dashboard/salarios/novedades')
+  revalidatePath('/dashboard/salarios')
+}
+
+export async function eliminarLiquidacion(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  await supabase.from('liquidaciones').delete().eq('id', id)
+
+  revalidatePath('/dashboard/salarios')
+  redirect('/dashboard/salarios')
 }

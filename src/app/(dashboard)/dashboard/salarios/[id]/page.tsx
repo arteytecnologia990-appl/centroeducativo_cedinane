@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { obtenerLiquidacion } from '@/features/salarios/queries'
-import { aprobarLiquidacion, anularLiquidacion } from '@/features/salarios/actions'
+import { aprobarLiquidacion, anularLiquidacion, eliminarLiquidacion } from '@/features/salarios/actions'
 import { Volver } from '@/components/layout/volver'
 import { BotonImprimir } from '@/components/asistencia/boton-imprimir'
 
@@ -55,6 +55,15 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
               className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
             >
               Anular
+            </button>
+          </form>
+          <form action={eliminarLiquidacion}>
+            <input type="hidden" name="id" value={id} />
+            <button
+              type="submit"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-destructive/40 bg-background px-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive-soft"
+            >
+              Eliminar
             </button>
           </form>
         </div>

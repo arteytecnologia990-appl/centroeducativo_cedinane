@@ -99,3 +99,35 @@ export async function obtenerLiquidacion(id: string) {
     .maybeSingle()
   return data ?? null
 }
+
+export type NovedadDetalle = {
+  id: string
+  persona_id: string
+  persona: string
+  tipo: string
+  cantidad: number
+  unidad: string
+  justificacion: string | null
+}
+
+export async function listarNovedadesPeriodo(periodo: string): Promise<NovedadDetalle[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('novedades')
+    .select('id, persona_id, tipo, cantidad, unidad, justificacion, personas(nombres, apellidos)')
+    .eq('periodo', periodo)
+    .order('created_at', { ascending: true })
+
+  return (data ?? []).map((n) => {
+    const persona = n.personas as { nombres: string; apellidos: string } | null
+    return {
+      id: n.id,
+      persona_id: n.persona_id,
+      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      tipo: n.tipo,
+      cantidad: Number(n.cantidad),
+      unidad: n.unidad,
+      justificacion: n.justificacion,
+    }
+  })
+}
