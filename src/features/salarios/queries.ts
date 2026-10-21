@@ -22,6 +22,7 @@ export type EmpleadoFila = {
     sueldo: number | null
     modalidad_salarial: string | null
     jornada_tipo: string | null
+    regimen: string | null
   } | null
 }
 
@@ -37,7 +38,7 @@ export async function listarEmpleadosSalario(): Promise<EmpleadoFila[]> {
 
   const { data } = await supabase
     .from('personas')
-    .select('id, nombres, apellidos, personal(sueldo, modalidad_salarial, jornada_tipo)')
+    .select('id, nombres, apellidos, personal(sueldo, modalidad_salarial, jornada_tipo, regimen)')
     .in('id', ids)
     .is('deleted_at', null)
     .order('apellidos', { ascending: true })

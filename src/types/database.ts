@@ -804,6 +804,7 @@ export type Database = {
           modalidad_salarial: string | null
           persona_id: string
           programa: string | null
+          regimen: string
           registro_profesional: string | null
           sector: string | null
           sede_id: string | null
@@ -828,6 +829,7 @@ export type Database = {
           modalidad_salarial?: string | null
           persona_id: string
           programa?: string | null
+          regimen?: string
           registro_profesional?: string | null
           sector?: string | null
           sede_id?: string | null
@@ -852,6 +854,7 @@ export type Database = {
           modalidad_salarial?: string | null
           persona_id?: string
           programa?: string | null
+          regimen?: string
           registro_profesional?: string | null
           sector?: string | null
           sede_id?: string | null

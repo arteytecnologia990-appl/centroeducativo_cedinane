@@ -30,6 +30,7 @@ type PersonalEditable = {
   sueldo?: number | null
   modalidad_salarial?: string | null
   jornada_tipo?: string | null
+  regimen?: string | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
   tiene_cd?: boolean | null
@@ -319,6 +320,13 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
               <option value="diurna">Diurna (8 h / 48 h)</option>
               <option value="nocturna">Nocturna (7 h / 42 h)</option>
               <option value="mixta">Mixta (7,5 h / 45 h)</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="regimen">Régimen</Label>
+            <select id="regimen" name="regimen" defaultValue={p?.regimen ?? 'dependencia'} className={claseSelect}>
+              <option value="dependencia">Dependencia (IPS)</option>
+              <option value="honorarios">Honorarios (IVA)</option>
             </select>
           </div>
           <div className="space-y-1.5">

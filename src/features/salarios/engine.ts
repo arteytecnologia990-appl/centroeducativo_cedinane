@@ -6,6 +6,7 @@ export type EmpleadoSalario = {
   sueldo: number
   modalidad: 'mensual' | 'jornal' | 'hora'
   jornada: 'diurna' | 'nocturna' | 'mixta'
+  regimen: 'dependencia' | 'honorarios'
 }
 
 export type NovedadesSalario = {
@@ -139,17 +140,37 @@ export function calcularLiquidacion(
     orden += 10
   }
 
-  const ips = totalHaberes * ((p.ips_obrero ?? 9) / 100)
-  detalle.push({
-    codigo: 'ips_obrero',
-    descripcion: 'IPS obrero',
-    cantidad: 0,
-    base: totalHaberes,
-    tasa: p.ips_obrero ?? 9,
-    importe: r2(-ips),
-    orden,
-  })
-  orden += 10
+  const esHonorarios = emp.regimen === 'honorarios'
+
+  let ips = 0
+  if (!esHonorarios) {
+    ips = totalHaberes * ((p.ips_obrero ?? 9) / 100)
+    detalle.push({
+      codigo: 'ips_obrero',
+      descripcion: 'IPS obrero',
+      cantidad: 0,
+      base: totalHaberes,
+      tasa: p.ips_obrero ?? 9,
+      importe: r2(-ips),
+      orden,
+    })
+    orden += 10
+  }
+
+  let iva = 0
+  if (esHonorarios) {
+    iva = totalHaberes * ((p.iva ?? 10) / 100)
+    detalle.push({
+      codigo: 'iva',
+      descripcion: 'IVA 10%',
+      cantidad: 0,
+      base: totalHaberes,
+      tasa: p.iva ?? 10,
+      importe: r2(iva),
+      orden,
+    })
+    orden += 10
+  }
 
   if (nov.adelanto > 0) {
     detalle.push({
@@ -165,8 +186,8 @@ export function calcularLiquidacion(
   }
 
   const totalDescuentos = r2(ausencia + ips + nov.adelanto)
-  const neto = r2(totalHaberes - totalDescuentos)
-  const ipsPatronal = r2(totalHaberes * ((p.ips_patronal ?? 16.5) / 100))
+  const neto = r2(totalHaberes - totalDescuentos + iva)
+  const ipsPatronal = esHonorarios ? 0 : r2(totalHaberes * ((p.ips_patronal ?? 16.5) / 100))
 
   return { detalle, totalHaberes, totalDescuentos, neto, ipsPatronal }
 }

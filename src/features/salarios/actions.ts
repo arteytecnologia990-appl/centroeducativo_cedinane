@@ -67,6 +67,7 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
       sueldo,
       modalidad: (e.personal?.modalidad_salarial ?? 'mensual') as EmpleadoSalario['modalidad'],
       jornada: (e.personal?.jornada_tipo ?? 'diurna') as EmpleadoSalario['jornada'],
+      regimen: (e.personal?.regimen ?? 'dependencia') as EmpleadoSalario['regimen'],
     }
 
     const nov =
