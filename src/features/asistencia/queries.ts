@@ -69,3 +69,42 @@ export async function listarAsistenciasMes(
 
   return (data ?? []) as MarcaMes[]
 }
+
+export type AsistenciaPeriodo = {
+  id: string
+  fecha: string
+  persona: string
+  hora_entrada: string | null
+  hora_salida: string | null
+  estado: string | null
+  origen: string
+}
+
+export async function listarAsistenciasPeriodo(
+  desde: string,
+  hasta: string
+): Promise<AsistenciaPeriodo[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('asistencias')
+    .select('id, fecha, hora_entrada, hora_salida, estado, origen, personas(nombres, apellidos)')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+    .order('fecha', { ascending: false })
+    .order('hora_entrada', { ascending: true })
+
+  if (error) throw new Error(error.message)
+
+  return (data ?? []).map((a) => {
+    const persona = a.personas as { nombres: string; apellidos: string } | null
+    return {
+      id: a.id,
+      fecha: a.fecha,
+      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      hora_entrada: a.hora_entrada,
+      hora_salida: a.hora_salida,
+      estado: a.estado,
+      origen: a.origen,
+    }
+  })
+}
