@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import {
   Banknote,
+  Calculator,
   CalendarRange,
   ChevronDown,
   ClipboardCheck,
@@ -44,6 +45,7 @@ const GRUPOS: Grupo[] = [
       { href: '/dashboard/asistencia', label: 'Asistencia', Icon: ClipboardCheck },
       { href: '/kiosco-asistencia', label: 'Kiosco', Icon: Monitor },
       { href: '/dashboard/horas-pagables', label: 'Horas pagables', Icon: Banknote },
+      { href: '/dashboard/salarios', label: 'Liquidaciones', Icon: Calculator },
     ],
   },
   {

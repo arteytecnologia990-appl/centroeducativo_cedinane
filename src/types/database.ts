@@ -159,6 +159,80 @@ export type Database = {
           },
         ]
       }
+      auditoria_liquidacion: {
+        Row: {
+          accion: string
+          created_at: string
+          detalle: Json | null
+          id: string
+          liquidacion_id: string | null
+          usuario: string | null
+        }
+        Insert: {
+          accion: string
+          created_at?: string
+          detalle?: Json | null
+          id?: string
+          liquidacion_id?: string | null
+          usuario?: string | null
+        }
+        Update: {
+          accion?: string
+          created_at?: string
+          detalle?: Json | null
+          id?: string
+          liquidacion_id?: string | null
+          usuario?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditoria_liquidacion_liquidacion_id_fkey"
+            columns: ["liquidacion_id"]
+            isOneToOne: false
+            referencedRelation: "liquidaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conceptos_salario: {
+        Row: {
+          activo: boolean
+          codigo: string
+          id: string
+          incluye_base_aguinaldo: boolean
+          incluye_base_ips: boolean
+          incluye_base_vacaciones: boolean
+          nombre: string
+          orden: number
+          remunerativo: boolean
+          tipo: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          id?: string
+          incluye_base_aguinaldo?: boolean
+          incluye_base_ips?: boolean
+          incluye_base_vacaciones?: boolean
+          nombre: string
+          orden?: number
+          remunerativo?: boolean
+          tipo: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          id?: string
+          incluye_base_aguinaldo?: boolean
+          incluye_base_ips?: boolean
+          incluye_base_vacaciones?: boolean
+          nombre?: string
+          orden?: number
+          remunerativo?: boolean
+          tipo?: string
+        }
+        Relationships: []
+      }
       horarios: {
         Row: {
           actividad: string | null
@@ -225,6 +299,139 @@ export type Database = {
           },
         ]
       }
+      jornadas: {
+        Row: {
+          codigo: string
+          created_at: string
+          horas_diarias: number
+          horas_semanales: number
+          id: string
+          nombre: string
+          tipo: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          horas_diarias: number
+          horas_semanales: number
+          id?: string
+          nombre: string
+          tipo: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          horas_diarias?: number
+          horas_semanales?: number
+          id?: string
+          nombre?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
+      liquidacion_detalle: {
+        Row: {
+          base_calculo: number | null
+          cantidad: number | null
+          concepto_codigo: string
+          descripcion: string | null
+          id: string
+          importe: number
+          liquidacion_id: string
+          orden: number
+          tasa: number | null
+        }
+        Insert: {
+          base_calculo?: number | null
+          cantidad?: number | null
+          concepto_codigo: string
+          descripcion?: string | null
+          id?: string
+          importe: number
+          liquidacion_id: string
+          orden?: number
+          tasa?: number | null
+        }
+        Update: {
+          base_calculo?: number | null
+          cantidad?: number | null
+          concepto_codigo?: string
+          descripcion?: string | null
+          id?: string
+          importe?: number
+          liquidacion_id?: string
+          orden?: number
+          tasa?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liquidacion_detalle_liquidacion_id_fkey"
+            columns: ["liquidacion_id"]
+            isOneToOne: false
+            referencedRelation: "liquidaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liquidaciones: {
+        Row: {
+          aprobado_por: string | null
+          calculado_por: string | null
+          created_at: string
+          estado: string
+          fecha_aprobacion: string | null
+          id: string
+          neto_pagar: number
+          periodo: string
+          persona_id: string
+          total_aportes_patronales: number
+          total_descuentos: number
+          total_haberes: number
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          aprobado_por?: string | null
+          calculado_por?: string | null
+          created_at?: string
+          estado?: string
+          fecha_aprobacion?: string | null
+          id?: string
+          neto_pagar?: number
+          periodo: string
+          persona_id: string
+          total_aportes_patronales?: number
+          total_descuentos?: number
+          total_haberes?: number
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          aprobado_por?: string | null
+          calculado_por?: string | null
+          created_at?: string
+          estado?: string
+          fecha_aprobacion?: string | null
+          id?: string
+          neto_pagar?: number
+          periodo?: string
+          persona_id?: string
+          total_aportes_patronales?: number
+          total_descuentos?: number
+          total_haberes?: number
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liquidaciones_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modulos_pantallas: {
         Row: {
           activo: boolean
@@ -258,6 +465,107 @@ export type Database = {
           pantalla?: string
           ruta?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      novedades: {
+        Row: {
+          cantidad: number
+          created_at: string
+          estado: string
+          fecha_desde: string | null
+          fecha_hasta: string | null
+          id: string
+          justificacion: string | null
+          periodo: string
+          persona_id: string
+          tipo: string
+          tratamiento: string | null
+          unidad: string
+          updated_at: string
+        }
+        Insert: {
+          cantidad?: number
+          created_at?: string
+          estado?: string
+          fecha_desde?: string | null
+          fecha_hasta?: string | null
+          id?: string
+          justificacion?: string | null
+          periodo: string
+          persona_id: string
+          tipo: string
+          tratamiento?: string | null
+          unidad?: string
+          updated_at?: string
+        }
+        Update: {
+          cantidad?: number
+          created_at?: string
+          estado?: string
+          fecha_desde?: string | null
+          fecha_hasta?: string | null
+          id?: string
+          justificacion?: string | null
+          periodo?: string
+          persona_id?: string
+          tipo?: string
+          tratamiento?: string | null
+          unidad?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "novedades_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parametros_legales: {
+        Row: {
+          articulo: string | null
+          codigo: string
+          created_at: string
+          fuente: string | null
+          id: string
+          nombre: string
+          norma: string | null
+          unidad: string
+          validado: boolean
+          valor: number
+          vigencia_desde: string
+          vigencia_hasta: string | null
+        }
+        Insert: {
+          articulo?: string | null
+          codigo: string
+          created_at?: string
+          fuente?: string | null
+          id?: string
+          nombre: string
+          norma?: string | null
+          unidad?: string
+          validado?: boolean
+          valor: number
+          vigencia_desde: string
+          vigencia_hasta?: string | null
+        }
+        Update: {
+          articulo?: string | null
+          codigo?: string
+          created_at?: string
+          fuente?: string | null
+          id?: string
+          nombre?: string
+          norma?: string | null
+          unidad?: string
+          validado?: boolean
+          valor?: number
+          vigencia_desde?: string
+          vigencia_hasta?: string | null
         }
         Relationships: []
       }
@@ -440,7 +748,9 @@ export type Database = {
           fecha_ingreso: string | null
           formacion_academica: string | null
           id: string
+          jornada_tipo: string | null
           logo: string | null
+          modalidad_salarial: string | null
           persona_id: string
           programa: string | null
           registro_profesional: string | null
@@ -462,7 +772,9 @@ export type Database = {
           fecha_ingreso?: string | null
           formacion_academica?: string | null
           id?: string
+          jornada_tipo?: string | null
           logo?: string | null
+          modalidad_salarial?: string | null
           persona_id: string
           programa?: string | null
           registro_profesional?: string | null
@@ -484,7 +796,9 @@ export type Database = {
           fecha_ingreso?: string | null
           formacion_academica?: string | null
           id?: string
+          jornada_tipo?: string | null
           logo?: string | null
+          modalidad_salarial?: string | null
           persona_id?: string
           programa?: string | null
           registro_profesional?: string | null
