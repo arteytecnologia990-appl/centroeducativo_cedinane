@@ -127,7 +127,9 @@ export async function registrarManual(formData: FormData): Promise<ManualResult>
   return { ok: true }
 }
 
-export async function guardarCalendario(formData: FormData): Promise<{ ok?: boolean; error?: string }> {
+export async function guardarCalendario(
+  formData: FormData
+): Promise<{ ok?: boolean; error?: string; sinHorario?: number }> {
   const personaId = String(formData.get('persona_id') ?? '')
   if (!personaId) return { error: 'Falta la persona.' }
 
@@ -140,9 +142,36 @@ export async function guardarCalendario(formData: FormData): Promise<{ ok?: bool
 
   const supabase = await createClient()
 
+  // Horario asignado por día de la semana (ISO: 1 = lunes … 7 = domingo)
+  const { data: horarios } = await supabase
+    .from('horarios')
+    .select('dia_semana, hora_inicio, hora_fin')
+    .eq('persona_id', personaId)
+    .eq('activo', true)
+    .is('deleted_at', null)
+
+  const spanPorDia = new Map<number, { inicio: string; fin: string }>()
+  for (const h of horarios ?? []) {
+    const prev = spanPorDia.get(h.dia_semana)
+    if (!prev) {
+      spanPorDia.set(h.dia_semana, { inicio: h.hora_inicio, fin: h.hora_fin })
+    } else {
+      spanPorDia.set(h.dia_semana, {
+        inicio: prev.inicio < h.hora_inicio ? prev.inicio : h.hora_inicio,
+        fin: prev.fin > h.hora_fin ? prev.fin : h.hora_fin,
+      })
+    }
+  }
+
+  let sinHorario = 0
+
   for (const m of marcas) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(m.fecha)) continue
     const estado = m.estado === 'presente' || m.estado === 'ausente' ? m.estado : null
+
+    const diaIso = ((new Date(`${m.fecha}T00:00:00`).getDay() + 6) % 7) + 1
+    const span = spanPorDia.get(diaIso) ?? null
+    if (estado === 'presente' && !span) sinHorario += 1
 
     const { data: existente } = await supabase
       .from('asistencias')
@@ -153,16 +182,37 @@ export async function guardarCalendario(formData: FormData): Promise<{ ok?: bool
 
     if (existente) {
       const sinHoras = !existente.hora_entrada && !existente.hora_salida
-      if (estado === null && sinHoras) {
-        await supabase.from('asistencias').delete().eq('id', existente.id)
+
+      if (estado === null) {
+        if (sinHoras) {
+          await supabase.from('asistencias').delete().eq('id', existente.id)
+        } else {
+          await supabase.from('asistencias').update({ estado: null }).eq('id', existente.id)
+        }
+      } else if (estado === 'ausente') {
+        await supabase
+          .from('asistencias')
+          .update({ estado: 'ausente', hora_entrada: null, hora_salida: null })
+          .eq('id', existente.id)
       } else {
-        await supabase.from('asistencias').update({ estado }).eq('id', existente.id)
+        // presente: si la fila no tiene horas (kiosco), usar el horario asignado
+        await supabase
+          .from('asistencias')
+          .update({
+            estado: 'presente',
+            ...(existente.hora_entrada
+              ? {}
+              : { hora_entrada: span?.inicio ?? null, hora_salida: span?.fin ?? null }),
+          })
+          .eq('id', existente.id)
       }
     } else if (estado) {
       await supabase.from('asistencias').insert({
         persona_id: personaId,
         fecha: m.fecha,
         estado,
+        hora_entrada: estado === 'presente' ? (span?.inicio ?? null) : null,
+        hora_salida: estado === 'presente' ? (span?.fin ?? null) : null,
         origen: 'manual',
       })
     }
@@ -170,5 +220,5 @@ export async function guardarCalendario(formData: FormData): Promise<{ ok?: bool
 
   revalidatePath('/dashboard/asistencia/calendario')
   revalidatePath('/dashboard/asistencia')
-  return { ok: true }
+  return { ok: true, sinHorario }
 }

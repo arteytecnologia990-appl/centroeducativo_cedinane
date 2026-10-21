@@ -1,4 +1,5 @@
 import { listarAsistenciasMes, listarPersonasParaAsistencia } from '@/features/asistencia/queries'
+import { listarHorarios } from '@/features/horarios/queries'
 import { CalendarioAsistencia } from '@/features/asistencia/components/calendario-asistencia'
 import { Volver } from '@/components/layout/volver'
 
@@ -26,6 +27,20 @@ export default async function CalendarioAsistenciaPage({
     if (m.estado === 'presente' || m.estado === 'ausente') inicial[m.fecha] = m.estado
   }
 
+  const horarios = personaId ? await listarHorarios(personaId) : []
+  const horariosPorDia: Record<number, { inicio: string; fin: string }> = {}
+  for (const h of horarios) {
+    const prev = horariosPorDia[h.dia_semana]
+    if (!prev) {
+      horariosPorDia[h.dia_semana] = { inicio: h.hora_inicio, fin: h.hora_fin }
+    } else {
+      horariosPorDia[h.dia_semana] = {
+        inicio: prev.inicio < h.hora_inicio ? prev.inicio : h.hora_inicio,
+        fin: prev.fin > h.hora_fin ? prev.fin : h.hora_fin,
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Volver href="/dashboard/asistencia" label="Asistencia" />
@@ -37,7 +52,13 @@ export default async function CalendarioAsistenciaPage({
         </p>
       </div>
 
-      <CalendarioAsistencia personas={personas} personaId={personaId} mes={mes} inicial={inicial} />
+      <CalendarioAsistencia
+        personas={personas}
+        personaId={personaId}
+        mes={mes}
+        inicial={inicial}
+        horariosPorDia={horariosPorDia}
+      />
     </div>
   )
 }

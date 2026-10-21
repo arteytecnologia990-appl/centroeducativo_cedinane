@@ -21,11 +21,13 @@ export function CalendarioAsistencia({
   personaId,
   mes,
   inicial,
+  horariosPorDia,
 }: {
   personas: Persona[]
   personaId: string
   mes: string
   inicial: Record<string, Estado>
+  horariosPorDia: Record<number, { inicio: string; fin: string }>
 }) {
   const router = useRouter()
   const [estados, setEstados] = useState<Record<string, Estado>>(inicial)
@@ -36,6 +38,7 @@ export function CalendarioAsistencia({
   const totalDias = new Date(anio, mesNum, 0).getDate()
   const offset = (new Date(anio, mesNum - 1, 1).getDay() + 6) % 7
   const dias = Array.from({ length: totalDias }, (_, i) => i + 1)
+  const tieneHorario = Object.keys(horariosPorDia).length > 0
 
   const fechaDe = (dia: number) => `${anio}-${String(mesNum).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
 
@@ -83,7 +86,13 @@ export function CalendarioAsistencia({
     fd.set('persona_id', personaId)
     fd.set('marcas', JSON.stringify(marcas))
     const r = await guardarCalendario(fd)
-    setMsg(r?.error ?? 'Guardado ✓')
+    if (r?.error) {
+      setMsg(r.error)
+    } else if ((r?.sinHorario ?? 0) > 0) {
+      setMsg(`Guardado. ${r!.sinHorario} día(s) sin horario asignado: se marcaron sin hora.`)
+    } else {
+      setMsg('Guardado ✓')
+    }
     setPending(false)
     if (!r?.error) router.refresh()
   }
@@ -159,6 +168,13 @@ export function CalendarioAsistencia({
         </Button>
       </div>
 
+      {!tieneHorario ? (
+        <div role="alert" className="rounded-md bg-warning-soft px-3 py-2 text-sm text-warning">
+          Esta persona <strong>no tiene horario asignado</strong>. Las asistencias se marcarán sin hora.
+          Cargá su horario en <strong>Horarios</strong>.
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-3 gap-3 text-center">
         <div className="rounded-lg border border-border p-3">
           <div className="text-xs text-muted-foreground">Asistencias</div>
@@ -188,20 +204,24 @@ export function CalendarioAsistencia({
           ))}
           {dias.map((dia) => {
             const estado = estados[fechaDe(dia)]
+            const iso = ((new Date(anio, mesNum - 1, dia).getDay() + 6) % 7) + 1
+            const span = horariosPorDia[iso]
             return (
               <button
                 key={dia}
                 type="button"
                 onClick={() => toggle(dia)}
-                aria-label={`Día ${dia}: ${estado ?? 'sin marcar'}`}
+                aria-label={`Día ${dia}: ${estado ?? 'sin marcar'}${span ? `, horario ${span.inicio.slice(0, 5)} a ${span.fin.slice(0, 5)}` : ', sin horario'}`}
+                title={span ? `Horario: ${span.inicio.slice(0, 5)} a ${span.fin.slice(0, 5)}` : 'Sin horario asignado'}
                 className={cn(
-                  'flex h-10 items-center justify-center rounded-md text-sm font-medium transition-colors',
+                  'flex h-12 flex-col items-center justify-center rounded-md text-sm font-medium leading-tight transition-colors',
                   estado === 'presente' && 'bg-success text-white',
                   estado === 'ausente' && 'bg-destructive text-white',
                   !estado && 'bg-muted text-muted-foreground hover:bg-accent'
                 )}
               >
-                {dia}
+                <span>{dia}</span>
+                {span ? <span className="text-[9px] opacity-80">{span.inicio.slice(0, 5)}</span> : null}
               </button>
             )
           })}
