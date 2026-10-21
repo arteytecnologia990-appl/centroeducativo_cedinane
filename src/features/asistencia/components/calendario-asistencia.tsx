@@ -47,6 +47,8 @@ export function CalendarioAsistencia({
   }
 
   function cambiarPersona(id: string) {
+    // Recordar la última persona elegida para que al volver aparezca la misma.
+    document.cookie = `calendario_persona=${id}; path=/; max-age=31536000; samesite=lax`
     router.push(`/dashboard/asistencia/calendario?persona_id=${id}&mes=${mes}`)
   }
 

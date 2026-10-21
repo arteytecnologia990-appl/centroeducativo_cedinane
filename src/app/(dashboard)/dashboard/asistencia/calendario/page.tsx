@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import { listarAsistenciasMes, listarPersonasParaAsistencia } from '@/features/asistencia/queries'
 import { listarHorarios } from '@/features/horarios/queries'
 import { CalendarioAsistencia } from '@/features/asistencia/components/calendario-asistencia'
@@ -14,7 +15,9 @@ export default async function CalendarioAsistenciaPage({
   const mes = /^\d{4}-\d{2}$/.test(params.mes ?? '') ? params.mes! : mesActual
 
   const personas = await listarPersonasParaAsistencia()
-  const personaId = params.persona_id ?? personas[0]?.id ?? ''
+  const cookieStore = await cookies()
+  const guardada = cookieStore.get('calendario_persona')?.value ?? ''
+  const personaId = params.persona_id ?? (guardada || personas[0]?.id || '')
 
   const [anio, mesNum] = mes.split('-').map(Number)
   const desde = `${anio}-${String(mesNum).padStart(2, '0')}-01`
