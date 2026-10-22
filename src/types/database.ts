@@ -1042,6 +1042,8 @@ export type Database = {
           activo: boolean
           caja_ahorro: string | null
           created_at: string
+          fecha_inicio: string | null
+          fecha_vencimiento: string | null
           id: string
           logo: string
           nombre: string
@@ -1054,6 +1056,8 @@ export type Database = {
           activo?: boolean
           caja_ahorro?: string | null
           created_at?: string
+          fecha_inicio?: string | null
+          fecha_vencimiento?: string | null
           id?: string
           logo?: string
           nombre: string
@@ -1066,6 +1070,8 @@ export type Database = {
           activo?: boolean
           caja_ahorro?: string | null
           created_at?: string
+          fecha_inicio?: string | null
+          fecha_vencimiento?: string | null
           id?: string
           logo?: string
           nombre?: string

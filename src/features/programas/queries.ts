@@ -9,6 +9,8 @@ export type Programa = {
   rtp: string | null
   resolucion: string | null
   activo: boolean
+  fecha_inicio: string | null
+  fecha_vencimiento: string | null
 }
 
 export async function listarProgramas(): Promise<Programa[]> {

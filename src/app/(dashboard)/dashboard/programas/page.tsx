@@ -16,6 +16,14 @@ const LOGOS = [
   { valor: '/logos/aso.jpg', etiqueta: 'ASO' },
 ]
 
+const fmtFecha = (f: string | null) => {
+  if (!f) return '—'
+  const d = new Date(`${f}T00:00:00`)
+  return Number.isNaN(d.getTime())
+    ? f
+    : new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)
+}
+
 export default async function ProgramasPage({
   searchParams,
 }: {
@@ -68,6 +76,19 @@ export default async function ProgramasPage({
           <Label htmlFor="resolucion">Resolución</Label>
           <Input id="resolucion" name="resolucion" defaultValue={editando?.resolucion ?? ''} />
         </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="fecha_inicio">Fecha del programa</Label>
+          <Input id="fecha_inicio" name="fecha_inicio" type="date" defaultValue={editando?.fecha_inicio ?? ''} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="fecha_vencimiento">Vencimiento</Label>
+          <Input
+            id="fecha_vencimiento"
+            name="fecha_vencimiento"
+            type="date"
+            defaultValue={editando?.fecha_vencimiento ?? ''}
+          />
+        </div>
         <label className="flex items-end gap-2 pb-1 text-sm text-foreground">
           <input type="checkbox" name="activo" defaultChecked={editando?.activo ?? true} className="size-4" />
           Activo
@@ -95,6 +116,7 @@ export default async function ProgramasPage({
               <TableHead>Nombre</TableHead>
               <TableHead>Caja de ahorro</TableHead>
               <TableHead>RUC / RTP</TableHead>
+              <TableHead>Vigencia</TableHead>
               <TableHead>Activo</TableHead>
               <TableHead className="w-16" />
               <TableHead className="w-16" />
@@ -110,6 +132,9 @@ export default async function ProgramasPage({
                 <TableCell className="tabular-nums">{p.caja_ahorro ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {p.ruc ?? '—'} / {p.rtp ?? '—'}
+                </TableCell>
+                <TableCell className="tabular-nums text-muted-foreground">
+                  {fmtFecha(p.fecha_inicio)} → {fmtFecha(p.fecha_vencimiento)}
                 </TableCell>
                 <TableCell>{p.activo ? 'Sí' : 'No'}</TableCell>
                 <TableCell>

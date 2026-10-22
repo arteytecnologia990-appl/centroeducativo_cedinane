@@ -8,6 +8,11 @@ export async function crearPrograma(formData: FormData): Promise<void> {
   const nombre = String(formData.get('nombre') ?? '').trim()
   if (!nombre) return
 
+  const fecha = (campo: string) => {
+    const valor = String(formData.get(campo) ?? '')
+    return /^\d{4}-\d{2}-\d{2}$/.test(valor) ? valor : null
+  }
+
   const supabase = await createClient()
   const datos = {
     nombre,
@@ -16,6 +21,8 @@ export async function crearPrograma(formData: FormData): Promise<void> {
     ruc: String(formData.get('ruc') ?? '').trim() || null,
     rtp: String(formData.get('rtp') ?? '').trim() || null,
     resolucion: String(formData.get('resolucion') ?? '').trim() || null,
+    fecha_inicio: fecha('fecha_inicio'),
+    fecha_vencimiento: fecha('fecha_vencimiento'),
     activo: formData.get('activo') === 'on',
     updated_at: new Date().toISOString(),
   }
