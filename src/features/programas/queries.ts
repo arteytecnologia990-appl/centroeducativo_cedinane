@@ -11,6 +11,7 @@ export type Programa = {
   activo: boolean
   fecha_inicio: string | null
   fecha_vencimiento: string | null
+  updated_at: string
 }
 
 export async function listarProgramas(): Promise<Programa[]> {

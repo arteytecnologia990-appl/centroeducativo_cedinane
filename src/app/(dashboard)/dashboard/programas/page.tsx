@@ -45,7 +45,7 @@ export default async function ProgramasPage({
       </div>
 
       <form
-        key={editando?.id ?? 'nuevo'}
+        key={editando?.updated_at ?? 'nuevo'}
         action={crearPrograma}
         className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6"
       >
