@@ -44,7 +44,11 @@ export default async function ProgramasPage({
         </p>
       </div>
 
-      <form action={crearPrograma} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
+      <form
+        key={editando?.id ?? 'nuevo'}
+        action={crearPrograma}
+        className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6"
+      >
         {editando ? <input type="hidden" name="id" value={editando.id} /> : null}
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="nombre">Nombre</Label>
