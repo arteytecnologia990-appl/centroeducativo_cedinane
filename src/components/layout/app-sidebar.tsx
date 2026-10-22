@@ -46,6 +46,7 @@ const GRUPOS: Grupo[] = [
       { href: '/kiosco-asistencia', label: 'Kiosco', Icon: Monitor },
       { href: '/dashboard/horas-pagables', label: 'Horas pagables', Icon: Banknote },
       { href: '/dashboard/salarios', label: 'Liquidaciones', Icon: Calculator },
+      { href: '/dashboard/programas', label: 'Programas', Icon: Landmark },
     ],
   },
   {

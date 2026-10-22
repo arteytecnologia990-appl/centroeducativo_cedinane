@@ -50,8 +50,11 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
       cargo: string | null
       programa: string | null
       caja_ahorro: string | null
+      programas: { nombre: string; logo: string; caja_ahorro: string | null; ruc: string | null; rtp: string | null } | null
     } | null
   } | null
+
+  const programa = persona?.personal?.programas ?? null
 
   const detalle = ((liq.liquidacion_detalle ?? []) as Linea[]).sort((a, b) => a.orden - b.orden)
   const totalHaberes = Number(liq.total_haberes)
@@ -98,13 +101,15 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
 
       <div className="mx-auto max-w-[210mm] bg-white p-6 text-black">
         <div className="flex items-start gap-3">
-          <Image src="/logos/cedinane.png" alt="ASO CEDINANE" width={70} height={61} className="h-[58px] w-auto" />
+          <Image src={programa?.logo ?? '/logos/cedinane.png'} alt="Logo" width={70} height={61} className="h-[58px] w-auto" />
           <div className="flex-1 text-center text-[10px] leading-tight">
             <p>
               Asociación Civil sin Fines de Lucro con Capacidad Restringida, “Centro de Desarrollo Integral para
               niños y adolescentes con necesidades educativas especiales” CEDINANE
             </p>
-            <p>Registro Patronal M.T.E.S.S. N°: 145628 · RUC: 80049699-0</p>
+            <p>
+              Registro Patronal M.T.E.S.S. N°: {programa?.rtp ?? '145628'} · RUC: {programa?.ruc ?? '80049699-0'}
+            </p>
           </div>
           <div className="w-[70px]" />
         </div>
@@ -133,7 +138,7 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
             </tr>
             <tr>
               <th className="border border-black px-2 py-1 text-left">AREA</th>
-              <td className="border border-black px-2 py-1">{persona?.personal?.programa ?? '—'}</td>
+              <td className="border border-black px-2 py-1">{programa?.nombre ?? persona?.personal?.programa ?? '—'}</td>
               <th className="border border-black px-2 py-1 text-left">PERIODO DE PAGO</th>
               <td className="border border-black px-2 py-1">
                 01 al {ultimoDia} {MESES[mes - 1]}

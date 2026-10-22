@@ -855,6 +855,7 @@ export type Database = {
           modalidad_salarial: string | null
           persona_id: string
           programa: string | null
+          programa_id: string | null
           regimen: string
           registro_profesional: string | null
           sector: string | null
@@ -881,6 +882,7 @@ export type Database = {
           modalidad_salarial?: string | null
           persona_id: string
           programa?: string | null
+          programa_id?: string | null
           regimen?: string
           registro_profesional?: string | null
           sector?: string | null
@@ -907,6 +909,7 @@ export type Database = {
           modalidad_salarial?: string | null
           persona_id?: string
           programa?: string | null
+          programa_id?: string | null
           regimen?: string
           registro_profesional?: string | null
           sector?: string | null
@@ -924,6 +927,13 @@ export type Database = {
             columns: ["persona_id"]
             isOneToOne: true
             referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_programa_id_fkey"
+            columns: ["programa_id"]
+            isOneToOne: false
+            referencedRelation: "programas"
             referencedColumns: ["id"]
           },
           {
@@ -1026,6 +1036,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      programas: {
+        Row: {
+          activo: boolean
+          caja_ahorro: string | null
+          created_at: string
+          id: string
+          logo: string
+          nombre: string
+          resolucion: string | null
+          rtp: string | null
+          ruc: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          caja_ahorro?: string | null
+          created_at?: string
+          id?: string
+          logo?: string
+          nombre: string
+          resolucion?: string | null
+          rtp?: string | null
+          ruc?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          caja_ahorro?: string | null
+          created_at?: string
+          id?: string
+          logo?: string
+          nombre?: string
+          resolucion?: string | null
+          rtp?: string | null
+          ruc?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       roles: {
         Row: {

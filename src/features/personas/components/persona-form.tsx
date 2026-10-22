@@ -32,6 +32,7 @@ type PersonalEditable = {
   jornada_tipo?: string | null
   regimen?: string | null
   caja_ahorro?: string | null
+  programa_id?: string | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
   tiene_cd?: boolean | null
@@ -108,7 +109,15 @@ function calcularAntiguedad(fecha: string): string {
   return partes.join(', ')
 }
 
-export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable; rolInicial?: string }) {
+export function PersonaForm({
+  persona,
+  rolInicial,
+  programas,
+}: {
+  persona?: PersonaEditable
+  rolInicial?: string
+  programas?: { id: string; nombre: string }[]
+}) {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const esEdicion = Boolean(persona?.id)
@@ -333,6 +342,17 @@ export function PersonaForm({ persona, rolInicial }: { persona?: PersonaEditable
           <div className="space-y-1.5">
             <Label htmlFor="caja_ahorro">Caja de ahorro</Label>
             <Input id="caja_ahorro" name="caja_ahorro" defaultValue={p?.caja_ahorro ?? ''} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="programa_id">Programa</Label>
+            <select id="programa_id" name="programa_id" defaultValue={p?.programa_id ?? ''} className={claseSelect}>
+              <option value="">—</option>
+              {(programas ?? []).map((pr) => (
+                <option key={pr.id} value={pr.id}>
+                  {pr.nombre}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-1.5">
             <Label>Antigüedad en la institución</Label>

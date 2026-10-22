@@ -1,4 +1,5 @@
 import { PersonaForm } from '@/features/personas/components/persona-form'
+import { listarProgramas } from '@/features/programas/queries'
 import { Volver } from '@/components/layout/volver'
 
 export default async function NuevaPersonaPage({
@@ -7,6 +8,7 @@ export default async function NuevaPersonaPage({
   searchParams: Promise<{ rol?: string }>
 }) {
   const { rol } = await searchParams
+  const programas = await listarProgramas()
 
   return (
     <div className="space-y-6">
@@ -18,7 +20,7 @@ export default async function NuevaPersonaPage({
           Cargá los datos básicos. Elegí el rol (empleado, alumno, paciente…) y después podés agregar vínculos.
         </p>
       </div>
-      <PersonaForm rolInicial={rol} />
+      <PersonaForm rolInicial={rol} programas={programas} />
     </div>
   )
 }

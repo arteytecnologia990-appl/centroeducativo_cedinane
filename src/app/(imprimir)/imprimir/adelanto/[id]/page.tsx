@@ -38,8 +38,14 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
     nombres: string
     apellidos: string
     ci: string | null
-    personal: { cargo: string | null; caja_ahorro: string | null } | null
+    personal: {
+      cargo: string | null
+      caja_ahorro: string | null
+      programas: { nombre: string; logo: string; caja_ahorro: string | null } | null
+    } | null
   } | null
+
+  const programa = persona?.personal?.programas ?? null
 
   const monto = Number(a.monto)
   const [anio, mes] = a.periodo.split('-').map(Number)
@@ -54,7 +60,7 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
       </div>
 
       <div className="flex items-start gap-3">
-        <Image src="/logos/cedinane.png" alt="ASO CEDINANE" width={70} height={61} className="h-[58px] w-auto" />
+        <Image src={programa?.logo ?? '/logos/cedinane.png'} alt="Logo" width={70} height={61} className="h-[58px] w-auto" />
         <div className="flex-1 text-center text-[10px] leading-tight">
           <p>
             Asociación Civil sin Fines de Lucro con Capacidad Restringida, “Centro de Desarrollo Integral para niños
@@ -91,7 +97,9 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
             <th className="border border-black px-2 py-1 text-left">CARGO</th>
             <td className="border border-black px-2 py-1">{persona?.personal?.cargo ?? '—'}</td>
             <th className="border border-black px-2 py-1 text-left">Caja de Ahorro</th>
-            <td className="border border-black px-2 py-1">{persona?.personal?.caja_ahorro ?? '—'}</td>
+            <td className="border border-black px-2 py-1">
+              {persona?.personal?.caja_ahorro ?? programa?.caja_ahorro ?? '—'}
+            </td>
           </tr>
         </tbody>
       </table>
