@@ -125,7 +125,20 @@ export function calcularLiquidacion(
     orden += 10
   }
 
-  const totalHaberes = r2(sueldoOrdinario + extra + nocturnidad + feriado)
+  if (nov.adelanto > 0) {
+    detalle.push({
+      codigo: 'adelanto_haber',
+      descripcion: 'Adelanto de salario',
+      cantidad: 0,
+      base: nov.adelanto,
+      tasa: 0,
+      importe: r2(nov.adelanto),
+      orden,
+    })
+    orden += 10
+  }
+
+  const totalHaberes = r2(sueldoOrdinario + extra + nocturnidad + feriado + nov.adelanto)
 
   const ausencia = nov.ausenciasDias * (sueldoOrdinario / diasMes)
   if (ausencia > 0) {
