@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calcularLiquidacion, type EmpleadoSalario, type NovedadesSalario } from './engine'
 import {
   horasFeriadoPorAsistencia,
+  listarAdelantosPeriodo,
   listarAusenciasAsistencia,
   listarEmpleadosSalario,
   listarNovedades,
@@ -55,6 +56,16 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
       ({ horasExtra: 0, horasNocturnas: 0, horasFeriado: 0, ausenciasDias: 0, adelanto: 0 } as NovedadesSalario)
     acc.horasFeriado += horas
     porPersona.set(personaId, acc)
+  }
+
+  // Adelantos de salario del período (se descuentan del neto).
+  const adelantos = await listarAdelantosPeriodo(periodo)
+  for (const a of adelantos) {
+    const acc =
+      porPersona.get(a.persona_id) ??
+      ({ horasExtra: 0, horasNocturnas: 0, horasFeriado: 0, ausenciasDias: 0, adelanto: 0 } as NovedadesSalario)
+    acc.adelanto += Number(a.monto) || 0
+    porPersona.set(a.persona_id, acc)
   }
 
   for (const e of empleados) {
@@ -265,4 +276,35 @@ export async function eliminarFeriado(formData: FormData): Promise<void> {
   const supabase = await createClient()
   await supabase.from('feriados').delete().eq('fecha', fecha)
   revalidatePath('/dashboard/salarios/feriados')
+}
+
+export async function crearAdelanto(formData: FormData): Promise<void> {
+  const personaId = String(formData.get('persona_id') ?? '')
+  const periodo = String(formData.get('periodo') ?? '')
+  const fecha = String(formData.get('fecha') ?? '')
+  const monto = Number(formData.get('monto') ?? 0)
+  if (!personaId || !/^\d{4}-\d{2}$/.test(periodo) || !Number.isFinite(monto) || monto <= 0) return
+
+  const supabase = await createClient()
+  await supabase.from('adelantos').insert({
+    persona_id: personaId,
+    periodo,
+    fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+    monto,
+    concepto: String(formData.get('concepto') ?? '').trim() || 'Adelanto de salario',
+  })
+
+  revalidatePath('/dashboard/salarios/adelantos')
+  revalidatePath('/dashboard/salarios')
+}
+
+export async function eliminarAdelanto(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  await supabase.from('adelantos').delete().eq('id', id)
+
+  revalidatePath('/dashboard/salarios/adelantos')
+  revalidatePath('/dashboard/salarios')
 }

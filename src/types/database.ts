@@ -39,6 +39,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      adelantos: {
+        Row: {
+          caja_ahorro: string | null
+          concepto: string
+          created_at: string
+          estado: string
+          fecha: string
+          id: string
+          monto: number
+          numero: number
+          periodo: string
+          persona_id: string
+        }
+        Insert: {
+          caja_ahorro?: string | null
+          concepto?: string
+          created_at?: string
+          estado?: string
+          fecha?: string
+          id?: string
+          monto: number
+          numero?: number
+          periodo: string
+          persona_id: string
+        }
+        Update: {
+          caja_ahorro?: string | null
+          concepto?: string
+          created_at?: string
+          estado?: string
+          fecha?: string
+          id?: string
+          monto?: number
+          numero?: number
+          periodo?: string
+          persona_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adelantos_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alumnos: {
         Row: {
           beca: number | null
@@ -792,6 +839,7 @@ export type Database = {
       personal: {
         Row: {
           antiguedad_institucion: string | null
+          caja_ahorro: string | null
           cargo: string | null
           created_at: string
           deleted_at: string | null
@@ -817,6 +865,7 @@ export type Database = {
         }
         Insert: {
           antiguedad_institucion?: string | null
+          caja_ahorro?: string | null
           cargo?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -842,6 +891,7 @@ export type Database = {
         }
         Update: {
           antiguedad_institucion?: string | null
+          caja_ahorro?: string | null
           cargo?: string | null
           created_at?: string
           deleted_at?: string | null

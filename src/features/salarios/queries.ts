@@ -239,3 +239,58 @@ export async function horasFeriadoPorAsistencia(periodo: string): Promise<Record
   }
   return horas
 }
+
+export type AdelantoFila = {
+  id: string
+  numero: number
+  persona_id: string
+  persona: string
+  periodo: string
+  fecha: string
+  monto: number
+  concepto: string
+  caja_ahorro: string | null
+}
+
+export async function listarAdelantos(periodo: string): Promise<AdelantoFila[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('adelantos')
+    .select('id, numero, persona_id, periodo, fecha, monto, concepto, caja_ahorro, personas(nombres, apellidos)')
+    .eq('periodo', periodo)
+    .order('numero', { ascending: false })
+
+  return (data ?? []).map((a) => {
+    const persona = a.personas as { nombres: string; apellidos: string } | null
+    return {
+      id: a.id,
+      numero: a.numero,
+      persona_id: a.persona_id,
+      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      periodo: a.periodo,
+      fecha: a.fecha,
+      monto: Number(a.monto),
+      concepto: a.concepto,
+      caja_ahorro: a.caja_ahorro,
+    }
+  })
+}
+
+export async function listarAdelantosPeriodo(periodo: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('adelantos')
+    .select('persona_id, monto')
+    .eq('periodo', periodo)
+  return data ?? []
+}
+
+export async function obtenerAdelanto(id: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('adelantos')
+    .select('*, personas(nombres, apellidos, ci, personal(cargo, caja_ahorro))')
+    .eq('id', id)
+    .maybeSingle()
+  return data ?? null
+}
