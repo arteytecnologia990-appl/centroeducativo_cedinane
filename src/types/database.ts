@@ -1151,6 +1151,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sesiones: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string
+          id: string
+          monto: number
+          porc_instituto: number
+          porc_profesional: number
+          tiempo_sesion: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion: string
+          id?: string
+          monto?: number
+          porc_instituto?: number
+          porc_profesional?: number
+          tiempo_sesion?: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string
+          id?: string
+          monto?: number
+          porc_instituto?: number
+          porc_profesional?: number
+          tiempo_sesion?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       usuario_roles: {
         Row: {
           created_at: string

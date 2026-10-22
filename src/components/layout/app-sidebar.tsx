@@ -12,6 +12,7 @@ import {
   FileText,
   GraduationCap,
   Landmark,
+  Layers,
   Monitor,
   Receipt,
   ScrollText,
@@ -36,6 +37,11 @@ const GRUPOS: Grupo[] = [
     id: 'personas',
     label: 'Personas',
     items: [{ href: '/dashboard/personas', label: 'Personas', Icon: Users }],
+  },
+  {
+    id: 'definiciones',
+    label: 'Definiciones',
+    items: [{ href: '/dashboard/definiciones/sesiones', label: 'Sesiones', Icon: Layers }],
   },
   {
     id: 'talento',
