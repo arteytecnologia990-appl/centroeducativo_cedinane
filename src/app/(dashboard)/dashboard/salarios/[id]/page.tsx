@@ -1,8 +1,25 @@
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { obtenerLiquidacion } from '@/features/salarios/queries'
 import { aprobarLiquidacion, anularLiquidacion, eliminarLiquidacion } from '@/features/salarios/actions'
+import { obtenerLiquidacion } from '@/features/salarios/queries'
+import { numeroALetras } from '@/features/salarios/numero-a-letras'
 import { Volver } from '@/components/layout/volver'
 import { BotonImprimir } from '@/components/asistencia/boton-imprimir'
+
+const MESES = [
+  'ENERO',
+  'FEBRERO',
+  'MARZO',
+  'ABRIL',
+  'MAYO',
+  'JUNIO',
+  'JULIO',
+  'AGOSTO',
+  'SEPTIEMBRE',
+  'OCTUBRE',
+  'NOVIEMBRE',
+  'DICIEMBRE',
+]
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
@@ -26,18 +43,27 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
     nombres: string
     apellidos: string
     ci: string | null
-    personal: { sueldo: number | null; modalidad_salarial: string | null; jornada_tipo: string | null } | null
+    personal: {
+      sueldo: number | null
+      modalidad_salarial: string | null
+      jornada_tipo: string | null
+      cargo: string | null
+      programa: string | null
+      caja_ahorro: string | null
+    } | null
   } | null
 
   const detalle = ((liq.liquidacion_detalle ?? []) as Linea[]).sort((a, b) => a.orden - b.orden)
-  const haberes = detalle.filter((d) => d.importe > 0)
-  const descuentos = detalle.filter((d) => d.importe < 0)
+  const totalHaberes = Number(liq.total_haberes)
+  const totalDescuentos = Number(liq.total_descuentos)
+  const neto = Number(liq.neto_pagar)
+  const [anio, mes] = liq.periodo.split('-').map(Number)
+  const ultimoDia = new Date(anio, mes, 0).getDate()
 
   return (
-    <div className="space-y-6">
-      <Volver href="/dashboard/salarios" label="Liquidaciones" />
-
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
+        <Volver href="/dashboard/salarios" label="Liquidaciones" />
         <div className="flex flex-wrap gap-2">
           <form action={aprobarLiquidacion}>
             <input type="hidden" name="id" value={id} />
@@ -66,101 +92,102 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
               Eliminar
             </button>
           </form>
+          <BotonImprimir />
         </div>
-        <BotonImprimir />
       </div>
 
       <div className="mx-auto max-w-[210mm] bg-white p-6 text-black">
-        <h1 className="mb-1 text-center text-lg font-bold uppercase tracking-wide">Recibo de salario</h1>
-        <p className="mb-4 text-center text-xs">Período {liq.periodo} · Estado: {liq.estado}</p>
+        <div className="flex items-start gap-3">
+          <Image src="/logos/cedinane.png" alt="ASO CEDINANE" width={70} height={61} className="h-[58px] w-auto" />
+          <div className="flex-1 text-center text-[10px] leading-tight">
+            <p>
+              Asociación Civil sin Fines de Lucro con Capacidad Restringida, “Centro de Desarrollo Integral para
+              niños y adolescentes con necesidades educativas especiales” CEDINANE
+            </p>
+            <p>Registro Patronal M.T.E.S.S. N°: 145628 · RUC: 80049699-0</p>
+          </div>
+          <div className="w-[70px]" />
+        </div>
 
-        <table className="w-full border-collapse text-sm">
+        <div className="mt-2 flex justify-between text-sm font-bold">
+          <span>N° RECIBO: {liq.numero}</span>
+          <span>MES: {String(mes).padStart(2, '0')}/{anio}</span>
+        </div>
+
+        <h1 className="mt-1 text-center text-base font-bold">LIQUIDACION DE SALARIO</h1>
+        <p className="text-center text-xs">(Art. 236 del Código del Trabajo)</p>
+
+        <table className="mt-3 w-full border-collapse text-sm">
           <tbody>
             <tr>
-              <th className="w-1/4 border border-black px-2 py-1 text-left">Trabajador</th>
-              <td className="border border-black px-2 py-1">
+              <th className="w-[20%] border border-black px-2 py-1 text-left">EMPLEADO</th>
+              <td className="border border-black px-2 py-1" colSpan={3}>
                 {persona?.apellidos}, {persona?.nombres}
               </td>
             </tr>
             <tr>
-              <th className="border border-black px-2 py-1 text-left">Cédula</th>
+              <th className="border border-black px-2 py-1 text-left">C.I. N°</th>
               <td className="border border-black px-2 py-1">{persona?.ci ?? '—'}</td>
+              <th className="w-[14%] border border-black px-2 py-1 text-left">CARGO</th>
+              <td className="border border-black px-2 py-1">{persona?.personal?.cargo ?? '—'}</td>
             </tr>
             <tr>
-              <th className="border border-black px-2 py-1 text-left">Modalidad</th>
+              <th className="border border-black px-2 py-1 text-left">AREA</th>
+              <td className="border border-black px-2 py-1">{persona?.personal?.programa ?? '—'}</td>
+              <th className="border border-black px-2 py-1 text-left">PERIODO DE PAGO</th>
               <td className="border border-black px-2 py-1">
-                {persona?.personal?.modalidad_salarial ?? 'mensual'} · jornada{' '}
-                {persona?.personal?.jornada_tipo ?? 'diurna'}
+                01 al {ultimoDia} {MESES[mes - 1]}
               </td>
             </tr>
           </tbody>
         </table>
 
-        <h2 className="mt-4 mb-1 text-sm font-bold uppercase">Haberes</h2>
-        <table className="w-full border-collapse text-xs">
+        <table className="mt-3 w-full border-collapse text-xs">
           <thead>
             <tr>
-              <th className="border border-black px-2 py-1 text-left font-bold">Concepto</th>
-              <th className="border border-black px-2 py-1 text-right font-bold">Cant.</th>
-              <th className="border border-black px-2 py-1 text-right font-bold">Base</th>
-              <th className="border border-black px-2 py-1 text-right font-bold">Tasa</th>
-              <th className="border border-black px-2 py-1 text-right font-bold">Importe</th>
+              <th className="border border-black px-2 py-1 text-left font-bold">CONCEPTO</th>
+              <th className="w-[10%] border border-black px-2 py-1 text-right font-bold">CANTIDAD</th>
+              <th className="w-[18%] border border-black px-2 py-1 text-right font-bold">HABERES</th>
+              <th className="w-[18%] border border-black px-2 py-1 text-right font-bold">DEDUCCIONES</th>
             </tr>
           </thead>
           <tbody>
-            {haberes.map((d) => (
+            {detalle.map((d) => (
               <tr key={d.id}>
                 <td className="border border-black px-2 py-[3px]">{d.descripcion ?? d.concepto_codigo}</td>
-                <td className="border border-black px-2 py-[3px] text-right tabular-nums">{Number(d.cantidad ?? 0)}</td>
                 <td className="border border-black px-2 py-[3px] text-right tabular-nums">
-                  {d.base_calculo != null ? guaranies(Number(d.base_calculo)) : '—'}
+                  {Number(d.cantidad ?? 0) > 0 ? Number(d.cantidad) : ''}
                 </td>
                 <td className="border border-black px-2 py-[3px] text-right tabular-nums">
-                  {d.tasa ? `${Number(d.tasa)}%` : '—'}
+                  {d.importe > 0 ? guaranies(Number(d.importe)) : ''}
                 </td>
-                <td className="border border-black px-2 py-[3px] text-right tabular-nums">{guaranies(Number(d.importe))}</td>
+                <td className="border border-black px-2 py-[3px] text-right tabular-nums">
+                  {d.importe < 0 ? guaranies(-Number(d.importe)) : ''}
+                </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="font-bold">
-              <td className="border border-black px-2 py-1" colSpan={4}>
-                Total haberes
+              <td className="border border-black px-2 py-1 text-right" colSpan={2}>
+                SUB TOTAL
               </td>
-              <td className="border border-black px-2 py-1 text-right tabular-nums">
-                {guaranies(Number(liq.total_haberes))}
-              </td>
+              <td className="border border-black px-2 py-1 text-right tabular-nums">{guaranies(totalHaberes)}</td>
+              <td className="border border-black px-2 py-1 text-right tabular-nums">{guaranies(totalDescuentos)}</td>
             </tr>
           </tfoot>
         </table>
 
-        <h2 className="mt-4 mb-1 text-sm font-bold uppercase">Descuentos</h2>
-        <table className="w-full border-collapse text-xs">
-          <tbody>
-            {descuentos.map((d) => (
-              <tr key={d.id}>
-                <td className="border border-black px-2 py-[3px]">{d.descripcion ?? d.concepto_codigo}</td>
-                <td className="border border-black px-2 py-[3px] text-right tabular-nums">{guaranies(Number(d.importe))}</td>
-              </tr>
-            ))}
-            <tr className="font-bold">
-              <td className="border border-black px-2 py-1">Total descuentos</td>
-              <td className="border border-black px-2 py-1 text-right tabular-nums">
-                {guaranies(-Number(liq.total_descuentos))}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="mt-3 flex items-end justify-between">
+          <p className="text-xs">Recibí conforme el importe neto de la presente liquidación</p>
+          <p className="text-base font-bold">NETO A COBRAR: {guaranies(neto)}</p>
+        </div>
+        <p className="mt-1 text-xs">Guaraníes: {numeroALetras(neto)}.</p>
 
-        <p className="mt-4 text-right text-base font-bold">Neto a pagar: {guaranies(Number(liq.neto_pagar))}</p>
-
-        <p className="mt-8 text-xs">
-          Recibí conforme: ______________________________ &nbsp;&nbsp;&nbsp; Firma del empleador:
-          ______________________________
-        </p>
-        <p className="mt-2 text-[10px] text-black/70">
-          Cálculo preliminar (Fase 1), pendiente de validación legal/contable.
-        </p>
+        <div className="mt-12 flex justify-between text-xs">
+          <span>Firma del Empleador</span>
+          <span>Firma del empleado</span>
+        </div>
       </div>
     </div>
   )

@@ -480,6 +480,7 @@ export type Database = {
           fecha_aprobacion: string | null
           id: string
           neto_pagar: number
+          numero: number
           periodo: string
           persona_id: string
           total_aportes_patronales: number
@@ -496,6 +497,7 @@ export type Database = {
           fecha_aprobacion?: string | null
           id?: string
           neto_pagar?: number
+          numero?: number
           periodo: string
           persona_id: string
           total_aportes_patronales?: number
@@ -512,6 +514,7 @@ export type Database = {
           fecha_aprobacion?: string | null
           id?: string
           neto_pagar?: number
+          numero?: number
           periodo?: string
           persona_id?: string
           total_aportes_patronales?: number

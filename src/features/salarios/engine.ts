@@ -15,6 +15,7 @@ export type NovedadesSalario = {
   horasFeriado: number
   ausenciasDias: number
   adelanto: number
+  adelantosDetalle?: { fecha: string; monto: number }[]
 }
 
 export type LineaDetalle = {
@@ -172,7 +173,20 @@ export function calcularLiquidacion(
     orden += 10
   }
 
-  if (nov.adelanto > 0) {
+  if (nov.adelantosDetalle && nov.adelantosDetalle.length > 0) {
+    for (const a of nov.adelantosDetalle) {
+      detalle.push({
+        codigo: 'adelanto',
+        descripcion: `Adelanto salario ${a.fecha.slice(8, 10)}/${a.fecha.slice(5, 7)}`,
+        cantidad: 0,
+        base: a.monto,
+        tasa: 0,
+        importe: r2(-a.monto),
+        orden,
+      })
+      orden += 10
+    }
+  } else if (nov.adelanto > 0) {
     detalle.push({
       codigo: 'adelanto',
       descripcion: 'Adelanto / préstamo',

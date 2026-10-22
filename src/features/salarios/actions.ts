@@ -64,7 +64,9 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
     const acc =
       porPersona.get(a.persona_id) ??
       ({ horasExtra: 0, horasNocturnas: 0, horasFeriado: 0, ausenciasDias: 0, adelanto: 0 } as NovedadesSalario)
-    acc.adelanto += Number(a.monto) || 0
+    const monto = Number(a.monto) || 0
+    acc.adelanto += monto
+    acc.adelantosDetalle = [...(acc.adelantosDetalle ?? []), { fecha: a.fecha, monto }]
     porPersona.set(a.persona_id, acc)
   }
 

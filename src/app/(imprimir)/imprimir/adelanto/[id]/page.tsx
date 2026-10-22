@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { obtenerAdelanto } from '@/features/salarios/queries'
@@ -52,11 +53,17 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
         <BotonImprimir />
       </div>
 
-      <p className="text-center text-[10px] leading-tight">
-        Asociación Civil sin Fines de Lucro con Capacidad Restringida, “Centro de Desarrollo Integral para niños y
-        adolescentes con necesidades educativas especiales” CEDINANE
-      </p>
-      <p className="text-center text-[10px]">Registro Patronal M.T.E.S.S. N°: 145628 · RUC: 80049699-0</p>
+      <div className="flex items-start gap-3">
+        <Image src="/logos/cedinane.png" alt="ASO CEDINANE" width={70} height={61} className="h-[58px] w-auto" />
+        <div className="flex-1 text-center text-[10px] leading-tight">
+          <p>
+            Asociación Civil sin Fines de Lucro con Capacidad Restringida, “Centro de Desarrollo Integral para niños
+            y adolescentes con necesidades educativas especiales” CEDINANE
+          </p>
+          <p>Registro Patronal M.T.E.S.S. N°: 145628 · RUC: 80049699-0</p>
+        </div>
+        <div className="w-[70px]" />
+      </div>
 
       <div className="mt-3 flex justify-between text-sm font-bold">
         <span>N° RECIBO: {a.numero}</span>

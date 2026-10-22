@@ -94,7 +94,7 @@ export async function obtenerLiquidacion(id: string) {
   const { data } = await supabase
     .from('liquidaciones')
     .select(
-      '*, personas(nombres, apellidos, ci, personal(sueldo, modalidad_salarial, jornada_tipo)), liquidacion_detalle(*)'
+      '*, personas(nombres, apellidos, ci, personal(sueldo, modalidad_salarial, jornada_tipo, cargo, programa, caja_ahorro)), liquidacion_detalle(*)'
     )
     .eq('id', id)
     .maybeSingle()
@@ -280,8 +280,9 @@ export async function listarAdelantosPeriodo(periodo: string) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('adelantos')
-    .select('persona_id, monto')
+    .select('persona_id, monto, fecha')
     .eq('periodo', periodo)
+    .order('fecha', { ascending: true })
   return data ?? []
 }
 
