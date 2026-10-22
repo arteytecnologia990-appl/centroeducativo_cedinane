@@ -144,6 +144,12 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
                 01 al {ultimoDia} {MESES[mes - 1]}
               </td>
             </tr>
+            <tr>
+              <th className="border border-black px-2 py-1 text-left">CAJA DE AHORRO</th>
+              <td className="border border-black px-2 py-1" colSpan={3}>
+                {programa?.caja_ahorro ?? persona?.personal?.caja_ahorro ?? '—'}
+              </td>
+            </tr>
           </tbody>
         </table>
 

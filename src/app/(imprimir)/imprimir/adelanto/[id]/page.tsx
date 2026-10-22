@@ -98,7 +98,7 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
             <td className="border border-black px-2 py-1">{persona?.personal?.cargo ?? '—'}</td>
             <th className="border border-black px-2 py-1 text-left">Caja de Ahorro</th>
             <td className="border border-black px-2 py-1">
-              {persona?.personal?.caja_ahorro ?? programa?.caja_ahorro ?? '—'}
+              {programa?.caja_ahorro ?? persona?.personal?.caja_ahorro ?? '—'}
             </td>
           </tr>
         </tbody>
