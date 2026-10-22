@@ -310,3 +310,51 @@ export async function eliminarAdelanto(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/salarios/adelantos')
   revalidatePath('/dashboard/salarios')
 }
+
+export async function crearAdelantoSesiones(formData: FormData): Promise<void> {
+  const personaId = String(formData.get('persona_id') ?? '')
+  const sesionId = String(formData.get('sesion_id') ?? '')
+  const cantidad = Number(formData.get('cantidad') ?? 0)
+  const fecha = String(formData.get('fecha') ?? '')
+  const periodo = String(formData.get('periodo') ?? '')
+
+  if (!personaId || !sesionId || !(cantidad > 0) || !/^\d{4}-\d{2}$/.test(periodo)) return
+
+  const supabase = await createClient()
+  const { data: sesion } = await supabase
+    .from('sesiones')
+    .select('monto, porc_profesional, descripcion')
+    .eq('id', sesionId)
+    .maybeSingle()
+  if (!sesion) return
+
+  const { data: personal } = await supabase
+    .from('personal')
+    .select('regimen')
+    .eq('persona_id', personaId)
+    .maybeSingle()
+
+  const params = await obtenerParametros(periodo)
+  const bruto = cantidad * Number(sesion.monto) * (Number(sesion.porc_profesional) / 100)
+  const porc = personal?.regimen === 'honorarios' ? (params.iva ?? 10) : (params.ips_obrero ?? 9)
+  const descuento = bruto * (porc / 100)
+  const neto = bruto - descuento
+
+  const redondear = (n: number) => Math.round(n * 100) / 100
+
+  await supabase.from('adelantos').insert({
+    persona_id: personaId,
+    periodo,
+    fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+    monto: redondear(neto),
+    concepto: `${cantidad} × ${sesion.descripcion}`,
+    sesion_id: sesionId,
+    cantidad_sesiones: cantidad,
+    monto_bruto: redondear(bruto),
+    porc_descuento: porc,
+    monto_descuento: redondear(descuento),
+  })
+
+  revalidatePath('/dashboard/salarios/adelantos')
+  revalidatePath('/dashboard/salarios')
+}

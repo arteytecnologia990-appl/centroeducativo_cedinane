@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { listarPersonasParaAsistencia } from '@/features/asistencia/queries'
 import { listarAdelantos } from '@/features/salarios/queries'
-import { crearAdelanto, eliminarAdelanto } from '@/features/salarios/actions'
+import { crearAdelanto, crearAdelantoSesiones, eliminarAdelanto } from '@/features/salarios/actions'
+import { listarSesiones } from '@/features/definiciones/queries'
 import { Volver } from '@/components/layout/volver'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,8 +31,9 @@ export default async function AdelantosPage({
   const periodo = /^\d{4}-\d{2}$/.test(params.periodo ?? '') ? params.periodo! : periodoActual
   const hoyStr = hoy.toISOString().slice(0, 10)
 
-  const [personas, adelantos] = await Promise.all([
+  const [personas, sesiones, adelantos] = await Promise.all([
     listarPersonasParaAsistencia(),
+    listarSesiones(),
     listarAdelantos(periodo),
   ])
 
@@ -61,6 +63,51 @@ export default async function AdelantosPage({
         >
           Ver
         </button>
+      </form>
+
+      <form action={crearAdelantoSesiones} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="persona_id_s">Profesional</Label>
+          <select id="persona_id_s" name="persona_id" required className={claseInput}>
+            <option value="">Elegí...</option>
+            {personas.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.apellidos}, {p.nombres}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="sesion_id">Tipo de sesión</Label>
+          <select id="sesion_id" name="sesion_id" required className={claseInput}>
+            <option value="">Elegí...</option>
+            {sesiones.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.descripcion} · {guaranies(Number(s.monto))} · {Number(s.porc_profesional)}%
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="cantidad">Cantidad</Label>
+          <Input id="cantidad" name="cantidad" type="number" min="1" step="1" required />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="fecha_s">Fecha</Label>
+          <Input id="fecha_s" name="fecha" type="date" defaultValue={hoyStr} />
+        </div>
+        <input type="hidden" name="periodo" value={periodo} />
+        <div className="sm:col-span-6">
+          <button
+            type="submit"
+            className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Registrar adelanto por sesiones
+          </button>
+          <span className="ml-2 text-xs text-muted-foreground">
+            Bruto = cantidad × monto × % profesional; se descuenta IPS o IVA según el régimen.
+          </span>
+        </div>
       </form>
 
       <form action={crearAdelanto} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">

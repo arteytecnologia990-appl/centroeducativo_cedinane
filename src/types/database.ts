@@ -42,39 +42,54 @@ export type Database = {
       adelantos: {
         Row: {
           caja_ahorro: string | null
+          cantidad_sesiones: number | null
           concepto: string
           created_at: string
           estado: string
           fecha: string
           id: string
           monto: number
+          monto_bruto: number | null
+          monto_descuento: number | null
           numero: number
           periodo: string
           persona_id: string
+          porc_descuento: number | null
+          sesion_id: string | null
         }
         Insert: {
           caja_ahorro?: string | null
+          cantidad_sesiones?: number | null
           concepto?: string
           created_at?: string
           estado?: string
           fecha?: string
           id?: string
           monto: number
+          monto_bruto?: number | null
+          monto_descuento?: number | null
           numero?: number
           periodo: string
           persona_id: string
+          porc_descuento?: number | null
+          sesion_id?: string | null
         }
         Update: {
           caja_ahorro?: string | null
+          cantidad_sesiones?: number | null
           concepto?: string
           created_at?: string
           estado?: string
           fecha?: string
           id?: string
           monto?: number
+          monto_bruto?: number | null
+          monto_descuento?: number | null
           numero?: number
           periodo?: string
           persona_id?: string
+          porc_descuento?: number | null
+          sesion_id?: string | null
         }
         Relationships: [
           {
@@ -82,6 +97,13 @@ export type Database = {
             columns: ["persona_id"]
             isOneToOne: false
             referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adelantos_sesion_id_fkey"
+            columns: ["sesion_id"]
+            isOneToOne: false
+            referencedRelation: "sesiones"
             referencedColumns: ["id"]
           },
         ]
