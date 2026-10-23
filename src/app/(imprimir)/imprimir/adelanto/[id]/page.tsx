@@ -51,6 +51,13 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
   const bruto = Number(a.monto_bruto ?? monto)
   const descuento = Number(a.monto_descuento ?? 0)
   const porc = Number(a.porc_descuento ?? 0)
+  const items = (a.adelanto_items ?? []) as {
+    id: string
+    descripcion: string
+    cantidad: number
+    porc_profesional: number
+    bruto: number
+  }[]
   const [anio, mes] = a.periodo.split('-').map(Number)
 
   return (
@@ -116,11 +123,23 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td className="border border-black px-2 py-1">{a.concepto}</td>
-            <td className="border border-black px-2 py-1 text-right tabular-nums">{guaranies(bruto)}</td>
-            <td className="border border-black px-2 py-1 text-right tabular-nums">—</td>
-          </tr>
+          {items.length > 0 ? (
+            items.map((it) => (
+              <tr key={it.id}>
+                <td className="border border-black px-2 py-1">
+                  {Number(it.cantidad)} × {it.descripcion} ({Number(it.porc_profesional)}%)
+                </td>
+                <td className="border border-black px-2 py-1 text-right tabular-nums">{guaranies(Number(it.bruto))}</td>
+                <td className="border border-black px-2 py-1 text-right tabular-nums">—</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td className="border border-black px-2 py-1">{a.concepto}</td>
+              <td className="border border-black px-2 py-1 text-right tabular-nums">{guaranies(bruto)}</td>
+              <td className="border border-black px-2 py-1 text-right tabular-nums">—</td>
+            </tr>
+          )}
           {descuento > 0 ? (
             <tr>
               <td className="border border-black px-2 py-1">Descuento régimen ({porc}%)</td>

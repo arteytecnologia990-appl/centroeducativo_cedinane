@@ -358,3 +358,86 @@ export async function crearAdelantoSesiones(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/salarios/adelantos')
   revalidatePath('/dashboard/salarios')
 }
+
+export async function crearAdelantoSesionesMulti(formData: FormData): Promise<void> {
+  const personaId = String(formData.get('persona_id') ?? '')
+  const periodo = String(formData.get('periodo') ?? '')
+  const fecha = String(formData.get('fecha') ?? '')
+  const ids = formData.getAll('sesion_id').map(String)
+  const cantidades = formData.getAll('cantidad').map((c) => Number(c) || 0)
+
+  if (!personaId || !/^\d{4}-\d{2}$/.test(periodo)) return
+
+  const supabase = await createClient()
+  const { data: personal } = await supabase
+    .from('personal')
+    .select('regimen')
+    .eq('persona_id', personaId)
+    .maybeSingle()
+
+  const params = await obtenerParametros(periodo)
+  const porc = personal?.regimen === 'honorarios' ? (params.iva ?? 10) : (params.ips_obrero ?? 9)
+
+  const { data: sesiones } = await supabase
+    .from('sesiones')
+    .select('id, monto, porc_profesional, descripcion')
+    .in('id', ids)
+
+  const mapa = new Map((sesiones ?? []).map((s) => [s.id, s]))
+  const redondear = (n: number) => Math.round(n * 100) / 100
+
+  const items: {
+    sesion_id: string
+    descripcion: string
+    cantidad: number
+    monto_unitario: number
+    porc_profesional: number
+    bruto: number
+  }[] = []
+  let bruto = 0
+
+  for (let i = 0; i < ids.length; i++) {
+    const s = mapa.get(ids[i])
+    const cant = cantidades[i]
+    if (!s || !(cant > 0)) continue
+    const b = cant * Number(s.monto) * (Number(s.porc_profesional) / 100)
+    bruto += b
+    items.push({
+      sesion_id: s.id,
+      descripcion: s.descripcion,
+      cantidad: cant,
+      monto_unitario: Number(s.monto),
+      porc_profesional: Number(s.porc_profesional),
+      bruto: redondear(b),
+    })
+  }
+
+  if (items.length === 0) return
+
+  const descuento = redondear(bruto * (porc / 100))
+  const neto = redondear(bruto - descuento)
+  const concepto =
+    items.length === 1 ? `${items[0].cantidad} × ${items[0].descripcion}` : `${items.length} conceptos de sesión`
+
+  const { data: adelanto, error } = await supabase
+    .from('adelantos')
+    .insert({
+      persona_id: personaId,
+      periodo,
+      fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+      monto: neto,
+      concepto,
+      monto_bruto: redondear(bruto),
+      porc_descuento: porc,
+      monto_descuento: descuento,
+    })
+    .select('id')
+    .single()
+
+  if (error || !adelanto) return
+
+  await supabase.from('adelanto_items').insert(items.map((it) => ({ ...it, adelanto_id: adelanto.id })))
+
+  revalidatePath('/dashboard/salarios/adelantos')
+  revalidatePath('/dashboard/salarios')
+}

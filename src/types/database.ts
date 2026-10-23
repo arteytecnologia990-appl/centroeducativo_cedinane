@@ -39,6 +39,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      adelanto_items: {
+        Row: {
+          adelanto_id: string
+          bruto: number
+          cantidad: number
+          descripcion: string
+          id: string
+          monto_unitario: number
+          porc_profesional: number
+          sesion_id: string | null
+        }
+        Insert: {
+          adelanto_id: string
+          bruto?: number
+          cantidad?: number
+          descripcion: string
+          id?: string
+          monto_unitario?: number
+          porc_profesional?: number
+          sesion_id?: string | null
+        }
+        Update: {
+          adelanto_id?: string
+          bruto?: number
+          cantidad?: number
+          descripcion?: string
+          id?: string
+          monto_unitario?: number
+          porc_profesional?: number
+          sesion_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adelanto_items_adelanto_id_fkey"
+            columns: ["adelanto_id"]
+            isOneToOne: false
+            referencedRelation: "adelantos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adelanto_items_sesion_id_fkey"
+            columns: ["sesion_id"]
+            isOneToOne: false
+            referencedRelation: "sesiones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adelantos: {
         Row: {
           caja_ahorro: string | null

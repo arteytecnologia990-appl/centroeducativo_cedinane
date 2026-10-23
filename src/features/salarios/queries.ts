@@ -290,8 +290,26 @@ export async function obtenerAdelanto(id: string) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('adelantos')
-    .select('*, personas(nombres, apellidos, ci, personal(cargo, caja_ahorro, programas(nombre, logo, caja_ahorro)))')
+    .select(
+      '*, adelanto_items(*), personas(nombres, apellidos, ci, personal(cargo, caja_ahorro, programas(nombre, logo, caja_ahorro)))'
+    )
     .eq('id', id)
     .maybeSingle()
   return data ?? null
+}
+
+export type PersonaRegimen = { id: string; nombres: string; apellidos: string; regimen: string }
+
+export async function listarPersonasConRegimen(): Promise<PersonaRegimen[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('personas')
+    .select('id, nombres, apellidos, personal(regimen)')
+    .is('deleted_at', null)
+    .order('apellidos', { ascending: true })
+
+  return (data ?? []).map((p) => {
+    const personal = p.personal as { regimen: string | null } | null
+    return { id: p.id, nombres: p.nombres, apellidos: p.apellidos, regimen: personal?.regimen ?? 'dependencia' }
+  })
 }
