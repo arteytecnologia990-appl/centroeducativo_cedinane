@@ -172,7 +172,7 @@ export function AppSidebar() {
             aria-label={colapsado ? 'Expandir menú' : 'Colapsar menú'}
             className="shrink-0 rounded-md p-1 transition-colors hover:bg-accent"
           >
-            <Image src="/logos/harness.png" alt="" width={26} height={26} className="size-[26px] rounded" />
+            <Image src="/logos/cedinane.png" alt="" width={26} height={26} className="size-[26px] rounded object-contain" />
           </button>
           {colapsado ? null : (
             <span className="truncate font-heading font-semibold text-foreground">Centro Educativo</span>
