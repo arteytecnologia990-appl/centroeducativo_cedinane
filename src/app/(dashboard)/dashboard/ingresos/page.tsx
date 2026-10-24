@@ -4,21 +4,25 @@ import { listarEmpleadosSalario } from '@/features/salarios/queries'
 import Link from 'next/link'
 import { eliminarIngreso } from '@/features/ingresos/actions'
 import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
+import { CobroModal } from '@/features/ingresos/components/cobro-modal'
+import { listarBancos } from '@/features/bancos/queries'
 import { Volver } from '@/components/layout/volver'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
 export default async function IngresosPage() {
-  const [ingresos, clientes, sesiones, empleados, alumnos] = await Promise.all([
+  const [ingresos, clientes, sesiones, empleados, alumnos, bancos] = await Promise.all([
     listarIngresos(),
     listarClientesConFacturas(),
     listarSesiones(),
     listarEmpleadosSalario(),
     listarAlumnosPacientes(),
+    listarBancos(),
   ])
   const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.nombres} ${e.apellidos}` }))
   const total = ingresos.reduce((s, i) => s + i.total, 0)
+  const hoy = new Date().toISOString().slice(0, 10)
 
   return (
     <div className="space-y-6">
@@ -68,18 +72,26 @@ export default async function IngresosPage() {
                   {c.factura_cdc ? `${c.factura_cdc.slice(0, 12)}…` : 'Pendiente'}
                 </TableCell>
                 <TableCell>
-                  <Link href={`/dashboard/ingresos/${c.id}`} className="mr-2 text-sm text-primary hover:underline">
-                    Detalle
-                  </Link>
-                  <form action={eliminarIngreso} className="inline">
-                    <input type="hidden" name="id" value={c.id} />
-                    <button
-                      type="submit"
-                      className="text-xs text-muted-foreground transition-colors hover:text-destructive"
-                    >
-                      Eliminar
-                    </button>
-                  </form>
+                  <div className="flex items-center gap-2">
+                    <CobroModal
+                      documento={c.documento ?? ''}
+                      bancos={bancos}
+                      hoy={hoy}
+                      habilitado={Boolean(c.factura_cdc)}
+                    />
+                    <Link href={`/dashboard/ingresos/${c.id}`} className="text-sm text-primary hover:underline">
+                      Detalle
+                    </Link>
+                    <form action={eliminarIngreso} className="inline">
+                      <input type="hidden" name="id" value={c.id} />
+                      <button
+                        type="submit"
+                        className="text-xs text-muted-foreground transition-colors hover:text-destructive"
+                      >
+                        Eliminar
+                      </button>
+                    </form>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
