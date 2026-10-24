@@ -261,12 +261,61 @@ export type XmlImportResult = {
   omitidas: number
   errores: string[]
   detalle: { cdc: string; nombre: string | null; total: number }[]
+  clientes: number
+}
+
+const normDoc = (d: string | null) => (d ?? '').replace(/[^0-9a-zA-Z]/g, '').toUpperCase()
+
+/** Da de alta como persona con rol "cliente" a los receptores que no existan. */
+async function asegurarClientes(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  receptores: { nombre: string | null; documento: string; tipo: string | null }[]
+): Promise<number> {
+  if (receptores.length === 0) return 0
+
+  const { data: personas } = await supabase.from('personas').select('id, ci').is('deleted_at', null)
+  const existentes = new Set((personas ?? []).map((p) => normDoc(p.ci)))
+  const vistos = new Set<string>()
+  let creadas = 0
+
+  for (const r of receptores) {
+    const base = normDoc(r.documento.split('-')[0])
+    if (!base || existentes.has(base) || vistos.has(base)) continue
+    vistos.add(base)
+
+    const palabras = (r.nombre ?? '').trim().split(/\s+/).filter(Boolean)
+    const apellidos = palabras.length >= 3 ? palabras.slice(-2).join(' ') : palabras.join(' ')
+    const nombres = palabras.length >= 3 ? palabras.slice(0, -2).join(' ') : ''
+
+    const { data: creada } = await supabase
+      .from('personas')
+      .insert({
+        ci: base,
+        nombres: nombres || apellidos || 'Cliente',
+        apellidos,
+        observaciones: `Alta automática desde XML (${r.tipo ?? 'doc'} ${r.documento})`,
+      })
+      .select('id')
+      .single()
+
+    if (!creada) continue
+
+    await supabase.from('persona_roles').insert({
+      persona_id: creada.id,
+      rol_negocio: 'cliente',
+      activo: true,
+      vigencia_desde: new Date().toISOString().slice(0, 10),
+    })
+    creadas += 1
+  }
+
+  return creadas
 }
 
 export async function importarXmlDtes(formData: FormData): Promise<XmlImportResult> {
   const archivos = formData.getAll('archivos').filter((f): f is File => f instanceof File)
   if (archivos.length === 0) {
-    return { importadas: 0, omitidas: 0, errores: ['No se enviaron archivos XML.'], detalle: [] }
+    return { importadas: 0, omitidas: 0, errores: ['No se enviaron archivos XML.'], detalle: [], clientes: 0 }
   }
 
   const supabase = await createClient()
@@ -338,10 +387,20 @@ export async function importarXmlDtes(formData: FormData): Promise<XmlImportResu
   if (nuevas.length > 0) {
     const { error } = await supabase.from('facturas').insert(nuevas)
     if (error) {
-      return { importadas: 0, omitidas, errores: [...errores, error.message], detalle: [] }
+      return { importadas: 0, omitidas, errores: [...errores, error.message], detalle: [], clientes: 0 }
     }
   }
 
+  const receptores = new Map<string, { nombre: string | null; documento: string; tipo: string | null }>()
+  for (const n of nuevas) {
+    receptores.set(n.documento_receptor, {
+      nombre: n.nombre_informado,
+      documento: n.documento_receptor,
+      tipo: n.tipo_identificacion,
+    })
+  }
+  const clientesCreados = await asegurarClientes(supabase, [...receptores.values()])
+
   revalidatePath('/dashboard/facturacion')
-  return { importadas: nuevas.length, omitidas, errores, detalle }
+  return { importadas: nuevas.length, omitidas, errores, detalle, clientes: clientesCreados }
 }

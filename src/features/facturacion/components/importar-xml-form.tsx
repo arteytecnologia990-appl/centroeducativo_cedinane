@@ -52,6 +52,9 @@ export function ImportarXmlForm() {
             <li>
               <strong className="text-foreground">{resultado.omitidas}</strong> omitidos (CDC ya existente)
             </li>
+            <li>
+              <strong className="text-foreground">{resultado.clientes}</strong> clientes nuevos (rol cliente)
+            </li>
           </ul>
           {resultado.detalle.length > 0 ? (
             <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
