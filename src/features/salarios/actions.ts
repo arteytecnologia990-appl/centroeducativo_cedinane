@@ -124,7 +124,7 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
       await supabase.from('liquidaciones').update(datos).eq('id', existente.id)
       liqId = existente.id
     } else {
-      const numero = await proximoNumero(supabase, 'liquidaciones', 317)
+      const numero = await proximoNumero(supabase, 'liquidaciones', 333)
       const { data: liq } = await supabase
         .from('liquidaciones')
         .insert({ persona_id: e.id, periodo, version: 1, numero, ...datos })
