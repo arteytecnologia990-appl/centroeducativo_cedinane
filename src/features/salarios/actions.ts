@@ -486,18 +486,13 @@ export async function actualizarAdelanto(formData: FormData): Promise<void> {
     .eq('id', id)
     .maybeSingle()
 
-  const datos: Record<string, unknown> = {
+  const manual = !actual?.sesion_id && !actual?.monto_bruto
+  const datos = {
     fecha,
     periodo: fecha.slice(0, 7),
     monto,
     concepto: String(formData.get('concepto') ?? '').trim() || 'Adelanto de salario',
-  }
-
-  // Recibo manual: el monto es el bruto (sin descuento)
-  if (!actual?.sesion_id && !actual?.monto_bruto) {
-    datos.monto_bruto = monto
-    datos.monto_descuento = 0
-    datos.porc_descuento = 0
+    ...(manual ? { monto_bruto: monto, monto_descuento: 0, porc_descuento: 0 } : {}),
   }
 
   await supabase.from('adelantos').update(datos).eq('id', id)
