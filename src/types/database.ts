@@ -311,6 +311,36 @@ export type Database = {
           },
         ]
       }
+      cobros: {
+        Row: {
+          created_at: string
+          documento_receptor: string
+          fecha: string
+          forma_pago: string
+          id: string
+          monto: number
+          referencia: string | null
+        }
+        Insert: {
+          created_at?: string
+          documento_receptor: string
+          fecha?: string
+          forma_pago?: string
+          id?: string
+          monto: number
+          referencia?: string | null
+        }
+        Update: {
+          created_at?: string
+          documento_receptor?: string
+          fecha?: string
+          forma_pago?: string
+          id?: string
+          monto?: number
+          referencia?: string | null
+        }
+        Relationships: []
+      }
       conceptos_salario: {
         Row: {
           activo: boolean
@@ -347,6 +377,45 @@ export type Database = {
           orden?: number
           remunerativo?: boolean
           tipo?: string
+        }
+        Relationships: []
+      }
+      facturas: {
+        Row: {
+          cdc: string
+          created_at: string
+          documento_receptor: string
+          estado: string
+          fecha_aprobacion: string | null
+          fecha_emision: string | null
+          id: string
+          monto_total: number
+          numero_documento: string | null
+          periodo: string | null
+        }
+        Insert: {
+          cdc: string
+          created_at?: string
+          documento_receptor: string
+          estado?: string
+          fecha_aprobacion?: string | null
+          fecha_emision?: string | null
+          id?: string
+          monto_total?: number
+          numero_documento?: string | null
+          periodo?: string | null
+        }
+        Update: {
+          cdc?: string
+          created_at?: string
+          documento_receptor?: string
+          estado?: string
+          fecha_aprobacion?: string | null
+          fecha_emision?: string | null
+          id?: string
+          monto_total?: number
+          numero_documento?: string | null
+          periodo?: string | null
         }
         Relationships: []
       }

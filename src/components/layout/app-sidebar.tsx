@@ -62,7 +62,7 @@ const GRUPOS: Grupo[] = [
       { href: '/dashboard/clientes', label: 'Ingresos', Icon: Wallet, pronto: true },
       { href: '/dashboard/caja', label: 'Caja', Icon: Landmark, pronto: true },
       { href: '/dashboard/egresos', label: 'Egresos', Icon: Receipt, pronto: true },
-      { href: '/dashboard/facturacion', label: 'Facturación', Icon: FileText, pronto: true },
+      { href: '/dashboard/facturacion', label: 'Facturación', Icon: FileText },
     ],
   },
   {
