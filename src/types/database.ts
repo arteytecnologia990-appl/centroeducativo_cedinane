@@ -695,6 +695,7 @@ export type Database = {
       }
       ingresos: {
         Row: {
+          alumno_paciente: string | null
           cantidad: number
           created_at: string
           documento: string | null
@@ -709,6 +710,7 @@ export type Database = {
           usuario: string
         }
         Insert: {
+          alumno_paciente?: string | null
           cantidad?: number
           created_at?: string
           documento?: string | null
@@ -723,6 +725,7 @@ export type Database = {
           usuario: string
         }
         Update: {
+          alumno_paciente?: string | null
           cantidad?: number
           created_at?: string
           documento?: string | null

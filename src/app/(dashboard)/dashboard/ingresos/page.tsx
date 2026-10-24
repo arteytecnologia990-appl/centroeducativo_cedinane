@@ -1,4 +1,4 @@
-import { listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
+import { listarAlumnosPacientes, listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
 import { listarSesiones } from '@/features/definiciones/queries'
 import { listarEmpleadosSalario } from '@/features/salarios/queries'
 import Link from 'next/link'
@@ -10,11 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
 export default async function IngresosPage() {
-  const [ingresos, clientes, sesiones, empleados] = await Promise.all([
+  const [ingresos, clientes, sesiones, empleados, alumnos] = await Promise.all([
     listarIngresos(),
     listarClientesConFacturas(),
     listarSesiones(),
     listarEmpleadosSalario(),
+    listarAlumnosPacientes(),
   ])
   const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.apellidos}, ${e.nombres}` }))
   const total = ingresos.reduce((s, i) => s + i.total, 0)
@@ -35,6 +36,7 @@ export default async function IngresosPage() {
         clientes={clientes}
         sesiones={sesiones.map((s) => ({ id: s.id, descripcion: s.descripcion, monto: Number(s.monto) }))}
         profesionales={profesionales}
+        alumnos={alumnos}
       />
 
       <div className="overflow-hidden rounded-lg border border-border">

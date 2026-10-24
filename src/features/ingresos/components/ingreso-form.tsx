@@ -13,16 +13,18 @@ const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
 type Linea = { terapia: string; profesional: string; precio: string; cantidad: string }
 type SesionOpcion = { id: string; descripcion: string; monto: number }
-type Profesional = { id: string; nombre: string }
+type Opcion = { id: string; nombre: string }
 
 export function IngresoForm({
   clientes,
   sesiones,
   profesionales,
+  alumnos,
 }: {
   clientes: ClienteConFacturas[]
   sesiones: SesionOpcion[]
-  profesionales: Profesional[]
+  profesionales: Opcion[]
+  alumnos: Opcion[]
 }) {
   const [documento, setDocumento] = useState('')
   const [factura, setFactura] = useState('')
@@ -44,9 +46,9 @@ export function IngresoForm({
 
   return (
     <form action={crearIngreso} className="space-y-3 rounded-lg border border-border p-4">
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-6">
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="documento">Usuario</Label>
+          <Label htmlFor="documento">Cliente</Label>
           <select
             id="documento"
             name="documento"
@@ -65,6 +67,17 @@ export function IngresoForm({
             ))}
           </select>
           <input type="hidden" name="usuario" value={cliente?.nombre ?? ''} />
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="alumno_paciente">Alumno / Paciente</Label>
+          <select id="alumno_paciente" name="alumno_paciente" className={claseInput}>
+            <option value="">—</option>
+            {alumnos.map((a) => (
+              <option key={a.id} value={a.nombre}>
+                {a.nombre}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="factura_cdc">Factura (XML)</Label>
@@ -114,16 +127,6 @@ export function IngresoForm({
         {lineas.map((l, i) => (
           <div key={i} className="grid grid-cols-[1fr_1fr_110px_90px_100px_36px] items-end gap-2">
             <div className="space-y-1.5">
-              {i === 0 ? <Label>Terapia / servicio</Label> : null}
-              <Input
-                name="terapia"
-                value={l.terapia}
-                list="sesiones-list"
-                onChange={(e) => cambiaTerapia(i, e.target.value)}
-                placeholder="Escribí o elegí de Sesiones"
-              />
-            </div>
-            <div className="space-y-1.5">
               {i === 0 ? <Label>Profesional</Label> : null}
               <select
                 name="profesional"
@@ -138,6 +141,16 @@ export function IngresoForm({
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="space-y-1.5">
+              {i === 0 ? <Label>Terapia / servicio</Label> : null}
+              <Input
+                name="terapia"
+                value={l.terapia}
+                list="sesiones-list"
+                onChange={(e) => cambiaTerapia(i, e.target.value)}
+                placeholder="Escribí o elegí de Sesiones"
+              />
             </div>
             <div className="space-y-1.5">
               {i === 0 ? <Label>Precio</Label> : null}

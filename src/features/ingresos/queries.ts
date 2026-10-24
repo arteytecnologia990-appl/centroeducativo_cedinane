@@ -89,3 +89,20 @@ export async function obtenerIngreso(id: string) {
     })) as IngresoItem[],
   }
 }
+
+export async function listarAlumnosPacientes(): Promise<{ id: string; nombre: string }[]> {
+  const supabase = await createClient()
+  const { data: roles } = await supabase
+    .from('persona_roles')
+    .select('persona_id')
+    .in('rol_negocio', ['alumno', 'paciente'])
+  const ids = [...new Set((roles ?? []).map((r) => r.persona_id))]
+  if (ids.length === 0) return []
+  const { data } = await supabase
+    .from('personas')
+    .select('id, nombres, apellidos')
+    .in('id', ids)
+    .is('deleted_at', null)
+    .order('apellidos', { ascending: true })
+  return (data ?? []).map((p) => ({ id: p.id, nombre: `${p.apellidos}, ${p.nombres}` }))
+}

@@ -45,6 +45,7 @@ export async function crearIngreso(formData: FormData): Promise<void> {
     .from('ingresos')
     .insert({
       usuario: usuario || documento || '—',
+      alumno_paciente: String(formData.get('alumno_paciente') ?? '').trim() || null,
       documento: documento || null,
       terapia: items.map((i) => i.terapia).join(' + '),
       profesional: items[0].profesional,
