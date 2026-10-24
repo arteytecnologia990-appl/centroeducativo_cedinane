@@ -15,6 +15,10 @@ type Linea = { terapia: string; profesional: string; precio: string; cantidad: s
 type SesionOpcion = { id: string; descripcion: string; monto: number }
 type Opcion = { id: string; nombre: string }
 
+const etiquetaCliente = (c: ClienteConFacturas) => `${c.nombre} — ${c.documento}`
+const etiquetaFactura = (f: { cdc: string; numero: string | null; monto: number }) =>
+  `${f.numero ?? f.cdc.slice(0, 12)} — ${guaranies(f.monto)}`
+
 export function IngresoForm({
   clientes,
   sesiones,
@@ -27,7 +31,9 @@ export function IngresoForm({
   alumnos: Opcion[]
 }) {
   const [documento, setDocumento] = useState('')
+  const [clienteTexto, setClienteTexto] = useState('')
   const [factura, setFactura] = useState('')
+  const [facturaTexto, setFacturaTexto] = useState('')
   const [metPago, setMetPago] = useState('')
   const [lineas, setLineas] = useState<Linea[]>([{ terapia: '', profesional: '', precio: '0', cantidad: '1' }])
 
@@ -44,58 +50,78 @@ export function IngresoForm({
   const quita = (i: number) => setLineas((prev) => prev.filter((_, j) => j !== i))
   const agrega = () => setLineas((prev) => [...prev, { terapia: '', profesional: '', precio: '0', cantidad: '1' }])
 
+  const cambiaCliente = (valor: string) => {
+    setClienteTexto(valor)
+    const c = clientes.find((x) => etiquetaCliente(x) === valor)
+    setDocumento(c?.documento ?? '')
+    setFactura('')
+    setFacturaTexto('')
+  }
+
+  const cambiaFactura = (valor: string) => {
+    setFacturaTexto(valor)
+    const f = (cliente?.facturas ?? []).find((x) => etiquetaFactura(x) === valor)
+    setFactura(f?.cdc ?? '')
+  }
+
   return (
     <form action={crearIngreso} className="space-y-3 rounded-lg border border-border p-4">
+      <datalist id="clientes-list">
+        {clientes.map((c) => (
+          <option key={c.documento} value={etiquetaCliente(c)} />
+        ))}
+      </datalist>
+      <datalist id="alumnos-list">
+        {alumnos.map((a) => (
+          <option key={a.id} value={a.nombre} />
+        ))}
+      </datalist>
+      <datalist id="profesionales-list">
+        {profesionales.map((p) => (
+          <option key={p.id} value={p.nombre} />
+        ))}
+      </datalist>
+      <datalist id="facturas-list">
+        {(cliente?.facturas ?? []).map((f) => (
+          <option key={f.cdc} value={etiquetaFactura(f)} />
+        ))}
+      </datalist>
+      <datalist id="sesiones-list">
+        {sesiones.map((s) => (
+          <option key={s.id} value={s.descripcion}>
+            {guaranies(s.monto)}
+          </option>
+        ))}
+      </datalist>
+
       <div className="grid gap-3 sm:grid-cols-6">
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="documento">Cliente</Label>
-          <select
-            id="documento"
-            name="documento"
-            value={documento}
-            onChange={(e) => {
-              setDocumento(e.target.value)
-              setFactura('')
-            }}
-            className={claseInput}
-          >
-            <option value="">Sin cliente (sin factura)</option>
-            {clientes.map((c) => (
-              <option key={c.documento} value={c.documento}>
-                {c.nombre} · {c.documento}
-              </option>
-            ))}
-          </select>
+          <Label htmlFor="cliente_texto">Cliente</Label>
+          <Input
+            id="cliente_texto"
+            list="clientes-list"
+            value={clienteTexto}
+            onChange={(e) => cambiaCliente(e.target.value)}
+            placeholder="Escribí para buscar..."
+          />
+          <input type="hidden" name="documento" value={documento} />
           <input type="hidden" name="usuario" value={cliente?.nombre ?? ''} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="alumno_paciente">Alumno / Paciente</Label>
-          <select id="alumno_paciente" name="alumno_paciente" className={claseInput}>
-            <option value="">—</option>
-            {alumnos.map((a) => (
-              <option key={a.id} value={a.nombre}>
-                {a.nombre}
-              </option>
-            ))}
-          </select>
+          <Input id="alumno_paciente" name="alumno_paciente" list="alumnos-list" placeholder="Escribí para buscar..." />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="factura_cdc">Factura (XML)</Label>
-          <select
-            id="factura_cdc"
-            name="factura_cdc"
-            value={factura}
-            onChange={(e) => setFactura(e.target.value)}
+          <Label htmlFor="factura_texto">Factura (XML)</Label>
+          <Input
+            id="factura_texto"
+            list="facturas-list"
+            value={facturaTexto}
+            onChange={(e) => cambiaFactura(e.target.value)}
             disabled={!cliente}
-            className={claseInput}
-          >
-            <option value="">Sin factura (pendiente)</option>
-            {(cliente?.facturas ?? []).map((f) => (
-              <option key={f.cdc} value={f.cdc}>
-                {f.numero ?? f.cdc.slice(0, 12)} · {guaranies(f.monto)}
-              </option>
-            ))}
-          </select>
+            placeholder={cliente ? 'Elegí...' : 'Sin cliente'}
+          />
+          <input type="hidden" name="factura_cdc" value={factura} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="met_pago">Met. Pago</Label>
@@ -115,32 +141,18 @@ export function IngresoForm({
         </div>
       </div>
 
-      <datalist id="sesiones-list">
-        {sesiones.map((s) => (
-          <option key={s.id} value={s.descripcion}>
-            {guaranies(s.monto)}
-          </option>
-        ))}
-      </datalist>
-
       <div className="space-y-2">
         {lineas.map((l, i) => (
           <div key={i} className="grid grid-cols-[1fr_1fr_110px_90px_100px_36px] items-end gap-2">
             <div className="space-y-1.5">
               {i === 0 ? <Label>Profesional</Label> : null}
-              <select
+              <Input
                 name="profesional"
                 value={l.profesional}
+                list="profesionales-list"
                 onChange={(e) => cambia(i, { profesional: e.target.value })}
-                className={claseInput}
-              >
-                <option value="">—</option>
-                {profesionales.map((p) => (
-                  <option key={p.id} value={p.nombre}>
-                    {p.nombre}
-                  </option>
-                ))}
-              </select>
+                placeholder="Escribí para buscar..."
+              />
             </div>
             <div className="space-y-1.5">
               {i === 0 ? <Label>Terapia / servicio</Label> : null}

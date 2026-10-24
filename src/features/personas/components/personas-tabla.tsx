@@ -21,7 +21,7 @@ export function PersonasTabla({ personas }: { personas: PersonaListado[] }) {
             <TableRow key={p.id}>
               <TableCell className="font-medium">
                 <Link href={`/dashboard/personas/${p.id}`} className="hover:underline">
-                  {p.apellidos}, {p.nombres}
+                  {p.nombres} {p.apellidos}
                 </Link>
               </TableCell>
               <TableCell className="tabular-nums">{p.ci ?? '—'}</TableCell>
