@@ -35,7 +35,8 @@ export async function importarDtes(formData: FormData): Promise<ImportResult> {
   }
 
   const workbook = new ExcelJS.Workbook()
-  await workbook.xlsx.load(Buffer.from(await archivo.arrayBuffer()) as unknown as Buffer)
+  const bytes = await archivo.arrayBuffer()
+  await workbook.xlsx.load(Buffer.from(bytes) as unknown as Parameters<typeof workbook.xlsx.load>[0])
   const hoja = workbook.worksheets[0]
   if (!hoja) {
     return { importadas: 0, omitidas: 0, canceladas: 0, errores: ['El archivo no tiene hojas.'] }
