@@ -58,7 +58,7 @@ export default async function ReciboAdelantoPage({ params }: { params: Promise<{
     porc_profesional: number
     bruto: number
   }[]
-  const [anio, mes] = a.periodo.split('-').map(Number)
+  const [anio, mes] = a.fecha.slice(0, 7).split('-').map(Number)
 
   return (
     <div className="mx-auto max-w-[210mm] bg-white p-6 text-black">
