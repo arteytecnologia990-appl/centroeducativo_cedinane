@@ -282,16 +282,17 @@ export async function eliminarFeriado(formData: FormData): Promise<void> {
 
 export async function crearAdelanto(formData: FormData): Promise<void> {
   const personaId = String(formData.get('persona_id') ?? '')
-  const periodo = String(formData.get('periodo') ?? '')
   const fecha = String(formData.get('fecha') ?? '')
+  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10)
+  const periodo = fechaValida.slice(0, 7)
   const monto = Number(formData.get('monto') ?? 0)
-  if (!personaId || !/^\d{4}-\d{2}$/.test(periodo) || !Number.isFinite(monto) || monto <= 0) return
+  if (!personaId || !Number.isFinite(monto) || monto <= 0) return
 
   const supabase = await createClient()
   await supabase.from('adelantos').insert({
     persona_id: personaId,
     periodo,
-    fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+    fecha: fechaValida,
     monto,
     concepto: String(formData.get('concepto') ?? '').trim() || 'Adelanto de salario',
   })
@@ -316,9 +317,10 @@ export async function crearAdelantoSesiones(formData: FormData): Promise<void> {
   const sesionId = String(formData.get('sesion_id') ?? '')
   const cantidad = Number(formData.get('cantidad') ?? 0)
   const fecha = String(formData.get('fecha') ?? '')
-  const periodo = String(formData.get('periodo') ?? '')
+  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10)
+  const periodo = fechaValida.slice(0, 7)
 
-  if (!personaId || !sesionId || !(cantidad > 0) || !/^\d{4}-\d{2}$/.test(periodo)) return
+  if (!personaId || !sesionId || !(cantidad > 0)) return
 
   const supabase = await createClient()
   const { data: sesion } = await supabase
@@ -345,7 +347,7 @@ export async function crearAdelantoSesiones(formData: FormData): Promise<void> {
   await supabase.from('adelantos').insert({
     persona_id: personaId,
     periodo,
-    fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+    fecha: fechaValida,
     monto: redondear(neto),
     concepto: `${cantidad} × ${sesion.descripcion}`,
     sesion_id: sesionId,
@@ -361,12 +363,13 @@ export async function crearAdelantoSesiones(formData: FormData): Promise<void> {
 
 export async function crearAdelantoSesionesMulti(formData: FormData): Promise<void> {
   const personaId = String(formData.get('persona_id') ?? '')
-  const periodo = String(formData.get('periodo') ?? '')
   const fecha = String(formData.get('fecha') ?? '')
+  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10)
+  const periodo = fechaValida.slice(0, 7)
   const ids = formData.getAll('sesion_id').map(String)
   const cantidades = formData.getAll('cantidad').map((c) => Number(c) || 0)
 
-  if (!personaId || !/^\d{4}-\d{2}$/.test(periodo)) return
+  if (!personaId) return
 
   const supabase = await createClient()
   const { data: personal } = await supabase
@@ -424,7 +427,7 @@ export async function crearAdelantoSesionesMulti(formData: FormData): Promise<vo
     .insert({
       persona_id: personaId,
       periodo,
-      fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+      fecha: fechaValida,
       monto: neto,
       concepto,
       monto_bruto: redondear(bruto),

@@ -254,10 +254,14 @@ export type AdelantoFila = {
 
 export async function listarAdelantos(periodo: string): Promise<AdelantoFila[]> {
   const supabase = await createClient()
+  const [anio, mes] = periodo.split('-').map(Number)
+  const desde = `${periodo}-01`
+  const hasta = `${periodo}-${String(new Date(anio, mes, 0).getDate()).padStart(2, '0')}`
   const { data } = await supabase
     .from('adelantos')
     .select('id, numero, persona_id, periodo, fecha, monto, concepto, caja_ahorro, personas(nombres, apellidos)')
-    .eq('periodo', periodo)
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
     .order('numero', { ascending: false })
 
   return (data ?? []).map((a) => {
@@ -278,10 +282,14 @@ export async function listarAdelantos(periodo: string): Promise<AdelantoFila[]> 
 
 export async function listarAdelantosPeriodo(periodo: string) {
   const supabase = await createClient()
+  const [anio, mes] = periodo.split('-').map(Number)
+  const desde = `${periodo}-01`
+  const hasta = `${periodo}-${String(new Date(anio, mes, 0).getDate()).padStart(2, '0')}`
   const { data } = await supabase
     .from('adelantos')
     .select('persona_id, monto, fecha')
-    .eq('periodo', periodo)
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
     .order('fecha', { ascending: true })
   return data ?? []
 }
