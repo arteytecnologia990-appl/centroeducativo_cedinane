@@ -179,6 +179,8 @@ export async function crearCobro(formData: FormData): Promise<void> {
   const documento = String(formData.get('documento') ?? '').trim()
   const fecha = String(formData.get('fecha') ?? '')
   const referencia = String(formData.get('referencia') ?? '').trim() || null
+  const next = String(formData.get('next') ?? '')
+  const facturaCdc = String(formData.get('factura_cdc') ?? '').trim() || null
   if (!documento) return
 
   const formas = formData.getAll('forma_pago').map((v) => String(v))
@@ -212,6 +214,17 @@ export async function crearCobro(formData: FormData): Promise<void> {
   if (pagos.length === 0) return
 
   const supabase = await createClient()
+
+  if (facturaCdc) {
+    const { data: yaCobrado } = await supabase
+      .from('cobros')
+      .select('id')
+      .eq('factura_cdc', facturaCdc)
+      .limit(1)
+      .maybeSingle()
+    if (yaCobrado) redirect(next ? `${next}?duplicado=1` : '/dashboard/ingresos?duplicado=1')
+  }
+
   const { data: cobro } = await supabase
     .from('cobros')
     .insert({
@@ -220,6 +233,7 @@ export async function crearCobro(formData: FormData): Promise<void> {
       fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
       forma_pago: pagos.length > 1 ? 'mixto' : pagos[0].forma_pago,
       referencia,
+      factura_cdc: facturaCdc,
       banco_id: pagos[0].banco_id,
       cuenta_id: pagos[0].cuenta_id,
       nro_transferencia: pagos[0].nro_transferencia,
@@ -231,7 +245,6 @@ export async function crearCobro(formData: FormData): Promise<void> {
 
   await supabase.from('cobro_pagos').insert(pagos.map((p) => ({ ...p, cobro_id: cobro.id })))
 
-  const next = String(formData.get('next') ?? '')
   revalidatePath('/dashboard/facturacion')
   redirect(next ? `${next}?cobrado=1` : '/dashboard/ingresos?cobrado=1')
 }

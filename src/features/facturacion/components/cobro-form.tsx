@@ -21,11 +21,13 @@ export function CobroForm({
   bancos,
   hoy,
   next,
+  facturaCdc,
 }: {
   documento: string
   bancos: Banco[]
   hoy: string
   next?: string
+  facturaCdc?: string | null
 }) {
   const [referencia, setReferencia] = useState('')
   const [pagos, setPagos] = useState<Pago[]>([{ forma: 'efectivo', monto: '', bancoId: '', cuentaId: '', nro: '' }])
@@ -41,6 +43,7 @@ export function CobroForm({
     <form action={crearCobro} className="space-y-3 rounded-lg border border-border p-4">
       <input type="hidden" name="documento" value={documento} />
       <input type="hidden" name="next" value={next ?? ''} />
+      <input type="hidden" name="factura_cdc" value={facturaCdc ?? ''} />
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label htmlFor="fecha">Fecha</Label>

@@ -12,7 +12,7 @@ export default async function IngresoDetallePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ cobrado?: string }>
+  searchParams: Promise<{ cobrado?: string; duplicado?: string }>
 }) {
   const { id } = await params
   const filtros = await searchParams
@@ -29,6 +29,11 @@ export default async function IngresoDetallePage({
       {filtros.cobrado ? (
         <p className="rounded-lg border border-success/40 bg-success/10 px-4 py-2 text-sm text-success">
           ✔ Cobro registrado correctamente.
+        </p>
+      ) : null}
+      {filtros.duplicado ? (
+        <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-2 text-sm text-warning">
+          Este comprobante ya tiene un cobro registrado. No se duplicó.
         </p>
       ) : null}
 
@@ -92,6 +97,7 @@ export default async function IngresoDetallePage({
               bancos={bancos}
               hoy={hoy}
               next={`/dashboard/ingresos/${ingreso.id}`}
+              facturaCdc={ingreso.factura_cdc}
             />
           </>
         ) : (

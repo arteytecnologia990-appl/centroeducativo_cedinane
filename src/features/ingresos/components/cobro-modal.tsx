@@ -11,11 +11,13 @@ export function CobroModal({
   bancos,
   hoy,
   habilitado,
+  facturaCdc,
 }: {
   documento: string
   bancos: Banco[]
   hoy: string
   habilitado: boolean
+  facturaCdc: string | null
 }) {
   const [abierto, setAbierto] = useState(false)
 
@@ -51,7 +53,13 @@ export function CobroModal({
                 ×
               </button>
             </div>
-            <CobroForm documento={documento} bancos={bancos} hoy={hoy} next="/dashboard/ingresos" />
+            <CobroForm
+              documento={documento}
+              bancos={bancos}
+              hoy={hoy}
+              next="/dashboard/ingresos"
+              facturaCdc={facturaCdc}
+            />
           </div>
         </div>
       ) : null}

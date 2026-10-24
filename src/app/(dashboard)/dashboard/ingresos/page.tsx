@@ -14,7 +14,7 @@ const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 export default async function IngresosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cobrado?: string }>
+  searchParams: Promise<{ cobrado?: string; duplicado?: string }>
 }) {
   const params = await searchParams
   const [ingresos, clientes, sesiones, empleados, alumnos, bancos] = await Promise.all([
@@ -44,6 +44,11 @@ export default async function IngresosPage({
       {params.cobrado ? (
         <p className="rounded-lg border border-success/40 bg-success/10 px-4 py-2 text-sm text-success">
           ✔ Cobro registrado correctamente.
+        </p>
+      ) : null}
+      {params.duplicado ? (
+        <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-2 text-sm text-warning">
+          Este comprobante ya tiene un cobro registrado. No se duplicó.
         </p>
       ) : null}
 
@@ -89,6 +94,7 @@ export default async function IngresosPage({
                       bancos={bancos}
                       hoy={hoy}
                       habilitado={Boolean(c.factura_cdc)}
+                      facturaCdc={c.factura_cdc}
                     />
                     <Link href={`/dashboard/ingresos/${c.id}`} className="text-sm text-primary hover:underline">
                       Detalle

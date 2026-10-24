@@ -390,6 +390,7 @@ export type Database = {
           created_at: string
           cuenta_id: string | null
           documento_receptor: string
+          factura_cdc: string | null
           fecha: string
           forma_pago: string
           id: string
@@ -402,6 +403,7 @@ export type Database = {
           created_at?: string
           cuenta_id?: string | null
           documento_receptor: string
+          factura_cdc?: string | null
           fecha?: string
           forma_pago?: string
           id?: string
@@ -414,6 +416,7 @@ export type Database = {
           created_at?: string
           cuenta_id?: string | null
           documento_receptor?: string
+          factura_cdc?: string | null
           fecha?: string
           forma_pago?: string
           id?: string
