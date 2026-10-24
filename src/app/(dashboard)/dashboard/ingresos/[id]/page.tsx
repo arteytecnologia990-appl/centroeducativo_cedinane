@@ -24,6 +24,10 @@ export default async function IngresoDetallePage({
   const bancos = await listarBancos()
   const facturas = await listarFacturasCliente(ingreso.documento ?? '')
   const vinculadas = await listarFacturasVinculadas(ingreso.id)
+  const vinculadasCdc = new Set(vinculadas.map((v) => v.cdc))
+  const facturasDisponibles = facturas.filter(
+    (f) => Number(f.monto_total) <= Number(ingreso.total) && !vinculadasCdc.has(f.cdc)
+  )
   const facturado = vinculadas.reduce((s, f) => s + Number(f.monto_total), 0)
   const diferencia = Number(ingreso.total) - facturado
   const hoy = new Date().toISOString().slice(0, 10)
@@ -157,7 +161,7 @@ export default async function IngresoDetallePage({
               className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
             >
               <option value="">Elegí...</option>
-              {facturas.map((f) => (
+              {facturasDisponibles.map((f) => (
                 <option key={f.cdc} value={f.cdc}>
                   {f.numero_documento ?? 's/n'} — {f.nombre_informado ?? f.documento_receptor} —{' '}
                   {guaranies(Number(f.monto_total))}
@@ -171,8 +175,10 @@ export default async function IngresoDetallePage({
           >
             Vincular factura
           </button>
-          {facturas.length === 0 ? (
-            <p className="text-xs text-warning">No hay facturas XML importadas. Importalas en Facturación.</p>
+          {facturasDisponibles.length === 0 ? (
+            <p className="text-xs text-warning">
+              No hay facturas disponibles (ya vinculadas o de monto mayor al ingreso).
+            </p>
           ) : null}
         </form>
       </section>
