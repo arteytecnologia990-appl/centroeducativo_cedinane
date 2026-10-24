@@ -332,6 +332,58 @@ export type Database = {
         }
         Relationships: []
       }
+      cobro_pagos: {
+        Row: {
+          banco_id: string | null
+          cobro_id: string
+          cuenta_id: string | null
+          forma_pago: string
+          id: string
+          monto: number
+          nro_transferencia: string | null
+        }
+        Insert: {
+          banco_id?: string | null
+          cobro_id: string
+          cuenta_id?: string | null
+          forma_pago: string
+          id?: string
+          monto?: number
+          nro_transferencia?: string | null
+        }
+        Update: {
+          banco_id?: string | null
+          cobro_id?: string
+          cuenta_id?: string | null
+          forma_pago?: string
+          id?: string
+          monto?: number
+          nro_transferencia?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobro_pagos_banco_id_fkey"
+            columns: ["banco_id"]
+            isOneToOne: false
+            referencedRelation: "bancos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobro_pagos_cobro_id_fkey"
+            columns: ["cobro_id"]
+            isOneToOne: false
+            referencedRelation: "cobros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobro_pagos_cuenta_id_fkey"
+            columns: ["cuenta_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_bancarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cobros: {
         Row: {
           banco_id: string | null

@@ -10,90 +10,154 @@ const claseInput =
 
 type Cuenta = { id: string; numero: string; tipo: string }
 type Banco = { id: string; nombre: string; cuentas: Cuenta[] }
+type Pago = { forma: string; monto: string; bancoId: string; cuentaId: string; nro: string }
 
-const tipoTexto: Record<string, string> = {
-  caja_ahorro: 'Caja de ahorro',
-  cuenta_corriente: 'Cta. corriente',
-}
+const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
+const tipoTexto: Record<string, string> = { caja_ahorro: 'Caja de ahorro', cuenta_corriente: 'Cta. corriente' }
+const FORMASPAGO = ['efectivo', 'transferencia', 'cheque', 'tarjeta']
 
 export function CobroForm({ documento, bancos, hoy }: { documento: string; bancos: Banco[]; hoy: string }) {
-  const [forma, setForma] = useState('efectivo')
-  const [bancoId, setBancoId] = useState('')
+  const [referencia, setReferencia] = useState('')
+  const [pagos, setPagos] = useState<Pago[]>([{ forma: 'efectivo', monto: '', bancoId: '', cuentaId: '', nro: '' }])
 
-  const banco = bancos.find((b) => b.id === bancoId)
-  const esTransferencia = forma === 'transferencia'
+  const total = pagos.reduce((s, p) => s + (Number(p.monto) || 0), 0)
+  const cambia = (i: number, parche: Partial<Pago>) =>
+    setPagos((prev) => prev.map((p, j) => (j === i ? { ...p, ...parche } : p)))
+  const quita = (i: number) => setPagos((prev) => prev.filter((_, j) => j !== i))
+  const agrega = () =>
+    setPagos((prev) => [...prev, { forma: 'efectivo', monto: '', bancoId: '', cuentaId: '', nro: '' }])
 
   return (
-    <form action={crearCobro} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
+    <form action={crearCobro} className="space-y-3 rounded-lg border border-border p-4">
       <input type="hidden" name="documento" value={documento} />
-
-      <div className="space-y-1.5">
-        <Label htmlFor="monto">Monto (Gs)</Label>
-        <Input id="monto" name="monto" type="number" min="1" step="1" required />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="fecha">Fecha</Label>
-        <Input id="fecha" name="fecha" type="date" defaultValue={hoy} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="forma_pago">Forma de pago</Label>
-        <select
-          id="forma_pago"
-          name="forma_pago"
-          value={forma}
-          onChange={(e) => setForma(e.target.value)}
-          className={claseInput}
-        >
-          <option value="efectivo">Efectivo</option>
-          <option value="transferencia">Transferencia</option>
-          <option value="cheque">Cheque</option>
-          <option value="tarjeta">Tarjeta</option>
-        </select>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="fecha">Fecha</Label>
+          <Input id="fecha" name="fecha" type="date" defaultValue={hoy} />
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="referencia">Referencia</Label>
+          <Input
+            id="referencia"
+            name="referencia"
+            value={referencia}
+            onChange={(e) => setReferencia(e.target.value)}
+            placeholder="Opcional"
+          />
+        </div>
       </div>
 
-      {esTransferencia ? (
-        <>
-          <div className="space-y-1.5">
-            <Label htmlFor="banco_id">Banco</Label>
-            <select
-              id="banco_id"
-              name="banco_id"
-              required
-              value={bancoId}
-              onChange={(e) => setBancoId(e.target.value)}
-              className={claseInput}
-            >
-              <option value="">Elegí...</option>
-              {bancos.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="cuenta_id">Cuenta</Label>
-            <select id="cuenta_id" name="cuenta_id" required disabled={!banco} className={claseInput}>
-              <option value="">{banco ? 'Elegí...' : 'Elegí un banco'}</option>
-              {(banco?.cuentas ?? []).map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.numero} ({tipoTexto[c.tipo] ?? c.tipo})
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="nro_transferencia">N° transferencia</Label>
-            <Input id="nro_transferencia" name="nro_transferencia" required />
-          </div>
-        </>
-      ) : null}
+      <div className="space-y-2">
+        {pagos.map((p, i) => {
+          const banco = bancos.find((b) => b.id === p.bancoId)
+          const esTransfer = p.forma === 'transferencia'
+          return (
+            <div key={i} className="space-y-2 rounded-md border border-border p-2">
+              <div className="grid grid-cols-[170px_130px_1fr_36px] items-end gap-2">
+                <div className="space-y-1.5">
+                  {i === 0 ? <Label>Medio</Label> : null}
+                  <select
+                    name="forma_pago"
+                    value={p.forma}
+                    onChange={(e) => cambia(i, { forma: e.target.value })}
+                    className={claseInput}
+                  >
+                    {FORMASPAGO.map((f) => (
+                      <option key={f} value={f}>
+                        {f}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  {i === 0 ? <Label>Monto</Label> : null}
+                  <Input
+                    name="monto_pago"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={p.monto}
+                    onChange={(e) => cambia(i, { monto: e.target.value })}
+                  />
+                </div>
+                <div />
+                <button
+                  type="button"
+                  onClick={() => quita(i)}
+                  disabled={pagos.length === 1}
+                  className="h-8 rounded-md border border-input text-sm text-muted-foreground disabled:opacity-40"
+                >
+                  ×
+                </button>
+              </div>
 
-      <div className="space-y-1.5 sm:col-span-2">
-        <Label htmlFor="referencia">Referencia</Label>
-        <Input id="referencia" name="referencia" placeholder="Opcional" />
+              {esTransfer ? (
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <Label>Banco</Label>
+                    <select
+                      name="banco_id"
+                      required
+                      value={p.bancoId}
+                      onChange={(e) => cambia(i, { bancoId: e.target.value, cuentaId: '' })}
+                      className={claseInput}
+                    >
+                      <option value="">Elegí...</option>
+                      {bancos.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Cuenta</Label>
+                    <select
+                      name="cuenta_id"
+                      required
+                      disabled={!banco}
+                      value={p.cuentaId}
+                      onChange={(e) => cambia(i, { cuentaId: e.target.value })}
+                      className={claseInput}
+                    >
+                      <option value="">{banco ? 'Elegí...' : 'Elegí un banco'}</option>
+                      {(banco?.cuentas ?? []).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.numero} ({tipoTexto[c.tipo] ?? c.tipo})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>N° transferencia</Label>
+                    <Input
+                      name="nro_transferencia"
+                      required
+                      value={p.nro}
+                      onChange={(e) => cambia(i, { nro: e.target.value })}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <input type="hidden" name="banco_id" value="" />
+                  <input type="hidden" name="cuenta_id" value="" />
+                  <input type="hidden" name="nro_transferencia" value="" />
+                </>
+              )}
+            </div>
+          )
+        })}
       </div>
-      <div className="flex items-end sm:col-span-6">
+
+      <button type="button" onClick={agrega} className="text-sm text-primary hover:underline">
+        + Agregar medio de pago
+      </button>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+        <span className="text-sm">
+          Total cobrado: <strong className="tabular-nums">{guaranies(total)}</strong>
+        </span>
         <button
           type="submit"
           className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"

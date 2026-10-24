@@ -176,25 +176,59 @@ export async function importarDtes(formData: FormData): Promise<ImportResult> {
 
 export async function crearCobro(formData: FormData): Promise<void> {
   const documento = String(formData.get('documento') ?? '').trim()
-  const monto = Number(formData.get('monto') ?? 0)
   const fecha = String(formData.get('fecha') ?? '')
-  const formaPago = String(formData.get('forma_pago') ?? 'efectivo')
-  const bancoId = String(formData.get('banco_id') ?? '') || null
-  const cuentaId = String(formData.get('cuenta_id') ?? '') || null
-  const nroTransferencia = String(formData.get('nro_transferencia') ?? '').trim() || null
-  if (!documento || !Number.isFinite(monto) || monto <= 0) return
+  const referencia = String(formData.get('referencia') ?? '').trim() || null
+  if (!documento) return
+
+  const formas = formData.getAll('forma_pago').map((v) => String(v))
+  const montos = formData.getAll('monto_pago').map((v) => Number(v) || 0)
+  const bancoIds = formData.getAll('banco_id').map((v) => String(v))
+  const cuentaIds = formData.getAll('cuenta_id').map((v) => String(v))
+  const nros = formData.getAll('nro_transferencia').map((v) => String(v))
+
+  const pagos: {
+    forma_pago: string
+    monto: number
+    banco_id: string | null
+    cuenta_id: string | null
+    nro_transferencia: string | null
+  }[] = []
+  let total = 0
+
+  for (let i = 0; i < formas.length; i++) {
+    const monto = montos[i] ?? 0
+    if (!formas[i] || monto <= 0) continue
+    total += monto
+    pagos.push({
+      forma_pago: formas[i],
+      monto,
+      banco_id: bancoIds[i] || null,
+      cuenta_id: cuentaIds[i] || null,
+      nro_transferencia: nros[i]?.trim() || null,
+    })
+  }
+
+  if (pagos.length === 0) return
 
   const supabase = await createClient()
-  await supabase.from('cobros').insert({
-    documento_receptor: documento,
-    monto,
-    fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
-    forma_pago: formaPago,
-    referencia: String(formData.get('referencia') ?? '').trim() || null,
-    banco_id: bancoId,
-    cuenta_id: cuentaId,
-    nro_transferencia: nroTransferencia,
-  })
+  const { data: cobro } = await supabase
+    .from('cobros')
+    .insert({
+      documento_receptor: documento,
+      monto: total,
+      fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
+      forma_pago: pagos.length > 1 ? 'mixto' : pagos[0].forma_pago,
+      referencia,
+      banco_id: pagos[0].banco_id,
+      cuenta_id: pagos[0].cuenta_id,
+      nro_transferencia: pagos[0].nro_transferencia,
+    })
+    .select('id')
+    .single()
+
+  if (!cobro) return
+
+  await supabase.from('cobro_pagos').insert(pagos.map((p) => ({ ...p, cobro_id: cobro.id })))
 
   revalidatePath('/dashboard/facturacion')
 }
