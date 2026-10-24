@@ -1,13 +1,8 @@
 import Link from 'next/link'
-import { listarCobros, listarFacturas, listarSaldos } from '@/features/facturacion/queries'
-import { crearCobro } from '@/features/facturacion/actions'
+import { Banknote, Eye } from 'lucide-react'
+import { listarCobros, listarFacturas, listarSaldos, normalizarDocumento } from '@/features/facturacion/queries'
 import { Volver } from '@/components/layout/volver'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-const claseInput =
-  'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
@@ -22,7 +17,6 @@ const fmtFecha = (f: string | null) => {
 export default async function FacturacionPage() {
   const [saldos, facturas, cobros] = await Promise.all([listarSaldos(), listarFacturas(), listarCobros()])
   const totalSaldo = saldos.reduce((s, c) => s + c.saldo, 0)
-  const hoy = new Date().toISOString().slice(0, 10)
 
   return (
     <div className="space-y-6">
@@ -55,6 +49,7 @@ export default async function FacturacionPage() {
                 <TableHead className="text-right">Facturado</TableHead>
                 <TableHead className="text-right">Cobrado</TableHead>
                 <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="w-24">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,11 +61,31 @@ export default async function FacturacionPage() {
                   <TableCell className="text-right tabular-nums">{guaranies(s.facturado)}</TableCell>
                   <TableCell className="text-right tabular-nums">{guaranies(s.cobrado)}</TableCell>
                   <TableCell className="text-right tabular-nums font-medium">{guaranies(s.saldo)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/dashboard/facturacion/clientes/${s.documento}#cobro`}
+                        title="Registrar cobro"
+                        aria-label="Registrar cobro"
+                        className="text-primary transition-opacity hover:opacity-70"
+                      >
+                        <Banknote className="size-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/facturacion/clientes/${s.documento}`}
+                        title="Ver facturas del cliente"
+                        aria-label="Ver facturas del cliente"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <Eye className="size-4" />
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {saldos.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-20 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={7} className="h-20 text-center text-sm text-muted-foreground">
                     Sin DTEs importados. Usá “Importar DTEs”.
                   </TableCell>
                 </TableRow>
@@ -78,52 +93,6 @@ export default async function FacturacionPage() {
             </TableBody>
           </Table>
         </div>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">Registrar cobro</h2>
-        <form action={crearCobro} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="documento">Cliente</Label>
-            <select id="documento" name="documento" required className={claseInput}>
-              <option value="">Elegí...</option>
-              {saldos.map((s) => (
-                <option key={s.documento} value={s.documento}>
-                  {s.documento} · {s.nombre ?? 's/n'} · saldo {guaranies(s.saldo)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="monto">Monto (Gs)</Label>
-            <Input id="monto" name="monto" type="number" min="1" step="1" required />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="fecha">Fecha</Label>
-            <Input id="fecha" name="fecha" type="date" defaultValue={hoy} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="forma_pago">Forma de pago</Label>
-            <select id="forma_pago" name="forma_pago" className={claseInput}>
-              <option value="efectivo">Efectivo</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="cheque">Cheque</option>
-              <option value="tarjeta">Tarjeta</option>
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="referencia">Referencia</Label>
-            <Input id="referencia" name="referencia" placeholder="Opcional" />
-          </div>
-          <div className="sm:col-span-6">
-            <button
-              type="submit"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              Registrar cobro
-            </button>
-          </div>
-        </form>
       </section>
 
       <section className="space-y-3">
@@ -173,6 +142,7 @@ export default async function FacturacionPage() {
                 <TableHead>Fecha</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Monto</TableHead>
+                <TableHead className="w-24">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -184,11 +154,31 @@ export default async function FacturacionPage() {
                   <TableCell className="tabular-nums">{fmtFecha(f.fecha_emision)}</TableCell>
                   <TableCell>{f.estado}</TableCell>
                   <TableCell className="text-right tabular-nums">{guaranies(Number(f.monto_total))}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/dashboard/facturacion/clientes/${normalizarDocumento(f.documento_receptor)}#cobro`}
+                        title="Registrar cobro"
+                        aria-label="Registrar cobro"
+                        className="text-primary transition-opacity hover:opacity-70"
+                      >
+                        <Banknote className="size-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/facturacion/clientes/${normalizarDocumento(f.documento_receptor)}`}
+                        title="Ver facturas del cliente"
+                        aria-label="Ver facturas del cliente"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <Eye className="size-4" />
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {facturas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-16 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
                     Sin facturas.
                   </TableCell>
                 </TableRow>

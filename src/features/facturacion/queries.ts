@@ -72,3 +72,57 @@ export async function listarCobros() {
   const { data } = await supabase.from('cobros').select('*').order('fecha', { ascending: false }).limit(100)
   return data ?? []
 }
+
+export type ClienteDetalle = {
+  documento: string
+  nombre: string | null
+  facturas: {
+    id: string
+    cdc: string
+    numero_documento: string | null
+    fecha_emision: string | null
+    monto_total: number
+    estado: string
+  }[]
+  cobros: { id: string; fecha: string; monto: number; forma_pago: string; referencia: string | null }[]
+  facturado: number
+  cobrado: number
+  saldo: number
+}
+
+export async function obtenerCliente(documento: string): Promise<ClienteDetalle> {
+  const supabase = await createClient()
+  const [{ data: facturas }, { data: cobros }] = await Promise.all([
+    supabase.from('facturas').select('*').order('fecha_emision', { ascending: false }),
+    supabase.from('cobros').select('*').order('fecha', { ascending: false }),
+  ])
+
+  const norm = normalizarDocumento(documento)
+  const propias = (facturas ?? []).filter((f) => normalizarDocumento(f.documento_receptor) === norm)
+  const cobrosPropios = (cobros ?? []).filter((c) => normalizarDocumento(c.documento_receptor) === norm)
+  const facturado = propias.reduce((s, f) => s + Number(f.monto_total), 0)
+  const cobrado = cobrosPropios.reduce((s, c) => s + Number(c.monto), 0)
+
+  return {
+    documento: propias[0]?.documento_receptor ?? documento,
+    nombre: propias.find((f) => f.nombre_informado)?.nombre_informado ?? null,
+    facturas: propias.map((f) => ({
+      id: f.id,
+      cdc: f.cdc,
+      numero_documento: f.numero_documento,
+      fecha_emision: f.fecha_emision,
+      monto_total: Number(f.monto_total),
+      estado: f.estado,
+    })),
+    cobros: cobrosPropios.map((c) => ({
+      id: c.id,
+      fecha: c.fecha,
+      monto: Number(c.monto),
+      forma_pago: c.forma_pago,
+      referencia: c.referencia,
+    })),
+    facturado,
+    cobrado,
+    saldo: facturado - cobrado,
+  }
+}
