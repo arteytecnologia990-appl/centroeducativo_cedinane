@@ -31,6 +31,7 @@ export async function crearCuenta(formData: FormData): Promise<void> {
     banco_id: bancoId,
     numero,
     tipo: String(formData.get('tipo') ?? 'caja_ahorro'),
+    moneda: String(formData.get('moneda') ?? 'PYG'),
     titular: String(formData.get('titular') ?? '').trim() || null,
   })
   revalidatePath('/dashboard/bancos')

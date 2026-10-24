@@ -13,6 +13,14 @@ const tipoTexto: Record<string, string> = {
   cuenta_corriente: 'Cuenta corriente',
 }
 
+const MONEDAS = [
+  { valor: 'PYG', etiqueta: 'Guaraníes (PYG)' },
+  { valor: 'USD', etiqueta: 'Dólares (USD)' },
+  { valor: 'EUR', etiqueta: 'Euros (EUR)' },
+  { valor: 'BRL', etiqueta: 'Reales (BRL)' },
+  { valor: 'ARS', etiqueta: 'Pesos arg. (ARS)' },
+]
+
 export default async function BancosPage() {
   const bancos = await listarBancos()
 
@@ -108,6 +116,16 @@ export default async function BancosPage() {
               <option value="cuenta_corriente">Cuenta corriente</option>
             </select>
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="moneda">Moneda</Label>
+            <select id="moneda" name="moneda" defaultValue="PYG" className={claseInput}>
+              {MONEDAS.map((m) => (
+                <option key={m.valor} value={m.valor}>
+                  {m.etiqueta}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="titular">Titular</Label>
             <Input id="titular" name="titular" placeholder="Opcional" />
@@ -129,6 +147,7 @@ export default async function BancosPage() {
                 <TableHead>Banco</TableHead>
                 <TableHead>N° cuenta</TableHead>
                 <TableHead>Tipo</TableHead>
+                <TableHead>Moneda</TableHead>
                 <TableHead>Titular</TableHead>
                 <TableHead className="w-16" />
               </TableRow>
@@ -140,6 +159,7 @@ export default async function BancosPage() {
                     <TableCell className="font-medium">{b.nombre}</TableCell>
                     <TableCell className="tabular-nums">{c.numero}</TableCell>
                     <TableCell className="text-muted-foreground">{tipoTexto[c.tipo] ?? c.tipo}</TableCell>
+                    <TableCell className="text-muted-foreground">{c.moneda}</TableCell>
                     <TableCell className="text-muted-foreground">{c.titular ?? '—'}</TableCell>
                     <TableCell>
                       <form action={eliminarCuenta}>
@@ -157,7 +177,7 @@ export default async function BancosPage() {
               )}
               {bancos.every((b) => b.cuentas.length === 0) ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={6} className="h-16 text-center text-sm text-muted-foreground">
                     Sin cuentas.
                   </TableCell>
                 </TableRow>
