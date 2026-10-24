@@ -22,7 +22,7 @@ export default async function IngresoDetallePage({
   if (!ingreso) notFound()
 
   const bancos = await listarBancos()
-  const facturas = ingreso.documento ? await listarFacturasCliente(ingreso.documento) : []
+  const facturas = await listarFacturasCliente(ingreso.documento ?? '')
   const hoy = new Date().toISOString().slice(0, 10)
 
   return (
@@ -120,7 +120,7 @@ export default async function IngresoDetallePage({
                 <option value="">Elegí...</option>
                 {facturas.map((f) => (
                   <option key={f.cdc} value={f.cdc}>
-                    {f.numero_documento ?? f.cdc.slice(0, 12)} · {guaranies(Number(f.monto_total))}
+                    {f.nombre_informado ?? f.documento_receptor} — {guaranies(Number(f.monto_total))}
                   </option>
                 ))}
               </select>
@@ -132,9 +132,7 @@ export default async function IngresoDetallePage({
               Vincular factura
             </button>
             {facturas.length === 0 ? (
-              <p className="text-xs text-warning">
-                No hay facturas XML de este cliente. Importalas en Facturación.
-              </p>
+              <p className="text-xs text-warning">No hay facturas XML importadas. Importalas en Facturación.</p>
             ) : null}
           </form>
         )}

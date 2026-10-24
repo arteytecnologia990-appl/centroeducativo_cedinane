@@ -80,7 +80,24 @@ export async function vincularFactura(formData: FormData): Promise<void> {
   if (!id || !facturaCdc) return
 
   const supabase = await createClient()
-  await supabase.from('ingresos').update({ factura_cdc: facturaCdc }).eq('id', id)
+  const { data: factura } = await supabase
+    .from('facturas')
+    .select('documento_receptor, nombre_informado')
+    .eq('cdc', facturaCdc)
+    .maybeSingle()
+
+  await supabase
+    .from('ingresos')
+    .update({
+      factura_cdc: facturaCdc,
+      ...(factura
+        ? {
+            documento: factura.documento_receptor,
+            usuario: factura.nombre_informado ?? factura.documento_receptor,
+          }
+        : {}),
+    })
+    .eq('id', id)
   revalidatePath(`/dashboard/ingresos/${id}`)
   revalidatePath('/dashboard/ingresos')
 }

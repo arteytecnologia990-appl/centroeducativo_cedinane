@@ -129,10 +129,11 @@ export async function listarAlumnosPacientes(): Promise<{ id: string; nombre: st
 
 export async function listarFacturasCliente(documento: string) {
   const supabase = await createClient()
-  const { data } = await supabase
+  let consulta = supabase
     .from('facturas')
-    .select('cdc, numero_documento, monto_total')
-    .eq('documento_receptor', documento)
+    .select('cdc, numero_documento, monto_total, documento_receptor, nombre_informado')
     .order('fecha_emision', { ascending: false })
+  if (documento) consulta = consulta.eq('documento_receptor', documento)
+  const { data } = await consulta
   return data ?? []
 }
