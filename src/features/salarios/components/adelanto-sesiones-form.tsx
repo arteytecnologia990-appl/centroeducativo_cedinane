@@ -50,7 +50,7 @@ export function AdelantoSesionesForm({
   const agrega = () => setLineas((prev) => [...prev, { sesionId: '', cantidad: 1 }])
 
   return (
-    <form action={crearAdelantoSesionesMulti} className="space-y-3 rounded-lg border border-border p-4">
+    <form action={crearAdelantoSesionesMulti} className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label htmlFor="persona_id_multi">Profesional</Label>

@@ -4,6 +4,7 @@ import { crearAdelanto, eliminarAdelanto } from '@/features/salarios/actions'
 import { listarSesiones } from '@/features/definiciones/queries'
 import { AdelantoSesionesForm } from '@/features/salarios/components/adelanto-sesiones-form'
 import { Volver } from '@/components/layout/volver'
+import { SeccionColapsable } from '@/components/layout/seccion-colapsable'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -66,21 +67,24 @@ export default async function AdelantosPage({
         </button>
       </form>
 
-      <AdelantoSesionesForm
-        personas={personas}
-        sesiones={sesiones.map((s) => ({
-          id: s.id,
-          descripcion: s.descripcion,
-          monto: Number(s.monto),
-          porc_profesional: Number(s.porc_profesional),
-        }))}
-        periodo={periodo}
-        fecha={hoyStr}
-        porcIps={parametros.ips_obrero ?? 9}
-        porcIva={parametros.iva ?? 10}
-      />
+      <SeccionColapsable titulo="Adelanto por sesiones" descripcion="evaluación, psicología, etc.">
+        <AdelantoSesionesForm
+          personas={personas}
+          sesiones={sesiones.map((s) => ({
+            id: s.id,
+            descripcion: s.descripcion,
+            monto: Number(s.monto),
+            porc_profesional: Number(s.porc_profesional),
+          }))}
+          periodo={periodo}
+          fecha={hoyStr}
+          porcIps={parametros.ips_obrero ?? 9}
+          porcIva={parametros.iva ?? 10}
+        />
+      </SeccionColapsable>
 
-      <form action={crearAdelanto} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
+      <SeccionColapsable titulo="Adelanto manual" descripcion="monto fijo">
+      <form action={crearAdelanto} className="grid gap-3 sm:grid-cols-6">
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="persona_id">Persona</Label>
           <select id="persona_id" name="persona_id" required className={claseInput}>
@@ -114,6 +118,7 @@ export default async function AdelantosPage({
           </button>
         </div>
       </form>
+      </SeccionColapsable>
 
       <div className="overflow-hidden rounded-lg border border-border">
         <Table>
