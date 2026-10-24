@@ -87,17 +87,46 @@ export async function vincularFactura(formData: FormData): Promise<void> {
     .maybeSingle()
 
   await supabase
-    .from('ingresos')
-    .update({
-      factura_cdc: facturaCdc,
-      ...(factura
-        ? {
-            documento: factura.documento_receptor,
-            usuario: factura.nombre_informado ?? factura.documento_receptor,
-          }
-        : {}),
-    })
-    .eq('id', id)
+    .from('ingreso_facturas')
+    .upsert(
+      { ingreso_id: id, factura_cdc: facturaCdc },
+      { onConflict: 'ingreso_id,factura_cdc', ignoreDuplicates: true }
+    )
+
+  const { data: ingreso } = await supabase.from('ingresos').select('factura_cdc').eq('id', id).maybeSingle()
+
+  const updates: { factura_cdc?: string; documento?: string; usuario?: string } = {}
+  if (!ingreso?.factura_cdc) updates.factura_cdc = facturaCdc
+  if (factura) {
+    updates.documento = factura.documento_receptor
+    updates.usuario = factura.nombre_informado ?? factura.documento_receptor
+  }
+
+  await supabase.from('ingresos').update(updates).eq('id', id)
+
+  revalidatePath(`/dashboard/ingresos/${id}`)
+  revalidatePath('/dashboard/ingresos')
+}
+
+export async function desvincularFactura(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  const cdc = String(formData.get('factura_cdc') ?? '')
+  if (!id || !cdc) return
+
+  const supabase = await createClient()
+  await supabase.from('ingreso_facturas').delete().eq('ingreso_id', id).eq('factura_cdc', cdc)
+
+  const { data: ingreso } = await supabase.from('ingresos').select('factura_cdc').eq('id', id).maybeSingle()
+  if (ingreso?.factura_cdc === cdc) {
+    const { data: otra } = await supabase
+      .from('ingreso_facturas')
+      .select('factura_cdc')
+      .eq('ingreso_id', id)
+      .limit(1)
+      .maybeSingle()
+    await supabase.from('ingresos').update({ factura_cdc: otra?.factura_cdc ?? null }).eq('id', id)
+  }
+
   revalidatePath(`/dashboard/ingresos/${id}`)
   revalidatePath('/dashboard/ingresos')
 }

@@ -137,3 +137,15 @@ export async function listarFacturasCliente(documento: string) {
   const { data } = await consulta
   return data ?? []
 }
+
+export async function listarFacturasVinculadas(ingresoId: string) {
+  const supabase = await createClient()
+  const { data: links } = await supabase.from('ingreso_facturas').select('factura_cdc').eq('ingreso_id', ingresoId)
+  const cdcs = (links ?? []).map((l) => l.factura_cdc)
+  if (cdcs.length === 0) return []
+  const { data: facturas } = await supabase
+    .from('facturas')
+    .select('cdc, numero_documento, nombre_informado, monto_total')
+    .in('cdc', cdcs)
+  return facturas ?? []
+}

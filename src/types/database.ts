@@ -710,6 +710,42 @@ export type Database = {
           },
         ]
       }
+      ingreso_facturas: {
+        Row: {
+          created_at: string
+          factura_cdc: string
+          id: string
+          ingreso_id: string
+        }
+        Insert: {
+          created_at?: string
+          factura_cdc: string
+          id?: string
+          ingreso_id: string
+        }
+        Update: {
+          created_at?: string
+          factura_cdc?: string
+          id?: string
+          ingreso_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingreso_facturas_factura_cdc_fkey"
+            columns: ["factura_cdc"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["cdc"]
+          },
+          {
+            foreignKeyName: "ingreso_facturas_ingreso_id_fkey"
+            columns: ["ingreso_id"]
+            isOneToOne: false
+            referencedRelation: "ingresos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ingreso_items: {
         Row: {
           cantidad: number
