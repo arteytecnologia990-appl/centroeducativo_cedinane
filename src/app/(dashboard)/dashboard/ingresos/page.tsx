@@ -1,27 +1,28 @@
-import { listarClientesConFacturas, listarCompromisos } from '@/features/compromisos/queries'
-import { eliminarCompromiso } from '@/features/compromisos/actions'
-import { CompromisoForm } from '@/features/compromisos/components/compromiso-form'
+import { listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
+import { eliminarIngreso } from '@/features/ingresos/actions'
+import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
 import { Volver } from '@/components/layout/volver'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
-export default async function CompromisosPage() {
-  const [compromisos, clientes] = await Promise.all([listarCompromisos(), listarClientesConFacturas()])
+export default async function IngresosPage() {
+  const [ingresos, clientes] = await Promise.all([listarIngresos(), listarClientesConFacturas()])
+  const total = ingresos.reduce((s, i) => s + i.total, 0)
 
   return (
     <div className="space-y-6">
       <Volver href="/dashboard" label="Inicio" />
 
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">Compromisos</h1>
+        <h1 className="font-heading text-2xl font-semibold text-foreground">Ingresos</h1>
         <p className="text-sm text-muted-foreground">
-          Ingresos por servicio <strong>antes</strong> de tener la factura. Cuando llega el XML, se engancha la
-          factura del cliente.
+          Servicios cobrados <strong>antes</strong> de la factura XML. Cuando llega el XML, se engancha la factura
+          del cliente. Total registrado: <strong>{guaranies(total)}</strong>
         </p>
       </div>
 
-      <CompromisoForm clientes={clientes} />
+      <IngresoForm clientes={clientes} />
 
       <div className="overflow-hidden rounded-lg border border-border">
         <Table>
@@ -39,7 +40,7 @@ export default async function CompromisosPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {compromisos.map((c) => (
+            {ingresos.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-medium">{c.usuario}</TableCell>
                 <TableCell>{c.terapia}</TableCell>
@@ -52,7 +53,7 @@ export default async function CompromisosPage() {
                   {c.factura_cdc ? `${c.factura_cdc.slice(0, 12)}…` : 'Pendiente'}
                 </TableCell>
                 <TableCell>
-                  <form action={eliminarCompromiso}>
+                  <form action={eliminarIngreso}>
                     <input type="hidden" name="id" value={c.id} />
                     <button
                       type="submit"
@@ -64,10 +65,10 @@ export default async function CompromisosPage() {
                 </TableCell>
               </TableRow>
             ))}
-            {compromisos.length === 0 ? (
+            {ingresos.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="h-20 text-center text-sm text-muted-foreground">
-                  Sin compromisos cargados.
+                  Sin ingresos cargados.
                 </TableCell>
               </TableRow>
             ) : null}

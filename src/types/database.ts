@@ -386,59 +386,6 @@ export type Database = {
           },
         ]
       }
-      compromisos: {
-        Row: {
-          cantidad: number
-          created_at: string
-          documento: string | null
-          estado: string
-          factura_cdc: string | null
-          id: string
-          met_pago: string | null
-          precio_unitario: number
-          profesional: string | null
-          terapia: string
-          total: number
-          usuario: string
-        }
-        Insert: {
-          cantidad?: number
-          created_at?: string
-          documento?: string | null
-          estado?: string
-          factura_cdc?: string | null
-          id?: string
-          met_pago?: string | null
-          precio_unitario?: number
-          profesional?: string | null
-          terapia: string
-          total?: number
-          usuario: string
-        }
-        Update: {
-          cantidad?: number
-          created_at?: string
-          documento?: string | null
-          estado?: string
-          factura_cdc?: string | null
-          id?: string
-          met_pago?: string | null
-          precio_unitario?: number
-          profesional?: string | null
-          terapia?: string
-          total?: number
-          usuario?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "compromisos_factura_cdc_fkey"
-            columns: ["factura_cdc"]
-            isOneToOne: false
-            referencedRelation: "facturas"
-            referencedColumns: ["cdc"]
-          },
-        ]
-      }
       conceptos_salario: {
         Row: {
           activo: boolean
@@ -705,6 +652,59 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "sedes"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      ingresos: {
+        Row: {
+          cantidad: number
+          created_at: string
+          documento: string | null
+          estado: string
+          factura_cdc: string | null
+          id: string
+          met_pago: string | null
+          precio_unitario: number
+          profesional: string | null
+          terapia: string
+          total: number
+          usuario: string
+        }
+        Insert: {
+          cantidad?: number
+          created_at?: string
+          documento?: string | null
+          estado?: string
+          factura_cdc?: string | null
+          id?: string
+          met_pago?: string | null
+          precio_unitario?: number
+          profesional?: string | null
+          terapia: string
+          total?: number
+          usuario: string
+        }
+        Update: {
+          cantidad?: number
+          created_at?: string
+          documento?: string | null
+          estado?: string
+          factura_cdc?: string | null
+          id?: string
+          met_pago?: string | null
+          precio_unitario?: number
+          profesional?: string | null
+          terapia?: string
+          total?: number
+          usuario?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingresos_factura_cdc_fkey"
+            columns: ["factura_cdc"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["cdc"]
           },
         ]
       }

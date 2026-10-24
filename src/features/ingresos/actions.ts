@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
-export async function crearCompromiso(formData: FormData): Promise<void> {
+export async function crearIngreso(formData: FormData): Promise<void> {
   const documento = String(formData.get('documento') ?? '').trim()
   const usuario = String(formData.get('usuario') ?? '').trim()
   const terapia = String(formData.get('terapia') ?? '').trim()
@@ -14,7 +14,7 @@ export async function crearCompromiso(formData: FormData): Promise<void> {
   if (!terapia) return
 
   const supabase = await createClient()
-  await supabase.from('compromisos').insert({
+  await supabase.from('ingresos').insert({
     usuario: usuario || documento || '—',
     documento: documento || null,
     terapia,
@@ -26,14 +26,14 @@ export async function crearCompromiso(formData: FormData): Promise<void> {
     factura_cdc: String(formData.get('factura_cdc') ?? '').trim() || null,
   })
 
-  revalidatePath('/dashboard/compromisos')
+  revalidatePath('/dashboard/ingresos')
 }
 
-export async function eliminarCompromiso(formData: FormData): Promise<void> {
+export async function eliminarIngreso(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '')
   if (!id) return
 
   const supabase = await createClient()
-  await supabase.from('compromisos').delete().eq('id', id)
-  revalidatePath('/dashboard/compromisos')
+  await supabase.from('ingresos').delete().eq('id', id)
+  revalidatePath('/dashboard/ingresos')
 }

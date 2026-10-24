@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { normalizarDocumento } from '@/features/facturacion/queries'
 
-export type Compromiso = {
+export type Ingreso = {
   id: string
   usuario: string
   documento: string | null
@@ -15,9 +15,9 @@ export type Compromiso = {
   estado: string
 }
 
-export async function listarCompromisos(): Promise<Compromiso[]> {
+export async function listarIngresos(): Promise<Ingreso[]> {
   const supabase = await createClient()
-  const { data } = await supabase.from('compromisos').select('*').order('created_at', { ascending: false })
+  const { data } = await supabase.from('ingresos').select('*').order('created_at', { ascending: false })
   return (data ?? []).map((c) => ({
     id: c.id,
     usuario: c.usuario,

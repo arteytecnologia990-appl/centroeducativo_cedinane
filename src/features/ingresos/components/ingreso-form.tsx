@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { crearCompromiso } from '@/features/compromisos/actions'
+import { crearIngreso } from '@/features/ingresos/actions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { ClienteConFacturas } from '@/features/compromisos/queries'
+import type { ClienteConFacturas } from '@/features/ingresos/queries'
 
 const claseInput =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
-export function CompromisoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
+export function IngresoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
   const [documento, setDocumento] = useState('')
   const [precio, setPrecio] = useState('0')
   const [cantidad, setCantidad] = useState('1')
@@ -20,7 +20,7 @@ export function CompromisoForm({ clientes }: { clientes: ClienteConFacturas[] })
   const total = (Number(precio) || 0) * (Number(cantidad) || 0)
 
   return (
-    <form action={crearCompromiso} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
+    <form action={crearIngreso} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
       <div className="space-y-1.5 sm:col-span-2">
         <Label htmlFor="documento">Usuario</Label>
         <select
@@ -109,7 +109,7 @@ export function CompromisoForm({ clientes }: { clientes: ClienteConFacturas[] })
           type="submit"
           className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          Registrar compromiso
+          Registrar ingreso
         </button>
       </div>
     </form>
