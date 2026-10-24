@@ -115,7 +115,7 @@ export default async function ReciboPage({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="mt-2 flex justify-between text-sm font-bold">
-          <span>N° RECIBO: {liq.numero}</span>
+          <span>N° RECIBO: L-{liq.numero}</span>
           <span>MES: {String(mes).padStart(2, '0')}/{anio}</span>
         </div>
 

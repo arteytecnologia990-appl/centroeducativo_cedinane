@@ -131,7 +131,7 @@ export default async function AdelantosPage({
           <TableBody>
             {adelantos.map((a) => (
               <TableRow key={a.id}>
-                <TableCell className="tabular-nums">{a.numero}</TableCell>
+                <TableCell className="tabular-nums">A-{a.numero}</TableCell>
                 <TableCell className="font-medium">{a.persona}</TableCell>
                 <TableCell className="tabular-nums">{fmtFecha(a.fecha)}</TableCell>
                 <TableCell className="text-muted-foreground">{a.concepto}</TableCell>
