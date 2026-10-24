@@ -1,4 +1,5 @@
 import { listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
+import Link from 'next/link'
 import { eliminarIngreso } from '@/features/ingresos/actions'
 import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
 import { Volver } from '@/components/layout/volver'
@@ -53,7 +54,10 @@ export default async function IngresosPage() {
                   {c.factura_cdc ? `${c.factura_cdc.slice(0, 12)}…` : 'Pendiente'}
                 </TableCell>
                 <TableCell>
-                  <form action={eliminarIngreso}>
+                  <Link href={`/dashboard/ingresos/${c.id}`} className="mr-2 text-sm text-primary hover:underline">
+                    Detalle
+                  </Link>
+                  <form action={eliminarIngreso} className="inline">
                     <input type="hidden" name="id" value={c.id} />
                     <button
                       type="submit"

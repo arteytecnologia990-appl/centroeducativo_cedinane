@@ -60,3 +60,32 @@ export async function listarClientesConFacturas(): Promise<ClienteConFacturas[]>
   }
   return [...mapa.values()]
 }
+
+export type IngresoItem = {
+  id: string
+  terapia: string
+  profesional: string | null
+  precio_unitario: number
+  cantidad: number
+  total: number
+}
+
+export async function obtenerIngreso(id: string) {
+  const supabase = await createClient()
+  const [{ data: ingreso }, { data: items }] = await Promise.all([
+    supabase.from('ingresos').select('*').eq('id', id).maybeSingle(),
+    supabase.from('ingreso_items').select('*').eq('ingreso_id', id).order('id', { ascending: true }),
+  ])
+  if (!ingreso) return null
+  return {
+    ...ingreso,
+    items: (items ?? []).map((i) => ({
+      id: i.id,
+      terapia: i.terapia,
+      profesional: i.profesional,
+      precio_unitario: Number(i.precio_unitario),
+      cantidad: Number(i.cantidad),
+      total: Number(i.total),
+    })) as IngresoItem[],
+  }
+}

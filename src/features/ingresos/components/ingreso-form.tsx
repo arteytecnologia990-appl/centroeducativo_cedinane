@@ -11,100 +11,149 @@ const claseInput =
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
+type Linea = { terapia: string; profesional: string; precio: string; cantidad: string }
+
 export function IngresoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
   const [documento, setDocumento] = useState('')
-  const [precio, setPrecio] = useState('0')
-  const [cantidad, setCantidad] = useState('1')
+  const [factura, setFactura] = useState('')
+  const [metPago, setMetPago] = useState('')
+  const [lineas, setLineas] = useState<Linea[]>([{ terapia: '', profesional: '', precio: '0', cantidad: '1' }])
 
   const cliente = clientes.find((c) => c.documento === documento)
-  const total = (Number(precio) || 0) * (Number(cantidad) || 0)
+  const subtotal = (l: Linea) => (Number(l.precio) || 0) * (Number(l.cantidad) || 0)
+  const total = lineas.reduce((s, l) => s + subtotal(l), 0)
+
+  const cambia = (i: number, parche: Partial<Linea>) =>
+    setLineas((prev) => prev.map((l, j) => (j === i ? { ...l, ...parche } : l)))
+  const quita = (i: number) => setLineas((prev) => prev.filter((_, j) => j !== i))
+  const agrega = () => setLineas((prev) => [...prev, { terapia: '', profesional: '', precio: '0', cantidad: '1' }])
 
   return (
-    <form action={crearIngreso} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
-      <div className="space-y-1.5 sm:col-span-2">
-        <Label htmlFor="documento">Usuario</Label>
-        <select
-          id="documento"
-          name="documento"
-          value={documento}
-          onChange={(e) => setDocumento(e.target.value)}
-          className={claseInput}
-        >
-          <option value="">Sin cliente (sin factura)</option>
-          {clientes.map((c) => (
-            <option key={c.documento} value={c.documento}>
-              {c.nombre} · {c.documento}
-            </option>
-          ))}
-        </select>
-        <input type="hidden" name="usuario" value={cliente?.nombre ?? ''} />
+    <form action={crearIngreso} className="space-y-3 rounded-lg border border-border p-4">
+      <div className="grid gap-3 sm:grid-cols-4">
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="documento">Usuario</Label>
+          <select
+            id="documento"
+            name="documento"
+            value={documento}
+            onChange={(e) => {
+              setDocumento(e.target.value)
+              setFactura('')
+            }}
+            className={claseInput}
+          >
+            <option value="">Sin cliente (sin factura)</option>
+            {clientes.map((c) => (
+              <option key={c.documento} value={c.documento}>
+                {c.nombre} · {c.documento}
+              </option>
+            ))}
+          </select>
+          <input type="hidden" name="usuario" value={cliente?.nombre ?? ''} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="factura_cdc">Factura (XML)</Label>
+          <select
+            id="factura_cdc"
+            name="factura_cdc"
+            value={factura}
+            onChange={(e) => setFactura(e.target.value)}
+            disabled={!cliente}
+            className={claseInput}
+          >
+            <option value="">Sin factura (pendiente)</option>
+            {(cliente?.facturas ?? []).map((f) => (
+              <option key={f.cdc} value={f.cdc}>
+                {f.numero ?? f.cdc.slice(0, 12)} · {guaranies(f.monto)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="met_pago">Met. Pago</Label>
+          <select
+            id="met_pago"
+            name="met_pago"
+            value={metPago}
+            onChange={(e) => setMetPago(e.target.value)}
+            className={claseInput}
+          >
+            <option value="">—</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="cheque">Cheque</option>
+            <option value="tarjeta">Tarjeta</option>
+          </select>
+        </div>
       </div>
 
-      <div className="space-y-1.5 sm:col-span-2">
-        <Label htmlFor="factura_cdc">Factura (XML)</Label>
-        <select id="factura_cdc" name="factura_cdc" disabled={!cliente} className={claseInput}>
-          <option value="">Sin factura (pendiente)</option>
-          {(cliente?.facturas ?? []).map((f) => (
-            <option key={f.cdc} value={f.cdc}>
-              {f.numero ?? f.cdc.slice(0, 12)} · {guaranies(f.monto)}
-            </option>
-          ))}
-        </select>
-        {!cliente ? (
-          <p className="text-[11px] text-muted-foreground">Elegí un usuario para ver sus facturas con saldo.</p>
-        ) : null}
+      <div className="space-y-2">
+        {lineas.map((l, i) => (
+          <div key={i} className="grid grid-cols-[1fr_1fr_110px_90px_100px_36px] items-end gap-2">
+            <div className="space-y-1.5">
+              {i === 0 ? <Label>Terapia / servicio</Label> : null}
+              <Input
+                name="terapia"
+                value={l.terapia}
+                onChange={(e) => cambia(i, { terapia: e.target.value })}
+                placeholder="Sesión de psicología"
+              />
+            </div>
+            <div className="space-y-1.5">
+              {i === 0 ? <Label>Profesional</Label> : null}
+              <Input
+                name="profesional"
+                value={l.profesional}
+                onChange={(e) => cambia(i, { profesional: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              {i === 0 ? <Label>Precio</Label> : null}
+              <Input
+                name="precio_unitario"
+                type="number"
+                min="0"
+                step="1"
+                value={l.precio}
+                onChange={(e) => cambia(i, { precio: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              {i === 0 ? <Label>Cant.</Label> : null}
+              <Input
+                name="cantidad"
+                type="number"
+                min="0"
+                step="0.01"
+                value={l.cantidad}
+                onChange={(e) => cambia(i, { cantidad: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              {i === 0 ? <Label>Subtotal</Label> : null}
+              <div className="flex h-8 items-center justify-end text-sm tabular-nums">{guaranies(subtotal(l))}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => quita(i)}
+              disabled={lineas.length === 1}
+              className="h-8 rounded-md border border-input text-sm text-muted-foreground disabled:opacity-40"
+            >
+              ×
+            </button>
+          </div>
+        ))}
       </div>
 
-      <div className="space-y-1.5 sm:col-span-2">
-        <Label htmlFor="terapia">Terapia / servicio</Label>
-        <Input id="terapia" name="terapia" required placeholder="Ej.: Sesión de psicología" />
-      </div>
+      <button type="button" onClick={agrega} className="text-sm text-primary hover:underline">
+        + Agregar línea
+      </button>
 
-      <div className="space-y-1.5 sm:col-span-2">
-        <Label htmlFor="profesional">Profesional</Label>
-        <Input id="profesional" name="profesional" />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="precio_unitario">Precio unitario</Label>
-        <Input
-          id="precio_unitario"
-          name="precio_unitario"
-          type="number"
-          min="0"
-          step="1"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="cantidad">Cantidad</Label>
-        <Input
-          id="cantidad"
-          name="cantidad"
-          type="number"
-          min="0"
-          step="0.01"
-          value={cantidad}
-          onChange={(e) => setCantidad(e.target.value)}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="total">Total</Label>
-        <Input id="total" name="total" readOnly value={String(total)} className="tabular-nums" />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="met_pago">Met. Pago</Label>
-        <select id="met_pago" name="met_pago" className={claseInput}>
-          <option value="">—</option>
-          <option value="efectivo">Efectivo</option>
-          <option value="transferencia">Transferencia</option>
-          <option value="cheque">Cheque</option>
-          <option value="tarjeta">Tarjeta</option>
-        </select>
-      </div>
-
-      <div className="flex items-end sm:col-span-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+        <span className="text-sm">
+          Total: <strong className="tabular-nums">{guaranies(total)}</strong>
+        </span>
         <button
           type="submit"
           className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"

@@ -655,6 +655,44 @@ export type Database = {
           },
         ]
       }
+      ingreso_items: {
+        Row: {
+          cantidad: number
+          id: string
+          ingreso_id: string
+          precio_unitario: number
+          profesional: string | null
+          terapia: string
+          total: number
+        }
+        Insert: {
+          cantidad?: number
+          id?: string
+          ingreso_id: string
+          precio_unitario?: number
+          profesional?: string | null
+          terapia: string
+          total?: number
+        }
+        Update: {
+          cantidad?: number
+          id?: string
+          ingreso_id?: string
+          precio_unitario?: number
+          profesional?: string | null
+          terapia?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingreso_items_ingreso_id_fkey"
+            columns: ["ingreso_id"]
+            isOneToOne: false
+            referencedRelation: "ingresos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ingresos: {
         Row: {
           cantidad: number
