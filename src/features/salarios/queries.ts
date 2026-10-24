@@ -287,7 +287,7 @@ export async function listarAdelantosPeriodo(periodo: string) {
   const hasta = `${periodo}-${String(new Date(anio, mes, 0).getDate()).padStart(2, '0')}`
   const { data } = await supabase
     .from('adelantos')
-    .select('persona_id, monto, fecha')
+    .select('persona_id, monto, monto_bruto, fecha')
     .gte('fecha', desde)
     .lte('fecha', hasta)
     .order('fecha', { ascending: true })

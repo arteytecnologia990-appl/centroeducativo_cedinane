@@ -15,6 +15,7 @@ export type NovedadesSalario = {
   horasFeriado: number
   ausenciasDias: number
   adelanto: number
+  adelantoBruto?: number
   adelantosDetalle?: { fecha: string; monto: number }[]
 }
 
@@ -78,7 +79,7 @@ export function calcularLiquidacion(
     cantidad: cantidadBase,
     base: r2(emp.modalidad === 'mensual' ? emp.sueldo : valorHora),
     tasa: 0,
-    importe: r2(sueldoOrdinario + nov.adelanto),
+    importe: r2(sueldoOrdinario + (nov.adelantoBruto ?? nov.adelanto)),
     orden,
   })
   orden += 10
@@ -125,7 +126,9 @@ export function calcularLiquidacion(
     orden += 10
   }
 
-  const totalHaberes = r2(sueldoOrdinario + nov.adelanto + extra + nocturnidad + feriado)
+  const totalHaberes = r2(
+    sueldoOrdinario + (nov.adelantoBruto ?? nov.adelanto) + extra + nocturnidad + feriado
+  )
 
   const ausencia = nov.ausenciasDias * (sueldoOrdinario / diasMes)
   if (ausencia > 0) {
