@@ -192,3 +192,150 @@ export async function crearCobro(formData: FormData): Promise<void> {
 
   revalidatePath('/dashboard/facturacion')
 }
+
+const limpiarXml = (v: string | null): string | null => {
+  if (v === null) return null
+  const s = v.replace(/<!\[CDATA\[|\]\]>/g, '').trim()
+  return s || null
+}
+
+const etiquetaXml = (xml: string, nombre: string): string | null => {
+  const m = xml.match(new RegExp(`<${nombre}(?:\\s[^>]*)?>([\\s\\S]*?)</${nombre}>`))
+  return m ? limpiarXml(m[1]) : null
+}
+
+export type DteXml = {
+  cdc: string | null
+  fecha: string | null
+  nombre: string | null
+  documento: string | null
+  tipoIdentificacion: string | null
+  timbrado: string | null
+  numero: string | null
+  total: number
+  gravado10: number
+  iva10: number
+  gravado5: number
+  iva5: number
+  exento: number
+}
+
+export function parsearXmlDte(xml: string): DteXml {
+  const cdc = xml.match(/<DE\s+Id="(\d{44})"/)?.[1] ?? null
+  const fecha = etiquetaXml(xml, 'dFeEmiDE')
+  const nomRec = etiquetaXml(xml, 'dNomRec')
+  const rucRec = etiquetaXml(xml, 'dRucRec')
+  const dvRec = etiquetaXml(xml, 'dDVRec')
+  const numIdRec = etiquetaXml(xml, 'dNumIDRec')
+  const dEst = etiquetaXml(xml, 'dEst')
+  const dPunExp = etiquetaXml(xml, 'dPunExp')
+  const dNumDoc = etiquetaXml(xml, 'dNumDoc')
+  const timbrado = etiquetaXml(xml, 'dNumTim')
+  const numero = (v: string | null) => Number(v) || 0
+
+  return {
+    cdc,
+    fecha: fecha ? fecha.slice(0, 10) : null,
+    nombre: nomRec,
+    documento: rucRec ? `${rucRec}-${dvRec ?? ''}` : numIdRec,
+    tipoIdentificacion: rucRec ? 'RUC' : 'CEDULA',
+    timbrado,
+    numero: dEst && dPunExp && dNumDoc ? `${dEst}-${dPunExp}-${dNumDoc}` : null,
+    total: numero(etiquetaXml(xml, 'dTotGralOpe')),
+    gravado10: numero(etiquetaXml(xml, 'dSub10')),
+    iva10: numero(etiquetaXml(xml, 'dIVA10')),
+    gravado5: numero(etiquetaXml(xml, 'dSub5')),
+    iva5: numero(etiquetaXml(xml, 'dIVA5')),
+    exento: numero(etiquetaXml(xml, 'dSubExe')) + numero(etiquetaXml(xml, 'dSubExo')),
+  }
+}
+
+export type XmlImportResult = {
+  importadas: number
+  omitidas: number
+  errores: string[]
+  detalle: { cdc: string; nombre: string | null; total: number }[]
+}
+
+export async function importarXmlDtes(formData: FormData): Promise<XmlImportResult> {
+  const archivos = formData.getAll('archivos').filter((f): f is File => f instanceof File)
+  if (archivos.length === 0) {
+    return { importadas: 0, omitidas: 0, errores: ['No se enviaron archivos XML.'], detalle: [] }
+  }
+
+  const supabase = await createClient()
+  const { data: existentes } = await supabase.from('facturas').select('cdc')
+  const vistos = new Set((existentes ?? []).map((f) => f.cdc))
+
+  const nuevas: {
+    cdc: string
+    estado: string
+    documento_receptor: string
+    nombre_informado: string | null
+    tipo_identificacion: string | null
+    tipo_registro: string
+    tipo_comprobante: string
+    timbrado: string | null
+    numero_documento: string | null
+    fecha_emision: string | null
+    periodo: string | null
+    monto_total: number
+    monto_gravado_10: number
+    iva_10: number
+    monto_gravado_5: number
+    iva_5: number
+    exento: number
+  }[] = []
+  const errores: string[] = []
+  const detalle: { cdc: string; nombre: string | null; total: number }[] = []
+  let omitidas = 0
+
+  for (const archivo of archivos) {
+    const xml = await archivo.text()
+    const d = parsearXmlDte(xml)
+    if (!d.cdc) {
+      errores.push(`${archivo.name}: no se encontró el CDC.`)
+      continue
+    }
+    if (vistos.has(d.cdc)) {
+      omitidas += 1
+      continue
+    }
+    if (!d.documento) {
+      errores.push(`${archivo.name}: sin documento del receptor.`)
+      continue
+    }
+
+    vistos.add(d.cdc)
+    nuevas.push({
+      cdc: d.cdc,
+      estado: 'Registrado',
+      documento_receptor: d.documento,
+      nombre_informado: d.nombre,
+      tipo_identificacion: d.tipoIdentificacion,
+      tipo_registro: 'VENTAS',
+      tipo_comprobante: 'FACTURA',
+      timbrado: d.timbrado,
+      numero_documento: d.numero,
+      fecha_emision: d.fecha ? new Date(`${d.fecha}T00:00:00`).toISOString() : null,
+      periodo: d.fecha ? d.fecha.slice(0, 7) : null,
+      monto_total: d.total,
+      monto_gravado_10: d.gravado10,
+      iva_10: d.iva10,
+      monto_gravado_5: d.gravado5,
+      iva_5: d.iva5,
+      exento: d.exento,
+    })
+    detalle.push({ cdc: d.cdc, nombre: d.nombre, total: d.total })
+  }
+
+  if (nuevas.length > 0) {
+    const { error } = await supabase.from('facturas').insert(nuevas)
+    if (error) {
+      return { importadas: 0, omitidas, errores: [...errores, error.message], detalle: [] }
+    }
+  }
+
+  revalidatePath('/dashboard/facturacion')
+  return { importadas: nuevas.length, omitidas, errores, detalle }
+}
