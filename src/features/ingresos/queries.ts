@@ -103,6 +103,6 @@ export async function listarAlumnosPacientes(): Promise<{ id: string; nombre: st
     .select('id, nombres, apellidos')
     .in('id', ids)
     .is('deleted_at', null)
-    .order('apellidos', { ascending: true })
-  return (data ?? []).map((p) => ({ id: p.id, nombre: `${p.apellidos}, ${p.nombres}` }))
+    .order('nombres', { ascending: true })
+  return (data ?? []).map((p) => ({ id: p.id, nombre: `${p.nombres} ${p.apellidos}` }))
 }
