@@ -13,24 +13,42 @@ export type Ingreso = {
   met_pago: string | null
   factura_cdc: string | null
   estado: string
+  cobrado: number
+  saldo: number
 }
 
 export async function listarIngresos(): Promise<Ingreso[]> {
   const supabase = await createClient()
-  const { data } = await supabase.from('ingresos').select('*').order('created_at', { ascending: false })
-  return (data ?? []).map((c) => ({
-    id: c.id,
-    usuario: c.usuario,
-    documento: c.documento,
-    terapia: c.terapia,
-    profesional: c.profesional,
-    precio_unitario: Number(c.precio_unitario),
-    cantidad: Number(c.cantidad),
-    total: Number(c.total),
-    met_pago: c.met_pago,
-    factura_cdc: c.factura_cdc,
-    estado: c.estado,
-  }))
+  const [{ data }, { data: cobros }] = await Promise.all([
+    supabase.from('ingresos').select('*').order('created_at', { ascending: false }),
+    supabase.from('cobros').select('factura_cdc, monto').not('factura_cdc', 'is', null),
+  ])
+
+  const cobradoPorFactura = new Map<string, number>()
+  for (const c of cobros ?? []) {
+    if (!c.factura_cdc) continue
+    cobradoPorFactura.set(c.factura_cdc, (cobradoPorFactura.get(c.factura_cdc) ?? 0) + Number(c.monto))
+  }
+
+  return (data ?? []).map((c) => {
+    const total = Number(c.total)
+    const cobrado = c.factura_cdc ? (cobradoPorFactura.get(c.factura_cdc) ?? 0) : 0
+    return {
+      id: c.id,
+      usuario: c.usuario,
+      documento: c.documento,
+      terapia: c.terapia,
+      profesional: c.profesional,
+      precio_unitario: Number(c.precio_unitario),
+      cantidad: Number(c.cantidad),
+      total,
+      met_pago: c.met_pago,
+      factura_cdc: c.factura_cdc,
+      estado: c.estado,
+      cobrado,
+      saldo: total - cobrado,
+    }
+  })
 }
 
 export type ClienteConFacturas = {

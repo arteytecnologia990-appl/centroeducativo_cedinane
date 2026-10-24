@@ -69,6 +69,8 @@ export default async function IngresosPage({
               <TableHead className="text-right">Precio Unitario</TableHead>
               <TableHead className="text-right">Cantidad</TableHead>
               <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Cobrado</TableHead>
+              <TableHead className="text-right">Saldo</TableHead>
               <TableHead>Met. Pago</TableHead>
               <TableHead>Factura</TableHead>
               <TableHead className="w-16" />
@@ -83,6 +85,8 @@ export default async function IngresosPage({
                 <TableCell className="text-right tabular-nums">{guaranies(c.precio_unitario)}</TableCell>
                 <TableCell className="text-right tabular-nums">{c.cantidad}</TableCell>
                 <TableCell className="text-right tabular-nums font-medium">{guaranies(c.total)}</TableCell>
+                <TableCell className="text-right tabular-nums">{guaranies(c.cobrado)}</TableCell>
+                <TableCell className="text-right tabular-nums">{guaranies(c.saldo)}</TableCell>
                 <TableCell className="capitalize text-muted-foreground">{c.met_pago ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {c.factura_cdc ? `${c.factura_cdc.slice(0, 12)}…` : 'Pendiente'}
@@ -114,7 +118,7 @@ export default async function IngresosPage({
             ))}
             {ingresos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-20 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={11} className="h-20 text-center text-sm text-muted-foreground">
                   Sin ingresos cargados.
                 </TableCell>
               </TableRow>
