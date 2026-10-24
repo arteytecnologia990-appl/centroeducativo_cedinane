@@ -383,39 +383,72 @@ export type Database = {
       facturas: {
         Row: {
           cdc: string
+          condicion: string | null
           created_at: string
           documento_receptor: string
           estado: string
+          exento: number
           fecha_aprobacion: string | null
           fecha_emision: string | null
           id: string
+          iva_10: number
+          iva_5: number
+          monto_gravado_10: number
+          monto_gravado_5: number
           monto_total: number
+          nombre_informado: string | null
           numero_documento: string | null
           periodo: string | null
+          timbrado: string | null
+          tipo_comprobante: string | null
+          tipo_identificacion: string | null
+          tipo_registro: string | null
         }
         Insert: {
           cdc: string
+          condicion?: string | null
           created_at?: string
           documento_receptor: string
           estado?: string
+          exento?: number
           fecha_aprobacion?: string | null
           fecha_emision?: string | null
           id?: string
+          iva_10?: number
+          iva_5?: number
+          monto_gravado_10?: number
+          monto_gravado_5?: number
           monto_total?: number
+          nombre_informado?: string | null
           numero_documento?: string | null
           periodo?: string | null
+          timbrado?: string | null
+          tipo_comprobante?: string | null
+          tipo_identificacion?: string | null
+          tipo_registro?: string | null
         }
         Update: {
           cdc?: string
+          condicion?: string | null
           created_at?: string
           documento_receptor?: string
           estado?: string
+          exento?: number
           fecha_aprobacion?: string | null
           fecha_emision?: string | null
           id?: string
+          iva_10?: number
+          iva_5?: number
+          monto_gravado_10?: number
+          monto_gravado_5?: number
           monto_total?: number
+          nombre_informado?: string | null
           numero_documento?: string | null
           periodo?: string | null
+          timbrado?: string | null
+          tipo_comprobante?: string | null
+          tipo_identificacion?: string | null
+          tipo_registro?: string | null
         }
         Relationships: []
       }

@@ -15,20 +15,22 @@ export type ClienteSaldo = {
 export async function listarSaldos(): Promise<ClienteSaldo[]> {
   const supabase = await createClient()
   const [{ data: facturas }, { data: cobros }, { data: personas }] = await Promise.all([
-    supabase.from('facturas').select('documento_receptor, monto_total, estado'),
+    supabase.from('facturas').select('documento_receptor, monto_total, estado, nombre_informado'),
     supabase.from('cobros').select('documento_receptor, monto'),
     supabase.from('personas').select('ci, nombres, apellidos').is('deleted_at', null),
   ])
 
   const acumulado = new Map<string, { facturado: number; cobrado: number; cantidad: number }>()
+  const nombrePorDocumento = new Map<string, string>()
 
   for (const f of facturas ?? []) {
-    if (String(f.estado).toLowerCase() !== 'aprobado') continue
+    if (String(f.estado).toLowerCase() === 'cancelado') continue
     const k = normalizarDocumento(f.documento_receptor)
     const acc = acumulado.get(k) ?? { facturado: 0, cobrado: 0, cantidad: 0 }
     acc.facturado += Number(f.monto_total)
     acc.cantidad += 1
     acumulado.set(k, acc)
+    if (f.nombre_informado) nombrePorDocumento.set(k, f.nombre_informado)
   }
 
   for (const c of cobros ?? []) {
@@ -38,10 +40,9 @@ export async function listarSaldos(): Promise<ClienteSaldo[]> {
     acumulado.set(k, acc)
   }
 
-  const nombrePorDocumento = new Map<string, string>()
   for (const p of personas ?? []) {
     const k = normalizarDocumento(p.ci)
-    if (k) nombrePorDocumento.set(k, `${p.apellidos}, ${p.nombres}`)
+    if (k && !nombrePorDocumento.has(k)) nombrePorDocumento.set(k, `${p.apellidos}, ${p.nombres}`)
   }
 
   return [...acumulado.entries()]

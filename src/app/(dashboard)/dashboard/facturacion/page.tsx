@@ -168,6 +168,7 @@ export default async function FacturacionPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>N°</TableHead>
+                <TableHead>Cliente</TableHead>
                 <TableHead>Documento</TableHead>
                 <TableHead>Fecha</TableHead>
                 <TableHead>Estado</TableHead>
@@ -178,6 +179,7 @@ export default async function FacturacionPage() {
               {facturas.map((f) => (
                 <TableRow key={f.cdc}>
                   <TableCell className="tabular-nums">{f.numero_documento ?? '—'}</TableCell>
+                  <TableCell className="font-medium">{f.nombre_informado ?? '—'}</TableCell>
                   <TableCell className="tabular-nums">{f.documento_receptor}</TableCell>
                   <TableCell className="tabular-nums">{fmtFecha(f.fecha_emision)}</TableCell>
                   <TableCell>{f.estado}</TableCell>
@@ -186,7 +188,7 @@ export default async function FacturacionPage() {
               ))}
               {facturas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={6} className="h-16 text-center text-sm text-muted-foreground">
                     Sin facturas.
                   </TableCell>
                 </TableRow>

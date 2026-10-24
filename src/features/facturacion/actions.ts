@@ -11,21 +11,34 @@ export type ImportResult = {
   errores: string[]
 }
 
-function parseMonto(valor: unknown): number | null {
-  if (typeof valor === 'number' && Number.isFinite(valor)) return valor
-  const limpio = String(valor ?? '')
-    .replace(/[^\d.,-]/g, '')
-    .replace(/\./g, '')
-    .replace(',', '.')
-  if (!limpio) return null
-  const n = Number(limpio)
-  return Number.isFinite(n) ? n : null
-}
+const norm = (s: unknown) =>
+  String(s ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
 
 function parseFecha(valor: unknown): string | null {
   if (valor instanceof Date) return valor.toISOString()
-  const d = new Date(String(valor ?? ''))
+  const s = String(valor ?? '').trim()
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (m) return new Date(Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1]))).toISOString()
+  const d = new Date(s)
   return Number.isNaN(d.getTime()) ? null : d.toISOString()
+}
+
+function parsePeriodo(valor: unknown, fecha: string | null): string | null {
+  const s = String(valor ?? '').trim()
+  const m = s.match(/^(\d{1,2})\/(\d{4})$/)
+  if (m) return `${m[2]}-${m[1].padStart(2, '0')}`
+  if (/^\d{4}-\d{2}$/.test(s)) return s
+  return fecha ? fecha.slice(0, 7) : null
+}
+
+const num = (v: unknown) => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
 }
 
 export async function importarDtes(formData: FormData): Promise<ImportResult> {
@@ -34,12 +47,49 @@ export async function importarDtes(formData: FormData): Promise<ImportResult> {
     return { importadas: 0, omitidas: 0, canceladas: 0, errores: ['No se envió ningún archivo.'] }
   }
 
-  const workbook = new ExcelJS.Workbook()
+  const wb = new ExcelJS.Workbook()
   const bytes = await archivo.arrayBuffer()
-  await workbook.xlsx.load(Buffer.from(bytes) as unknown as Parameters<typeof workbook.xlsx.load>[0])
-  const hoja = workbook.worksheets[0]
+  await wb.xlsx.load(Buffer.from(bytes) as unknown as Parameters<typeof wb.xlsx.load>[0])
+  const hoja = wb.worksheets[0]
   if (!hoja) {
     return { importadas: 0, omitidas: 0, canceladas: 0, errores: ['El archivo no tiene hojas.'] }
+  }
+
+  const cols: Record<string, number> = {}
+  hoja.getRow(1).eachCell((cell, n) => {
+    const k = norm(cell.value)
+    if (k) cols[k] = n
+  })
+  const buscar = (patron: string, excluir?: string) => {
+    const key = Object.keys(cols).find((k) => k.includes(patron) && (!excluir || !k.includes(excluir)))
+    return key ? cols[key] : null
+  }
+
+  const cCdc = buscar('cdc')
+  const cNombre = buscar('nombre o razon social del informado')
+  const cTipoId = buscar('tipo de identificacion del informado')
+  const cDoc = buscar('identificacion del informado', 'tipo')
+  const cFecha = buscar('fecha de emision')
+  const cPeriodo = buscar('periodo')
+  const cNumero = buscar('numero de comprobante', 'asociado')
+  const cTimbrado = buscar('timbrado del comprobante', 'asociado')
+  const cTotal = buscar('total comprobante')
+  const cGrav10 = buscar('monto gravado 10')
+  const cIva10 = buscar('iva 10')
+  const cGrav5 = buscar('monto gravado 5')
+  const cIva5 = buscar('iva 5')
+  const cExento = buscar('monto no gravado')
+  const cTipoComp = buscar('tipo de comprobante')
+  const cTipoReg = buscar('tipo de registro')
+  const cCond = buscar('condicion de la operacion')
+
+  if (!cCdc || !cDoc) {
+    return {
+      importadas: 0,
+      omitidas: 0,
+      canceladas: 0,
+      errores: ['No se encontraron las columnas CDC / Documento. ¿Es el Excel "DetalleComprobantesRegistrados"?'],
+    }
   }
 
   const supabase = await createClient()
@@ -49,20 +99,31 @@ export async function importarDtes(formData: FormData): Promise<ImportResult> {
   const nuevas: {
     cdc: string
     estado: string
-    numero_documento: string | null
     documento_receptor: string
+    nombre_informado: string | null
+    tipo_identificacion: string | null
+    tipo_registro: string | null
+    tipo_comprobante: string | null
+    condicion: string | null
+    timbrado: string | null
+    numero_documento: string | null
     fecha_emision: string | null
-    monto_total: number
     periodo: string | null
+    monto_total: number
+    monto_gravado_10: number
+    iva_10: number
+    monto_gravado_5: number
+    iva_5: number
+    exento: number
   }[] = []
   const errores: string[] = []
   let omitidas = 0
-  let canceladas = 0
 
   hoja.eachRow((row, idx) => {
     if (idx === 1) return
 
-    const cdc = String(row.getCell(1).value ?? '').trim()
+    const valor = (col: number | null) => (col ? row.getCell(col).value : null)
+    const cdc = String(valor(cCdc) ?? '').trim()
     if (!/^\d{44}$/.test(cdc)) {
       errores.push(`Fila ${idx}: CDC inválido (${cdc || 'vacío'}).`)
       return
@@ -72,44 +133,45 @@ export async function importarDtes(formData: FormData): Promise<ImportResult> {
       return
     }
 
-    const estado = String(row.getCell(2).value ?? '').trim() || 'Aprobado'
-    const numero = String(row.getCell(3).value ?? '').trim()
-    const documento = String(row.getCell(4).value ?? '').trim()
+    const documento = String(valor(cDoc) ?? '').trim()
     if (!documento) {
-      errores.push(`Fila ${idx}: sin documento receptor (CDC ${cdc.slice(0, 12)}…).`)
+      errores.push(`Fila ${idx}: sin documento del informado.`)
       return
     }
 
-    const monto = parseMonto(row.getCell(7).value)
-    if (monto === null) {
-      errores.push(`Fila ${idx}: monto inválido.`)
-      return
-    }
-
-    const fecha = parseFecha(row.getCell(5).value)
-    if (estado.toLowerCase() === 'cancelado') canceladas += 1
-
+    const fecha = parseFecha(valor(cFecha))
     vistos.add(cdc)
     nuevas.push({
       cdc,
-      estado,
-      numero_documento: numero || null,
+      estado: 'Registrado',
       documento_receptor: documento,
+      nombre_informado: String(valor(cNombre) ?? '').trim() || null,
+      tipo_identificacion: String(valor(cTipoId) ?? '').trim() || null,
+      tipo_registro: String(valor(cTipoReg) ?? '').trim() || null,
+      tipo_comprobante: String(valor(cTipoComp) ?? '').trim() || null,
+      condicion: String(valor(cCond) ?? '').trim() || null,
+      timbrado: String(valor(cTimbrado) ?? '').trim() || null,
+      numero_documento: String(valor(cNumero) ?? '').trim() || null,
       fecha_emision: fecha,
-      monto_total: monto,
-      periodo: fecha ? fecha.slice(0, 7) : null,
+      periodo: parsePeriodo(valor(cPeriodo), fecha),
+      monto_total: num(valor(cTotal)),
+      monto_gravado_10: num(valor(cGrav10)),
+      iva_10: num(valor(cIva10)),
+      monto_gravado_5: num(valor(cGrav5)),
+      iva_5: num(valor(cIva5)),
+      exento: num(valor(cExento)),
     })
   })
 
   if (nuevas.length > 0) {
     const { error } = await supabase.from('facturas').insert(nuevas)
     if (error) {
-      return { importadas: 0, omitidas, canceladas, errores: [...errores, error.message] }
+      return { importadas: 0, omitidas, canceladas: 0, errores: [...errores, error.message] }
     }
   }
 
   revalidatePath('/dashboard/facturacion')
-  return { importadas: nuevas.length, omitidas, canceladas, errores }
+  return { importadas: nuevas.length, omitidas, canceladas: 0, errores }
 }
 
 export async function crearCobro(formData: FormData): Promise<void> {
