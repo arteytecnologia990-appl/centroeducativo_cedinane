@@ -2,6 +2,7 @@
 
 import ExcelJS from 'exceljs'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export type ImportResult = {
@@ -230,7 +231,9 @@ export async function crearCobro(formData: FormData): Promise<void> {
 
   await supabase.from('cobro_pagos').insert(pagos.map((p) => ({ ...p, cobro_id: cobro.id })))
 
+  const next = String(formData.get('next') ?? '')
   revalidatePath('/dashboard/facturacion')
+  redirect(next ? `${next}?cobrado=1` : '/dashboard/ingresos?cobrado=1')
 }
 
 const limpiarXml = (v: string | null): string | null => {

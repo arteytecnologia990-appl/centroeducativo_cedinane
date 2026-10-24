@@ -51,7 +51,7 @@ export function CobroModal({
                 ×
               </button>
             </div>
-            <CobroForm documento={documento} bancos={bancos} hoy={hoy} />
+            <CobroForm documento={documento} bancos={bancos} hoy={hoy} next="/dashboard/ingresos" />
           </div>
         </div>
       ) : null}

@@ -7,8 +7,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
-export default async function IngresoDetallePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function IngresoDetallePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ cobrado?: string }>
+}) {
   const { id } = await params
+  const filtros = await searchParams
   const ingreso = await obtenerIngreso(id)
   if (!ingreso) notFound()
 
@@ -18,6 +25,12 @@ export default async function IngresoDetallePage({ params }: { params: Promise<{
   return (
     <div className="space-y-6">
       <Volver href="/dashboard/ingresos" label="Ingresos" />
+
+      {filtros.cobrado ? (
+        <p className="rounded-lg border border-success/40 bg-success/10 px-4 py-2 text-sm text-success">
+          ✔ Cobro registrado correctamente.
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -74,7 +87,12 @@ export default async function IngresoDetallePage({ params }: { params: Promise<{
             <p className="text-sm text-muted-foreground">
               Factura vinculada: <span className="font-mono text-xs">{ingreso.factura_cdc.slice(0, 16)}…</span>
             </p>
-            <CobroForm documento={ingreso.documento ?? ''} bancos={bancos} hoy={hoy} />
+            <CobroForm
+              documento={ingreso.documento ?? ''}
+              bancos={bancos}
+              hoy={hoy}
+              next={`/dashboard/ingresos/${ingreso.id}`}
+            />
           </>
         ) : (
           <p className="rounded-lg border border-border p-4 text-sm text-muted-foreground">

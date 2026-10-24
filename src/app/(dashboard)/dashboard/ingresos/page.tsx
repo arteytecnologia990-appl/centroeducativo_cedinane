@@ -11,7 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
-export default async function IngresosPage() {
+export default async function IngresosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cobrado?: string }>
+}) {
+  const params = await searchParams
   const [ingresos, clientes, sesiones, empleados, alumnos, bancos] = await Promise.all([
     listarIngresos(),
     listarClientesConFacturas(),
@@ -35,6 +40,12 @@ export default async function IngresosPage() {
           del cliente. Total registrado: <strong>{guaranies(total)}</strong>
         </p>
       </div>
+
+      {params.cobrado ? (
+        <p className="rounded-lg border border-success/40 bg-success/10 px-4 py-2 text-sm text-success">
+          ✔ Cobro registrado correctamente.
+        </p>
+      ) : null}
 
       <IngresoForm
         clientes={clientes}

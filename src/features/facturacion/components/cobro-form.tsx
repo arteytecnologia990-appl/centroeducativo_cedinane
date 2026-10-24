@@ -16,7 +16,17 @@ const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 const tipoTexto: Record<string, string> = { caja_ahorro: 'Caja de ahorro', cuenta_corriente: 'Cta. corriente' }
 const FORMASPAGO = ['efectivo', 'transferencia', 'cheque', 'tarjeta']
 
-export function CobroForm({ documento, bancos, hoy }: { documento: string; bancos: Banco[]; hoy: string }) {
+export function CobroForm({
+  documento,
+  bancos,
+  hoy,
+  next,
+}: {
+  documento: string
+  bancos: Banco[]
+  hoy: string
+  next?: string
+}) {
   const [referencia, setReferencia] = useState('')
   const [pagos, setPagos] = useState<Pago[]>([{ forma: 'efectivo', monto: '', bancoId: '', cuentaId: '', nro: '' }])
 
@@ -30,6 +40,7 @@ export function CobroForm({ documento, bancos, hoy }: { documento: string; banco
   return (
     <form action={crearCobro} className="space-y-3 rounded-lg border border-border p-4">
       <input type="hidden" name="documento" value={documento} />
+      <input type="hidden" name="next" value={next ?? ''} />
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label htmlFor="fecha">Fecha</Label>
