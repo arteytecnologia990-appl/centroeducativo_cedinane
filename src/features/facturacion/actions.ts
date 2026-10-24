@@ -220,7 +220,7 @@ export type DteXml = {
   exento: number
 }
 
-export function parsearXmlDte(xml: string): DteXml {
+function parsearXmlDte(xml: string): DteXml {
   const cdc = xml.match(/<DE\s+Id="(\d{44})"/)?.[1] ?? null
   const fecha = etiquetaXml(xml, 'dFeEmiDE')
   const nomRec = etiquetaXml(xml, 'dNomRec')
