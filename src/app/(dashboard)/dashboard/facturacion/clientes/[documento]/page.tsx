@@ -1,13 +1,9 @@
 import { notFound } from 'next/navigation'
 import { obtenerCliente } from '@/features/facturacion/queries'
-import { crearCobro } from '@/features/facturacion/actions'
+import { CobroForm } from '@/features/facturacion/components/cobro-form'
+import { listarBancos } from '@/features/bancos/queries'
 import { Volver } from '@/components/layout/volver'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-const claseInput =
-  'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
@@ -24,6 +20,7 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
   const cliente = await obtenerCliente(decodeURIComponent(documento))
   if (cliente.facturas.length === 0 && cliente.cobros.length === 0) notFound()
 
+  const bancos = await listarBancos()
   const hoy = new Date().toISOString().slice(0, 10)
 
   return (
@@ -45,38 +42,7 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
 
       <section id="cobro" className="space-y-3 scroll-mt-4">
         <h2 className="font-heading text-lg font-semibold text-foreground">Registrar cobro</h2>
-        <form action={crearCobro} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-6">
-          <input type="hidden" name="documento" value={cliente.documento} />
-          <div className="space-y-1.5">
-            <Label htmlFor="monto">Monto (Gs)</Label>
-            <Input id="monto" name="monto" type="number" min="1" step="1" required />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="fecha">Fecha</Label>
-            <Input id="fecha" name="fecha" type="date" defaultValue={hoy} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="forma_pago">Forma de pago</Label>
-            <select id="forma_pago" name="forma_pago" className={claseInput}>
-              <option value="efectivo">Efectivo</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="cheque">Cheque</option>
-              <option value="tarjeta">Tarjeta</option>
-            </select>
-          </div>
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="referencia">Referencia</Label>
-            <Input id="referencia" name="referencia" placeholder="Opcional" />
-          </div>
-          <div className="flex items-end sm:col-span-6">
-            <button
-              type="submit"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              Registrar cobro
-            </button>
-          </div>
-        </form>
+        <CobroForm documento={cliente.documento} bancos={bancos} hoy={hoy} />
       </section>
 
       <section className="space-y-3">
@@ -122,6 +88,8 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
               <TableRow>
                 <TableHead>Fecha</TableHead>
                 <TableHead>Forma</TableHead>
+                <TableHead>Banco / Cuenta</TableHead>
+                <TableHead>N° transf.</TableHead>
                 <TableHead>Referencia</TableHead>
                 <TableHead className="text-right">Monto</TableHead>
               </TableRow>
@@ -131,13 +99,17 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
                 <TableRow key={c.id}>
                   <TableCell className="tabular-nums">{fmtFecha(c.fecha)}</TableCell>
                   <TableCell className="capitalize">{c.forma_pago}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {c.banco ? `${c.banco}${c.cuenta ? ` · ${c.cuenta}` : ''}` : '—'}
+                  </TableCell>
+                  <TableCell className="tabular-nums">{c.nro_transferencia ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground">{c.referencia ?? '—'}</TableCell>
                   <TableCell className="text-right tabular-nums">{guaranies(c.monto)}</TableCell>
                 </TableRow>
               ))}
               {cliente.cobros.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-16 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={6} className="h-16 text-center text-sm text-muted-foreground">
                     Sin cobros registrados.
                   </TableCell>
                 </TableRow>

@@ -311,35 +311,80 @@ export type Database = {
           },
         ]
       }
+      bancos: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: []
+      }
       cobros: {
         Row: {
+          banco_id: string | null
           created_at: string
+          cuenta_id: string | null
           documento_receptor: string
           fecha: string
           forma_pago: string
           id: string
           monto: number
+          nro_transferencia: string | null
           referencia: string | null
         }
         Insert: {
+          banco_id?: string | null
           created_at?: string
+          cuenta_id?: string | null
           documento_receptor: string
           fecha?: string
           forma_pago?: string
           id?: string
           monto: number
+          nro_transferencia?: string | null
           referencia?: string | null
         }
         Update: {
+          banco_id?: string | null
           created_at?: string
+          cuenta_id?: string | null
           documento_receptor?: string
           fecha?: string
           forma_pago?: string
           id?: string
           monto?: number
+          nro_transferencia?: string | null
           referencia?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cobros_banco_id_fkey"
+            columns: ["banco_id"]
+            isOneToOne: false
+            referencedRelation: "bancos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobros_cuenta_id_fkey"
+            columns: ["cuenta_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_bancarias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conceptos_salario: {
         Row: {
@@ -379,6 +424,47 @@ export type Database = {
           tipo?: string
         }
         Relationships: []
+      }
+      cuentas_bancarias: {
+        Row: {
+          activo: boolean
+          banco_id: string
+          created_at: string
+          id: string
+          moneda: string
+          numero: string
+          tipo: string
+          titular: string | null
+        }
+        Insert: {
+          activo?: boolean
+          banco_id: string
+          created_at?: string
+          id?: string
+          moneda?: string
+          numero: string
+          tipo?: string
+          titular?: string | null
+        }
+        Update: {
+          activo?: boolean
+          banco_id?: string
+          created_at?: string
+          id?: string
+          moneda?: string
+          numero?: string
+          tipo?: string
+          titular?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cuentas_bancarias_banco_id_fkey"
+            columns: ["banco_id"]
+            isOneToOne: false
+            referencedRelation: "bancos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       facturas: {
         Row: {

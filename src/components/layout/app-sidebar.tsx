@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import {
   Banknote,
+  Building2,
   Calculator,
   CalendarRange,
   ChevronDown,
@@ -63,6 +64,7 @@ const GRUPOS: Grupo[] = [
       { href: '/dashboard/caja', label: 'Caja', Icon: Landmark, pronto: true },
       { href: '/dashboard/egresos', label: 'Egresos', Icon: Receipt, pronto: true },
       { href: '/dashboard/facturacion', label: 'Facturación', Icon: FileText },
+      { href: '/dashboard/bancos', label: 'Bancos', Icon: Building2 },
     ],
   },
   {

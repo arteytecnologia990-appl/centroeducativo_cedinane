@@ -84,7 +84,7 @@ export type ClienteDetalle = {
     monto_total: number
     estado: string
   }[]
-  cobros: { id: string; fecha: string; monto: number; forma_pago: string; referencia: string | null }[]
+  cobros: CobroCliente[]
   facturado: number
   cobrado: number
   saldo: number
@@ -94,7 +94,7 @@ export async function obtenerCliente(documento: string): Promise<ClienteDetalle>
   const supabase = await createClient()
   const [{ data: facturas }, { data: cobros }] = await Promise.all([
     supabase.from('facturas').select('*').order('fecha_emision', { ascending: false }),
-    supabase.from('cobros').select('*').order('fecha', { ascending: false }),
+    supabase.from('cobros').select('*, bancos(nombre), cuentas_bancarias(numero, tipo)').order('fecha', { ascending: false }),
   ])
 
   const norm = normalizarDocumento(documento)
@@ -114,15 +114,33 @@ export async function obtenerCliente(documento: string): Promise<ClienteDetalle>
       monto_total: Number(f.monto_total),
       estado: f.estado,
     })),
-    cobros: cobrosPropios.map((c) => ({
-      id: c.id,
-      fecha: c.fecha,
-      monto: Number(c.monto),
-      forma_pago: c.forma_pago,
-      referencia: c.referencia,
-    })),
+    cobros: cobrosPropios.map((c) => {
+      const banco = c.bancos as { nombre: string } | null
+      const cuenta = c.cuentas_bancarias as { numero: string } | null
+      return {
+        id: c.id,
+        fecha: c.fecha,
+        monto: Number(c.monto),
+        forma_pago: c.forma_pago,
+        referencia: c.referencia,
+        banco: banco?.nombre ?? null,
+        cuenta: cuenta?.numero ?? null,
+        nro_transferencia: c.nro_transferencia,
+      }
+    }),
     facturado,
     cobrado,
     saldo: facturado - cobrado,
   }
+}
+
+export type CobroCliente = {
+  id: string
+  fecha: string
+  monto: number
+  forma_pago: string
+  referencia: string | null
+  banco: string | null
+  cuenta: string | null
+  nro_transferencia: string | null
 }

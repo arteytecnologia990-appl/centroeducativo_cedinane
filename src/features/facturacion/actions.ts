@@ -179,6 +179,9 @@ export async function crearCobro(formData: FormData): Promise<void> {
   const monto = Number(formData.get('monto') ?? 0)
   const fecha = String(formData.get('fecha') ?? '')
   const formaPago = String(formData.get('forma_pago') ?? 'efectivo')
+  const bancoId = String(formData.get('banco_id') ?? '') || null
+  const cuentaId = String(formData.get('cuenta_id') ?? '') || null
+  const nroTransferencia = String(formData.get('nro_transferencia') ?? '').trim() || null
   if (!documento || !Number.isFinite(monto) || monto <= 0) return
 
   const supabase = await createClient()
@@ -188,6 +191,9 @@ export async function crearCobro(formData: FormData): Promise<void> {
     fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0, 10),
     forma_pago: formaPago,
     referencia: String(formData.get('referencia') ?? '').trim() || null,
+    banco_id: bancoId,
+    cuenta_id: cuentaId,
+    nro_transferencia: nroTransferencia,
   })
 
   revalidatePath('/dashboard/facturacion')
