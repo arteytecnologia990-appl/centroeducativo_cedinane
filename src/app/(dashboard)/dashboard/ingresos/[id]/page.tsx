@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation'
 import { listarFacturasCliente, listarFacturasVinculadas, obtenerIngreso } from '@/features/ingresos/queries'
-import { desvincularFactura, vincularFactura } from '@/features/ingresos/actions'
+import { desvincularFactura } from '@/features/ingresos/actions'
+import { VincularFacturaForm } from '@/features/ingresos/components/vincular-factura-form'
 import { CobroForm } from '@/features/facturacion/components/cobro-form'
 import { listarBancos } from '@/features/bancos/queries'
 import { Volver } from '@/components/layout/volver'
-import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
@@ -22,7 +22,7 @@ export default async function IngresoDetallePage({
   if (!ingreso) notFound()
 
   const bancos = await listarBancos()
-  const facturas = await listarFacturasCliente(ingreso.documento ?? '')
+  const facturas = await listarFacturasCliente('')
   const vinculadas = await listarFacturasVinculadas(ingreso.id)
   const vinculadasCdc = new Set(vinculadas.map((v) => v.cdc))
   const facturasDisponibles = facturas.filter(
@@ -147,40 +147,7 @@ export default async function IngresoDetallePage({
           </span>
         </div>
 
-        <form
-          action={vincularFactura}
-          className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4"
-        >
-          <input type="hidden" name="id" value={ingreso.id} />
-          <div className="space-y-1.5">
-            <Label htmlFor="factura_cdc">Agregar factura XML</Label>
-            <select
-              id="factura_cdc"
-              name="factura_cdc"
-              required
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-            >
-              <option value="">Elegí...</option>
-              {facturasDisponibles.map((f) => (
-                <option key={f.cdc} value={f.cdc}>
-                  {f.numero_documento ?? 's/n'} — {f.nombre_informado ?? f.documento_receptor} —{' '}
-                  {guaranies(Number(f.monto_total))}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Vincular factura
-          </button>
-          {facturasDisponibles.length === 0 ? (
-            <p className="text-xs text-warning">
-              No hay facturas disponibles (ya vinculadas o de monto mayor al ingreso).
-            </p>
-          ) : null}
-        </form>
+        <VincularFacturaForm ingresoId={ingreso.id} facturas={facturasDisponibles} />
       </section>
 
       <section className="space-y-3">
