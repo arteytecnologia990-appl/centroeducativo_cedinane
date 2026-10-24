@@ -472,3 +472,37 @@ export async function crearAdelantoSesionesMulti(formData: FormData): Promise<vo
   revalidatePath('/dashboard/salarios/adelantos')
   revalidatePath('/dashboard/salarios')
 }
+
+export async function actualizarAdelanto(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  const fecha = String(formData.get('fecha') ?? '')
+  const monto = Number(formData.get('monto') ?? 0)
+  if (!id || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !(monto > 0)) return
+
+  const supabase = await createClient()
+  const { data: actual } = await supabase
+    .from('adelantos')
+    .select('sesion_id, monto_bruto')
+    .eq('id', id)
+    .maybeSingle()
+
+  const datos: Record<string, unknown> = {
+    fecha,
+    periodo: fecha.slice(0, 7),
+    monto,
+    concepto: String(formData.get('concepto') ?? '').trim() || 'Adelanto de salario',
+  }
+
+  // Recibo manual: el monto es el bruto (sin descuento)
+  if (!actual?.sesion_id && !actual?.monto_bruto) {
+    datos.monto_bruto = monto
+    datos.monto_descuento = 0
+    datos.porc_descuento = 0
+  }
+
+  await supabase.from('adelantos').update(datos).eq('id', id)
+
+  revalidatePath('/dashboard/salarios/adelantos')
+  revalidatePath('/dashboard/salarios')
+  redirect('/dashboard/salarios/adelantos')
+}

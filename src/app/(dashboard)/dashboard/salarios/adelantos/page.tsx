@@ -142,6 +142,12 @@ export default async function AdelantosPage({
                 <TableCell className="text-muted-foreground">{a.concepto}</TableCell>
                 <TableCell className="text-right tabular-nums">{guaranies(a.monto)}</TableCell>
                 <TableCell>
+                  <Link
+                    href={`/dashboard/salarios/adelantos/${a.id}/editar`}
+                    className="mr-2 text-sm text-primary hover:underline"
+                  >
+                    Editar
+                  </Link>
                   <Link href={`/imprimir/adelanto/${a.id}`} className="text-sm text-primary hover:underline">
                     Recibo
                   </Link>
