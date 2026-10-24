@@ -17,7 +17,7 @@ export default async function IngresosPage() {
     listarEmpleadosSalario(),
     listarAlumnosPacientes(),
   ])
-  const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.apellidos}, ${e.nombres}` }))
+  const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.nombres} ${e.apellidos}` }))
   const total = ingresos.reduce((s, i) => s + i.total, 0)
 
   return (
