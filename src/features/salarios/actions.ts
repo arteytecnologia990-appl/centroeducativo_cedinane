@@ -13,6 +13,19 @@ import {
   obtenerParametros,
 } from './queries'
 
+/** Menor número libre de la serie (reutiliza los eliminados). */
+async function proximoNumero(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tabla: 'adelantos' | 'liquidaciones',
+  desde: number
+): Promise<number> {
+  const { data } = await supabase.from(tabla).select('numero').order('numero', { ascending: true })
+  const usados = new Set((data ?? []).map((r) => Number(r.numero)))
+  let n = desde
+  while (usados.has(n)) n += 1
+  return n
+}
+
 export async function calcularPeriodo(formData: FormData): Promise<void> {
   const periodo = String(formData.get('periodo') ?? '')
   if (!/^\d{4}-\d{2}$/.test(periodo)) return
@@ -89,30 +102,41 @@ export async function calcularPeriodo(formData: FormData): Promise<void> {
 
     const r = calcularLiquidacion(emp, nov, params)
 
-    const { data: liq, error } = await supabase
+    const datos = {
+      total_haberes: r.totalHaberes,
+      total_descuentos: r.totalDescuentos,
+      neto_pagar: r.neto,
+      total_aportes_patronales: r.ipsPatronal,
+      estado: 'calculada',
+    }
+
+    const { data: existente } = await supabase
       .from('liquidaciones')
-      .upsert(
-        {
-          persona_id: e.id,
-          periodo,
-          version: 1,
-          total_haberes: r.totalHaberes,
-          total_descuentos: r.totalDescuentos,
-          neto_pagar: r.neto,
-          total_aportes_patronales: r.ipsPatronal,
-          estado: 'calculada',
-        },
-        { onConflict: 'persona_id,periodo,version' }
-      )
       .select('id')
-      .single()
+      .eq('persona_id', e.id)
+      .eq('periodo', periodo)
+      .eq('version', 1)
+      .maybeSingle()
 
-    if (error || !liq) continue
+    let liqId: string
+    if (existente) {
+      await supabase.from('liquidaciones').update(datos).eq('id', existente.id)
+      liqId = existente.id
+    } else {
+      const numero = await proximoNumero(supabase, 'liquidaciones', 317)
+      const { data: liq } = await supabase
+        .from('liquidaciones')
+        .insert({ persona_id: e.id, periodo, version: 1, numero, ...datos })
+        .select('id')
+        .single()
+      if (!liq) continue
+      liqId = liq.id
+    }
 
-    await supabase.from('liquidacion_detalle').delete().eq('liquidacion_id', liq.id)
+    await supabase.from('liquidacion_detalle').delete().eq('liquidacion_id', liqId)
     await supabase.from('liquidacion_detalle').insert(
       r.detalle.map((d) => ({
-        liquidacion_id: liq.id,
+        liquidacion_id: liqId,
         concepto_codigo: d.codigo,
         descripcion: d.descripcion,
         cantidad: d.cantidad,
@@ -289,8 +313,10 @@ export async function crearAdelanto(formData: FormData): Promise<void> {
   if (!personaId || !Number.isFinite(monto) || monto <= 0) return
 
   const supabase = await createClient()
+  const numero = await proximoNumero(supabase, 'adelantos', 79)
   await supabase.from('adelantos').insert({
     persona_id: personaId,
+    numero,
     periodo,
     fecha: fechaValida,
     monto,
@@ -346,6 +372,7 @@ export async function crearAdelantoSesiones(formData: FormData): Promise<void> {
 
   await supabase.from('adelantos').insert({
     persona_id: personaId,
+    numero: await proximoNumero(supabase, 'adelantos', 79),
     periodo,
     fecha: fechaValida,
     monto: redondear(neto),
@@ -426,6 +453,7 @@ export async function crearAdelantoSesionesMulti(formData: FormData): Promise<vo
     .from('adelantos')
     .insert({
       persona_id: personaId,
+      numero: await proximoNumero(supabase, 'adelantos', 79),
       periodo,
       fecha: fechaValida,
       monto: neto,
