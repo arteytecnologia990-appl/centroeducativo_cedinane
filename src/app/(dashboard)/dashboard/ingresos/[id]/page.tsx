@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
-import { obtenerIngreso } from '@/features/ingresos/queries'
+import { listarFacturasCliente, obtenerIngreso } from '@/features/ingresos/queries'
+import { vincularFactura } from '@/features/ingresos/actions'
 import { CobroForm } from '@/features/facturacion/components/cobro-form'
 import { listarBancos } from '@/features/bancos/queries'
 import { Volver } from '@/components/layout/volver'
+import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
@@ -20,6 +22,7 @@ export default async function IngresoDetallePage({
   if (!ingreso) notFound()
 
   const bancos = await listarBancos()
+  const facturas = ingreso.documento ? await listarFacturasCliente(ingreso.documento) : []
   const hoy = new Date().toISOString().slice(0, 10)
 
   return (
@@ -101,9 +104,39 @@ export default async function IngresoDetallePage({
             />
           </>
         ) : (
-          <p className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
-            Vinculá una <strong>factura XML</strong> a este ingreso para habilitar el cobro.
-          </p>
+          <form
+            action={vincularFactura}
+            className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4"
+          >
+            <input type="hidden" name="id" value={ingreso.id} />
+            <div className="space-y-1.5">
+              <Label htmlFor="factura_cdc">Vincular factura XML</Label>
+              <select
+                id="factura_cdc"
+                name="factura_cdc"
+                required
+                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+              >
+                <option value="">Elegí...</option>
+                {facturas.map((f) => (
+                  <option key={f.cdc} value={f.cdc}>
+                    {f.numero_documento ?? f.cdc.slice(0, 12)} · {guaranies(Number(f.monto_total))}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Vincular factura
+            </button>
+            {facturas.length === 0 ? (
+              <p className="text-xs text-warning">
+                No hay facturas XML de este cliente. Importalas en Facturación.
+              </p>
+            ) : null}
+          </form>
         )}
       </section>
     </div>

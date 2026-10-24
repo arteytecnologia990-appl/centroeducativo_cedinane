@@ -73,3 +73,14 @@ export async function eliminarIngreso(formData: FormData): Promise<void> {
   await supabase.from('ingresos').delete().eq('id', id)
   revalidatePath('/dashboard/ingresos')
 }
+
+export async function vincularFactura(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  const facturaCdc = String(formData.get('factura_cdc') ?? '').trim() || null
+  if (!id || !facturaCdc) return
+
+  const supabase = await createClient()
+  await supabase.from('ingresos').update({ factura_cdc: facturaCdc }).eq('id', id)
+  revalidatePath(`/dashboard/ingresos/${id}`)
+  revalidatePath('/dashboard/ingresos')
+}

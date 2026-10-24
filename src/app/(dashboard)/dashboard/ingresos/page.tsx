@@ -79,7 +79,12 @@ export default async function IngresosPage({
           <TableBody>
             {ingresos.map((c) => (
               <TableRow key={c.id}>
-                <TableCell className="font-medium">{c.usuario}</TableCell>
+                <TableCell className="font-medium">
+                  {c.usuario}
+                  {c.alumno_paciente ? (
+                    <div className="text-xs font-normal text-muted-foreground">{c.alumno_paciente}</div>
+                  ) : null}
+                </TableCell>
                 <TableCell>{c.terapia}</TableCell>
                 <TableCell className="text-muted-foreground">{c.profesional ?? '—'}</TableCell>
                 <TableCell className="text-right tabular-nums">{guaranies(c.precio_unitario)}</TableCell>

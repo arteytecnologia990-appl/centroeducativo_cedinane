@@ -13,6 +13,7 @@ export type Ingreso = {
   met_pago: string | null
   factura_cdc: string | null
   estado: string
+  alumno_paciente: string | null
   cobrado: number
   saldo: number
 }
@@ -45,6 +46,7 @@ export async function listarIngresos(): Promise<Ingreso[]> {
       met_pago: c.met_pago,
       factura_cdc: c.factura_cdc,
       estado: c.estado,
+      alumno_paciente: c.alumno_paciente,
       cobrado,
       saldo: total - cobrado,
     }
@@ -123,4 +125,14 @@ export async function listarAlumnosPacientes(): Promise<{ id: string; nombre: st
     .is('deleted_at', null)
     .order('nombres', { ascending: true })
   return (data ?? []).map((p) => ({ id: p.id, nombre: `${p.nombres} ${p.apellidos}` }))
+}
+
+export async function listarFacturasCliente(documento: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('facturas')
+    .select('cdc, numero_documento, monto_total')
+    .eq('documento_receptor', documento)
+    .order('fecha_emision', { ascending: false })
+  return data ?? []
 }
