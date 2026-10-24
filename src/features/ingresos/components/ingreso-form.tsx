@@ -12,8 +12,18 @@ const claseInput =
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
 type Linea = { terapia: string; profesional: string; precio: string; cantidad: string }
+type SesionOpcion = { id: string; descripcion: string; monto: number }
+type Profesional = { id: string; nombre: string }
 
-export function IngresoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
+export function IngresoForm({
+  clientes,
+  sesiones,
+  profesionales,
+}: {
+  clientes: ClienteConFacturas[]
+  sesiones: SesionOpcion[]
+  profesionales: Profesional[]
+}) {
   const [documento, setDocumento] = useState('')
   const [factura, setFactura] = useState('')
   const [metPago, setMetPago] = useState('')
@@ -25,6 +35,10 @@ export function IngresoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
 
   const cambia = (i: number, parche: Partial<Linea>) =>
     setLineas((prev) => prev.map((l, j) => (j === i ? { ...l, ...parche } : l)))
+  const cambiaTerapia = (i: number, valor: string) => {
+    const sesion = sesiones.find((s) => s.descripcion === valor)
+    cambia(i, sesion ? { terapia: valor, precio: String(sesion.monto) } : { terapia: valor })
+  }
   const quita = (i: number) => setLineas((prev) => prev.filter((_, j) => j !== i))
   const agrega = () => setLineas((prev) => [...prev, { terapia: '', profesional: '', precio: '0', cantidad: '1' }])
 
@@ -88,6 +102,14 @@ export function IngresoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
         </div>
       </div>
 
+      <datalist id="sesiones-list">
+        {sesiones.map((s) => (
+          <option key={s.id} value={s.descripcion}>
+            {guaranies(s.monto)}
+          </option>
+        ))}
+      </datalist>
+
       <div className="space-y-2">
         {lineas.map((l, i) => (
           <div key={i} className="grid grid-cols-[1fr_1fr_110px_90px_100px_36px] items-end gap-2">
@@ -96,17 +118,26 @@ export function IngresoForm({ clientes }: { clientes: ClienteConFacturas[] }) {
               <Input
                 name="terapia"
                 value={l.terapia}
-                onChange={(e) => cambia(i, { terapia: e.target.value })}
-                placeholder="Sesión de psicología"
+                list="sesiones-list"
+                onChange={(e) => cambiaTerapia(i, e.target.value)}
+                placeholder="Escribí o elegí de Sesiones"
               />
             </div>
             <div className="space-y-1.5">
               {i === 0 ? <Label>Profesional</Label> : null}
-              <Input
+              <select
                 name="profesional"
                 value={l.profesional}
                 onChange={(e) => cambia(i, { profesional: e.target.value })}
-              />
+                className={claseInput}
+              >
+                <option value="">—</option>
+                {profesionales.map((p) => (
+                  <option key={p.id} value={p.nombre}>
+                    {p.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1.5">
               {i === 0 ? <Label>Precio</Label> : null}

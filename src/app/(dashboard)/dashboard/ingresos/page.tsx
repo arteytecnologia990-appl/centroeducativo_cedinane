@@ -1,4 +1,6 @@
 import { listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
+import { listarSesiones } from '@/features/definiciones/queries'
+import { listarEmpleadosSalario } from '@/features/salarios/queries'
 import Link from 'next/link'
 import { eliminarIngreso } from '@/features/ingresos/actions'
 import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
@@ -8,7 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 
 export default async function IngresosPage() {
-  const [ingresos, clientes] = await Promise.all([listarIngresos(), listarClientesConFacturas()])
+  const [ingresos, clientes, sesiones, empleados] = await Promise.all([
+    listarIngresos(),
+    listarClientesConFacturas(),
+    listarSesiones(),
+    listarEmpleadosSalario(),
+  ])
+  const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.apellidos}, ${e.nombres}` }))
   const total = ingresos.reduce((s, i) => s + i.total, 0)
 
   return (
@@ -23,7 +31,11 @@ export default async function IngresosPage() {
         </p>
       </div>
 
-      <IngresoForm clientes={clientes} />
+      <IngresoForm
+        clientes={clientes}
+        sesiones={sesiones.map((s) => ({ id: s.id, descripcion: s.descripcion, monto: Number(s.monto) }))}
+        profesionales={profesionales}
+      />
 
       <div className="overflow-hidden rounded-lg border border-border">
         <Table>
