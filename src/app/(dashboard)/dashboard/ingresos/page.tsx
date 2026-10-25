@@ -96,14 +96,6 @@ export default async function IngresosPage({
           >
             +
           </Link>
-          <Link
-            href={`/dashboard/ingresos?dia=${hoyISO}`}
-            title="Ir a hoy"
-            className="inline-flex h-7 items-center gap-1 rounded-md border border-primary/60 px-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-          >
-            <CalendarDays className="size-3.5" />
-            Hoy
-          </Link>
         </div>
         <ScrollADia />
         <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -133,7 +125,17 @@ export default async function IngresosPage({
             )
           })}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
+        <div className="mt-2 flex justify-center">
+          <Link
+            href={`/dashboard/ingresos?dia=${hoyISO}`}
+            title="Ir a hoy"
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-primary/60 px-2.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            <CalendarDays className="size-3.5" />
+            Ir a hoy
+          </Link>
+        </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
           {ingresosDelDia.length} ingreso(s) · Total del día:{' '}
           <strong className="text-foreground">{guaranies(totalDelDia)}</strong>
         </p>

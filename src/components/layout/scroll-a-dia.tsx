@@ -2,10 +2,18 @@
 
 import { useEffect } from 'react'
 
-/** Desplaza la franja de días para centrar el día de hoy. */
+/** Centra el día de hoy dentro de la franja horizontal. */
 export function ScrollADia() {
   useEffect(() => {
-    document.getElementById('dia-hoy')?.scrollIntoView({ inline: 'center', block: 'nearest' })
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById('dia-hoy')
+      const cont = el?.parentElement
+      if (!el || !cont) return
+      const elRect = el.getBoundingClientRect()
+      const contRect = cont.getBoundingClientRect()
+      cont.scrollLeft += elRect.left - contRect.left - cont.clientWidth / 2 + elRect.width / 2
+    })
+    return () => cancelAnimationFrame(raf)
   }, [])
   return null
 }
