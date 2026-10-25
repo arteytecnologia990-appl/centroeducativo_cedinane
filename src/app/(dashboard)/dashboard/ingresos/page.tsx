@@ -29,20 +29,22 @@ export default async function IngresosPage({
   const total = ingresos.reduce((s, i) => s + i.total, 0)
   const hoy = new Date().toISOString().slice(0, 10)
   const hoyISO = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
-  const mes =
-    params.mes && /^\d{4}-\d{2}$/.test(params.mes) ? params.mes : hoyISO.slice(0, 7)
-  const dia = params.dia ?? (mes === hoyISO.slice(0, 7) ? hoyISO : `${mes}-01`)
-  const [anioMes, nroMes] = mes.split('-').map(Number)
-  const primerDia = new Date(Date.UTC(anioMes, nroMes - 1, 1, 12))
-  const diasEnMes = new Date(Date.UTC(anioMes, nroMes, 0, 12)).getUTCDate()
-  const primerWeekday = (primerDia.getUTCDay() + 6) % 7
-  const celdas: (number | null)[] = [
-    ...Array.from({ length: primerWeekday }, () => null),
-    ...Array.from({ length: diasEnMes }, (_, i) => i + 1),
-  ]
-  const nombreMes = primerDia.toLocaleDateString('es-PY', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-  const mesAnterior = new Date(Date.UTC(anioMes, nroMes - 2, 1, 12)).toISOString().slice(0, 7)
-  const mesSiguiente = new Date(Date.UTC(anioMes, nroMes, 1, 12)).toISOString().slice(0, 7)
+  const dia = params.dia && /^\d{4}-\d{2}-\d{2}$/.test(params.dia) ? params.dia : hoyISO
+  const [anioDia, mesDia] = dia.split('-').map(Number)
+  const mesAnterior = new Date(Date.UTC(anioDia, mesDia - 2, 1, 12)).toISOString().slice(0, 7)
+  const mesSiguiente = new Date(Date.UTC(anioDia, mesDia, 1, 12)).toISOString().slice(0, 7)
+  const nombreMes = new Date(`${dia}T12:00:00Z`).toLocaleDateString('es-PY', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+  const dias = Array.from({ length: 15 }, (_, i) => {
+    const d = new Date(`${dia}T12:00:00Z`)
+    d.setUTCDate(d.getUTCDate() + i - 7)
+    const iso = d.toISOString().slice(0, 10)
+    const semana = d.toLocaleDateString('es-PY', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
+    return { iso, label: semana.charAt(0).toUpperCase() + semana.slice(1), num: d.getUTCDate() }
+  })
   const fechaLocal = (iso: string) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
   const ingresosDelDia = ingresos.filter((i) => fechaLocal(i.created_at) === dia)
   const totalDelDia = ingresosDelDia.reduce((s, i) => s + i.total, 0)
@@ -78,49 +80,43 @@ export default async function IngresosPage({
       <section className="rounded-lg border border-border bg-card p-3">
         <div className="mb-2 flex items-center justify-between">
           <Link
-            href={`/dashboard/ingresos?mes=${mesAnterior}`}
-            className="inline-flex size-7 items-center justify-center rounded-md border border-border text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            href={`/dashboard/ingresos?dia=${mesAnterior}-01`}
+            className="inline-flex size-7 items-center justify-center rounded-md border border-border text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label="Mes anterior"
           >
-            ◀
+            −
           </Link>
           <p className="text-sm font-semibold capitalize text-foreground">{nombreMes}</p>
           <Link
-            href={`/dashboard/ingresos?mes=${mesSiguiente}`}
-            className="inline-flex size-7 items-center justify-center rounded-md border border-border text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            href={`/dashboard/ingresos?dia=${mesSiguiente}-01`}
+            className="inline-flex size-7 items-center justify-center rounded-md border border-border text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label="Mes siguiente"
           >
-            ▶
+            +
           </Link>
         </div>
-        <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-          {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => (
-            <div key={d}>{d}</div>
-          ))}
-        </div>
-        <div className="mt-1 grid grid-cols-7 gap-1">
-          {celdas.map((n, i) => {
-            if (n === null) return <div key={`b-${i}`} />
-            const iso = `${mes}-${String(n).padStart(2, '0')}`
-            const activo = iso === dia
-            const esHoy = iso === hoyISO
-            const cant = ingresosPorDia.get(iso) ?? 0
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {dias.map((d) => {
+            const activo = d.iso === dia
+            const esHoy = d.iso === hoyISO
+            const cant = ingresosPorDia.get(d.iso) ?? 0
             return (
               <Link
-                key={iso}
-                href={`/dashboard/ingresos?mes=${mes}&dia=${iso}`}
-                className={`relative flex h-9 items-center justify-center rounded-md text-sm transition-colors ${
+                key={d.iso}
+                href={`/dashboard/ingresos?dia=${d.iso}`}
+                className={`relative flex min-w-[44px] shrink-0 flex-col items-center rounded-md border px-1.5 py-1 text-center transition-colors ${
                   activo
-                    ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                     : esHoy
-                      ? 'font-semibold text-primary ring-1 ring-primary/60 hover:bg-primary/10'
-                      : 'text-foreground hover:bg-accent'
+                      ? 'border-primary/60 text-primary hover:bg-primary/10'
+                      : 'border-border text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
               >
-                {n}
+                <span className="text-[10px] font-medium uppercase">{d.label}</span>
+                <span className="text-sm font-semibold tabular-nums">{d.num}</span>
                 {cant > 0 ? (
                   <span
-                    className={`absolute bottom-1 size-1 rounded-full ${activo ? 'bg-primary-foreground' : 'bg-primary'}`}
+                    className={`absolute bottom-0.5 size-1 rounded-full ${activo ? 'bg-primary-foreground' : 'bg-primary'}`}
                   />
                 ) : null}
               </Link>
