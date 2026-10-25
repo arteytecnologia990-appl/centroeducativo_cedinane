@@ -30,6 +30,7 @@ export function CobroForm({
   facturaCdc?: string | null
 }) {
   const [referencia, setReferencia] = useState('')
+  const [fecha, setFecha] = useState(hoy)
   const [pagos, setPagos] = useState<Pago[]>([{ forma: 'efectivo', monto: '', bancoId: '', cuentaId: '', nro: '' }])
 
   const total = pagos.reduce((s, p) => s + (Number(p.monto) || 0), 0)
@@ -47,7 +48,7 @@ export function CobroForm({
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label htmlFor="fecha">Fecha</Label>
-          <Input id="fecha" name="fecha" type="date" defaultValue={hoy} />
+          <Input id="fecha" name="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="referencia">Referencia</Label>

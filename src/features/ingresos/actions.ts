@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export async function crearIngreso(formData: FormData): Promise<void> {
@@ -82,9 +83,24 @@ export async function vincularFactura(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const { data: factura } = await supabase
     .from('facturas')
-    .select('documento_receptor, nombre_informado')
+    .select('documento_receptor, nombre_informado, monto_total')
     .eq('cdc', facturaCdc)
     .maybeSingle()
+
+  const [{ data: ingresoActual }, { data: links }] = await Promise.all([
+    supabase.from('ingresos').select('total').eq('id', id).maybeSingle(),
+    supabase.from('ingreso_facturas').select('factura_cdc').eq('ingreso_id', id),
+  ])
+  const cdcs = (links ?? []).map((l) => l.factura_cdc)
+  let vinculado = 0
+  if (cdcs.length > 0) {
+    const { data: fs } = await supabase.from('facturas').select('monto_total').in('cdc', cdcs)
+    vinculado = (fs ?? []).reduce((s, f) => s + Number(f.monto_total), 0)
+  }
+  const restante = Number(ingresoActual?.total ?? 0) - vinculado
+  if (Number(factura?.monto_total ?? 0) > restante) {
+    redirect(`/dashboard/ingresos/${id}?excede=1`)
+  }
 
   await supabase
     .from('ingreso_facturas')

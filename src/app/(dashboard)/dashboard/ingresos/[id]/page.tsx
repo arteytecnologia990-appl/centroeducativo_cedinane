@@ -14,7 +14,7 @@ export default async function IngresoDetallePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ cobrado?: string; duplicado?: string }>
+  searchParams: Promise<{ cobrado?: string; duplicado?: string; excede?: string }>
 }) {
   const { id } = await params
   const filtros = await searchParams
@@ -25,11 +25,11 @@ export default async function IngresoDetallePage({
   const facturas = await listarFacturasCliente('')
   const vinculadas = await listarFacturasVinculadas(ingreso.id)
   const vinculadasCdc = new Set(vinculadas.map((v) => v.cdc))
-  const facturasDisponibles = facturas.filter(
-    (f) => Number(f.monto_total) <= Number(ingreso.total) && !vinculadasCdc.has(f.cdc)
-  )
   const facturado = vinculadas.reduce((s, f) => s + Number(f.monto_total), 0)
   const diferencia = Number(ingreso.total) - facturado
+  const facturasDisponibles = facturas.filter(
+    (f) => Number(f.monto_total) <= diferencia && !vinculadasCdc.has(f.cdc)
+  )
   const hoy = new Date().toISOString().slice(0, 10)
 
   return (
@@ -44,6 +44,11 @@ export default async function IngresoDetallePage({
       {filtros.duplicado ? (
         <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-2 text-sm text-warning">
           Este comprobante ya tiene un cobro registrado. No se duplicó.
+        </p>
+      ) : null}
+      {filtros.excede ? (
+        <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          La factura supera el saldo pendiente del ingreso. No se vinculó.
         </p>
       ) : null}
 
