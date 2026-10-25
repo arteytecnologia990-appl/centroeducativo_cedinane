@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react'
 
-/** Centra el día de hoy dentro de la franja horizontal. */
-export function ScrollADia() {
+/** Centra el día de hoy dentro de la franja horizontal (se re-ejecuta al cambiar de día). */
+export function ScrollADia({ dia }: { dia: string }) {
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       const el = document.getElementById('dia-hoy')
@@ -14,6 +14,6 @@ export function ScrollADia() {
       cont.scrollLeft += elRect.left - contRect.left - cont.clientWidth / 2 + elRect.width / 2
     })
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [dia])
   return null
 }

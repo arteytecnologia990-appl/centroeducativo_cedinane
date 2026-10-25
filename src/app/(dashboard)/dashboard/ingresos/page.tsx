@@ -97,7 +97,7 @@ export default async function IngresosPage({
             +
           </Link>
         </div>
-        <ScrollADia />
+        <ScrollADia dia={dia} />
         <div className="flex gap-1.5 overflow-x-auto pb-1">
           {dias.map((d) => {
             const activo = d.iso === dia
