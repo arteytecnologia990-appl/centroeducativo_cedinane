@@ -16,6 +16,7 @@ export type Ingreso = {
   alumno_paciente: string | null
   cobrado: number
   saldo: number
+  created_at: string
 }
 
 export async function listarIngresos(): Promise<Ingreso[]> {
@@ -49,6 +50,7 @@ export async function listarIngresos(): Promise<Ingreso[]> {
       alumno_paciente: c.alumno_paciente,
       cobrado,
       saldo: total - cobrado,
+      created_at: c.created_at,
     }
   })
 }

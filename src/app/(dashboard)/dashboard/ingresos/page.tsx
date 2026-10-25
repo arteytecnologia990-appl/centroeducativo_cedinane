@@ -14,7 +14,7 @@ const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
 export default async function IngresosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cobrado?: string; duplicado?: string }>
+  searchParams: Promise<{ cobrado?: string; duplicado?: string; dia?: string }>
 }) {
   const params = await searchParams
   const [ingresos, clientes, sesiones, empleados, alumnos, bancos] = await Promise.all([
@@ -28,6 +28,23 @@ export default async function IngresosPage({
   const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.nombres} ${e.apellidos}` }))
   const total = ingresos.reduce((s, i) => s + i.total, 0)
   const hoy = new Date().toISOString().slice(0, 10)
+  const hoyISO = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
+  const dia = params.dia ?? hoyISO
+  const dias = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(`${hoyISO}T12:00:00Z`)
+    d.setUTCDate(d.getUTCDate() + i)
+    const iso = d.toISOString().slice(0, 10)
+    const semana = d.toLocaleDateString('es-PY', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
+    return { iso, label: `${semana.charAt(0).toUpperCase()}${semana.slice(1)}-${d.getUTCDate()}` }
+  })
+  const mesAnio = new Date(`${hoyISO}T12:00:00Z`).toLocaleDateString('es-PY', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+  const fechaLocal = (iso: string) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
+  const ingresosDelDia = ingresos.filter((i) => fechaLocal(i.created_at) === dia)
+  const totalDelDia = ingresosDelDia.reduce((s, i) => s + i.total, 0)
 
   return (
     <div className="space-y-6">
@@ -52,12 +69,54 @@ export default async function IngresosPage({
         </p>
       ) : null}
 
-      <IngresoForm
-        clientes={clientes}
-        sesiones={sesiones.map((s) => ({ id: s.id, descripcion: s.descripcion, monto: Number(s.monto) }))}
-        profesionales={profesionales}
-        alumnos={alumnos}
-      />
+      <section className="space-y-2 rounded-lg border border-border bg-card p-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold capitalize text-foreground">{mesAnio}</p>
+          <Link href={`/dashboard/ingresos?dia=${hoyISO}`} className="text-xs text-primary hover:underline">
+            Ir a hoy
+          </Link>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {dias.map((d) => {
+            const activo = d.iso === dia
+            const esHoy = d.iso === hoyISO
+            return (
+              <Link
+                key={d.iso}
+                href={`/dashboard/ingresos?dia=${d.iso}`}
+                className={`flex min-w-[72px] shrink-0 flex-col items-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  activo
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                    : esHoy
+                      ? 'border-primary/60 text-primary hover:bg-primary/10'
+                      : 'border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+              >
+                {d.label}
+                {esHoy ? <span className="text-[10px] font-semibold uppercase tracking-wide">Hoy</span> : null}
+              </Link>
+            )
+          })}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {ingresosDelDia.length} ingreso(s) · Total del día:{' '}
+          <strong className="text-foreground">{guaranies(totalDelDia)}</strong>
+        </p>
+      </section>
+
+      <details className="rounded-lg border border-border bg-card">
+        <summary className="cursor-pointer select-none px-4 py-2 text-sm font-medium text-foreground">
+          + Nuevo ingreso
+        </summary>
+        <div className="border-t border-border p-4">
+          <IngresoForm
+            clientes={clientes}
+            sesiones={sesiones.map((s) => ({ id: s.id, descripcion: s.descripcion, monto: Number(s.monto) }))}
+            profesionales={profesionales}
+            alumnos={alumnos}
+          />
+        </div>
+      </details>
 
       <div className="overflow-hidden rounded-lg border border-border">
         <Table>
@@ -77,7 +136,7 @@ export default async function IngresosPage({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {ingresos.map((c) => (
+            {ingresosDelDia.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-medium">
                   {c.usuario}
@@ -121,7 +180,7 @@ export default async function IngresosPage({
                 </TableCell>
               </TableRow>
             ))}
-            {ingresos.length === 0 ? (
+            {ingresosDelDia.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} className="h-20 text-center text-sm text-muted-foreground">
                   Sin ingresos cargados.
