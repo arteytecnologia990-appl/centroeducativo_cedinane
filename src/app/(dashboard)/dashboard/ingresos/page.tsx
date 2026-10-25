@@ -6,6 +6,7 @@ import { eliminarIngreso } from '@/features/ingresos/actions'
 import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
 import { CobroModal } from '@/features/ingresos/components/cobro-modal'
 import { listarBancos } from '@/features/bancos/queries'
+import { ScrollADia } from '@/components/layout/scroll-a-dia'
 import { Volver } from '@/components/layout/volver'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
@@ -38,9 +39,9 @@ export default async function IngresosPage({
     year: 'numeric',
     timeZone: 'UTC',
   })
-  const dias = Array.from({ length: 15 }, (_, i) => {
+  const dias = Array.from({ length: 31 }, (_, i) => {
     const d = new Date(`${dia}T12:00:00Z`)
-    d.setUTCDate(d.getUTCDate() + i - 7)
+    d.setUTCDate(d.getUTCDate() + i - 15)
     const iso = d.toISOString().slice(0, 10)
     const semana = d.toLocaleDateString('es-PY', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
     return { iso, label: semana.charAt(0).toUpperCase() + semana.slice(1), num: d.getUTCDate() }
@@ -51,7 +52,7 @@ export default async function IngresosPage({
   const ingresosPorDia = new Map<string, number>()
   for (const i of ingresos) {
     const k = fechaLocal(i.created_at)
-    ingresosPorDia.set(k, (ingresosPorDia.get(k) ?? 0) + 1)
+    ingresosPorDia.set(k, (ingresosPorDia.get(k) ?? 0) + i.total)
   }
 
   return (
@@ -95,16 +96,18 @@ export default async function IngresosPage({
             +
           </Link>
         </div>
+        <ScrollADia />
         <div className="flex gap-1.5 overflow-x-auto pb-1">
           {dias.map((d) => {
             const activo = d.iso === dia
             const esHoy = d.iso === hoyISO
-            const cant = ingresosPorDia.get(d.iso) ?? 0
+            const monto = ingresosPorDia.get(d.iso) ?? 0
             return (
               <Link
                 key={d.iso}
+                id={esHoy ? 'dia-hoy' : undefined}
                 href={`/dashboard/ingresos?dia=${d.iso}`}
-                className={`relative flex min-w-[44px] shrink-0 flex-col items-center rounded-md border px-1.5 py-1 text-center transition-colors ${
+                className={`relative flex min-w-[76px] shrink-0 flex-col items-center rounded-md border px-1.5 py-1 text-center transition-colors ${
                   activo
                     ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                     : esHoy
@@ -114,11 +117,9 @@ export default async function IngresosPage({
               >
                 <span className="text-[10px] font-medium uppercase">{d.label}</span>
                 <span className="text-sm font-semibold tabular-nums">{d.num}</span>
-                {cant > 0 ? (
-                  <span
-                    className={`absolute bottom-0.5 size-1 rounded-full ${activo ? 'bg-primary-foreground' : 'bg-primary'}`}
-                  />
-                ) : null}
+                <span className={`text-[10px] tabular-nums ${monto > 0 ? 'font-medium' : 'opacity-50'}`}>
+                  {monto > 0 ? guaranies(monto) : '—'}
+                </span>
               </Link>
             )
           })}
