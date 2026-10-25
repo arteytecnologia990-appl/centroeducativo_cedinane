@@ -2,6 +2,7 @@ import { listarAlumnosPacientes, listarClientesConFacturas, listarIngresos } fro
 import { listarSesiones } from '@/features/definiciones/queries'
 import { listarEmpleadosSalario } from '@/features/salarios/queries'
 import Link from 'next/link'
+import { CalendarDays } from 'lucide-react'
 import { eliminarIngreso } from '@/features/ingresos/actions'
 import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
 import { CobroModal } from '@/features/ingresos/components/cobro-modal'
@@ -79,7 +80,7 @@ export default async function IngresosPage({
       ) : null}
 
       <section className="rounded-lg border border-border bg-card p-3">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex items-center gap-2">
           <Link
             href={`/dashboard/ingresos?dia=${mesAnterior}-01`}
             className="inline-flex size-7 items-center justify-center rounded-md border border-border text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -87,13 +88,21 @@ export default async function IngresosPage({
           >
             −
           </Link>
-          <p className="text-sm font-semibold capitalize text-foreground">{nombreMes}</p>
+          <p className="flex-1 text-center text-sm font-semibold capitalize text-foreground">{nombreMes}</p>
           <Link
             href={`/dashboard/ingresos?dia=${mesSiguiente}-01`}
             className="inline-flex size-7 items-center justify-center rounded-md border border-border text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label="Mes siguiente"
           >
             +
+          </Link>
+          <Link
+            href={`/dashboard/ingresos?dia=${hoyISO}`}
+            title="Ir a hoy"
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-primary/60 px-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            <CalendarDays className="size-3.5" />
+            Hoy
           </Link>
         </div>
         <ScrollADia />
