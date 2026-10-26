@@ -28,7 +28,7 @@ export async function listarPersonasParaHorario(): Promise<PersonaOpcion[]> {
     .select('id, nombres, apellidos')
     .in('id', ids)
     .is('deleted_at', null)
-    .order('apellidos', { ascending: true })
+    .order('nombres', { ascending: true })
 
   return (data ?? []) as PersonaOpcion[]
 }
@@ -82,7 +82,7 @@ export async function listarHorariosReporte(): Promise<HorarioReporte[]> {
   const { data: personas } = await supabase.from('personas').select('id, nombres, apellidos')
   const { data: sedes } = await supabase.from('sedes').select('id, codigo')
 
-  const nombre = new Map((personas ?? []).map((p) => [p.id, `${p.apellidos}, ${p.nombres}`]))
+  const nombre = new Map((personas ?? []).map((p) => [p.id, `${p.nombres} ${p.apellidos}`]))
   const sede = new Map((sedes ?? []).map((s) => [s.id, s.codigo]))
 
   return (horarios ?? []).map((h) => ({
