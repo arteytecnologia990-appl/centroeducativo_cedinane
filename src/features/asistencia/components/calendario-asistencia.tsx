@@ -138,7 +138,7 @@ export function CalendarioAsistencia({
             {personas.length === 0 ? <option value="">Sin personas</option> : null}
             {personas.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.apellidos}, {p.nombres}
+                {p.nombres} {p.apellidos}
               </option>
             ))}
           </select>

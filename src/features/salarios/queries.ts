@@ -41,7 +41,7 @@ export async function listarEmpleadosSalario(): Promise<EmpleadoFila[]> {
     .select('id, nombres, apellidos, personal(sueldo, modalidad_salarial, jornada_tipo, regimen)')
     .in('id', ids)
     .is('deleted_at', null)
-    .order('apellidos', { ascending: true })
+    .order('nombres', { ascending: true })
 
   return (data ?? []) as EmpleadoFila[]
 }
@@ -80,7 +80,7 @@ export async function listarLiquidaciones(periodo: string): Promise<LiquidacionF
     return {
       id: l.id,
       persona_id: l.persona_id,
-      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      persona: persona ? `${persona.nombres} ${persona.apellidos}` : '—',
       total_haberes: Number(l.total_haberes),
       total_descuentos: Number(l.total_descuentos),
       neto_pagar: Number(l.neto_pagar),
@@ -124,7 +124,7 @@ export async function listarNovedadesPeriodo(periodo: string): Promise<NovedadDe
     return {
       id: n.id,
       persona_id: n.persona_id,
-      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      persona: persona ? `${persona.nombres} ${persona.apellidos}` : '—',
       tipo: n.tipo,
       cantidad: Number(n.cantidad),
       unidad: n.unidad,
@@ -270,7 +270,7 @@ export async function listarAdelantos(periodo: string): Promise<AdelantoFila[]> 
       id: a.id,
       numero: a.numero,
       persona_id: a.persona_id,
-      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      persona: persona ? `${persona.nombres} ${persona.apellidos}` : '—',
       periodo: a.periodo,
       fecha: a.fecha,
       monto: Number(a.monto),
@@ -314,7 +314,7 @@ export async function listarPersonasConRegimen(): Promise<PersonaRegimen[]> {
     .from('personas')
     .select('id, nombres, apellidos, personal(regimen)')
     .is('deleted_at', null)
-    .order('apellidos', { ascending: true })
+    .order('nombres', { ascending: true })
 
   return (data ?? []).map((p) => {
     const personal = p.personal as { regimen: string | null } | null

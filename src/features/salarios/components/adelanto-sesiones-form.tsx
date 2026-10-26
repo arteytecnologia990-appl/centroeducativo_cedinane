@@ -65,7 +65,7 @@ export function AdelantoSesionesForm({
             <option value="">Elegí...</option>
             {personas.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.apellidos}, {p.nombres}
+                {p.nombres} {p.apellidos}
               </option>
             ))}
           </select>

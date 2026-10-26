@@ -24,7 +24,7 @@ export async function listarAsistenciasDia(fecha: string): Promise<AsistenciaDia
     return {
       id: a.id,
       persona_id: a.persona_id,
-      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      persona: persona ? `${persona.nombres} ${persona.apellidos}` : '—',
       hora_entrada: a.hora_entrada,
       hora_salida: a.hora_salida,
       origen: a.origen,
@@ -47,7 +47,7 @@ export async function listarPersonasParaAsistencia() {
     .select('id, nombres, apellidos')
     .in('id', ids)
     .is('deleted_at', null)
-    .order('apellidos', { ascending: true })
+    .order('nombres', { ascending: true })
 
   return data ?? []
 }
@@ -100,7 +100,7 @@ export async function listarAsistenciasPeriodo(
     return {
       id: a.id,
       fecha: a.fecha,
-      persona: persona ? `${persona.apellidos}, ${persona.nombres}` : '—',
+      persona: persona ? `${persona.nombres} ${persona.apellidos}` : '—',
       hora_entrada: a.hora_entrada,
       hora_salida: a.hora_salida,
       estado: a.estado,

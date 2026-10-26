@@ -44,7 +44,7 @@ export function AsistenciaManualForm({ personas, fecha }: { personas: Persona[];
           <option value="">Elegí una persona</option>
           {personas.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.apellidos}, {p.nombres}
+              {p.nombres} {p.apellidos}
             </option>
           ))}
         </select>
