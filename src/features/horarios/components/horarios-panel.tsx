@@ -49,7 +49,7 @@ export function HorariosPanel({
     [horarios, personaId]
   )
   const nombrePersona = useMemo(
-    () => new Map(personas.map((p) => [p.id, `${p.apellidos}, ${p.nombres}`])),
+    () => new Map(personas.map((p) => [p.id, `${p.nombres} ${p.apellidos}`])),
     [personas]
   )
 
@@ -111,7 +111,7 @@ export function HorariosPanel({
             <option value="">Todas las personas</option>
             {personas.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.apellidos}, {p.nombres}
+                {p.nombres} {p.apellidos}
               </option>
             ))}
           </select>
@@ -173,7 +173,7 @@ export function HorariosPanel({
             <option value="">Elegí una persona</option>
             {personas.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.apellidos}, {p.nombres}
+                {p.nombres} {p.apellidos}
               </option>
             ))}
           </select>
