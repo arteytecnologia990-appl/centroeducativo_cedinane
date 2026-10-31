@@ -97,6 +97,15 @@ export default async function ProgramasPage({
           <input type="checkbox" name="activo" defaultChecked={editando?.activo ?? true} className="size-4" />
           Activo
         </label>
+        <div className="space-y-1.5 sm:col-span-6">
+          <Label htmlFor="descripcion">Descripción</Label>
+          <Input
+            id="descripcion"
+            name="descripcion"
+            defaultValue={editando?.descripcion ?? ''}
+            placeholder="Descripción del programa"
+          />
+        </div>
         <div className="sm:col-span-6">
           <button
             type="submit"
@@ -118,6 +127,7 @@ export default async function ProgramasPage({
             <TableRow>
               <TableHead>Logo</TableHead>
               <TableHead>Nombre</TableHead>
+              <TableHead>Descripción</TableHead>
               <TableHead>Caja de ahorro</TableHead>
               <TableHead>RUC / RTP</TableHead>
               <TableHead>Vigencia</TableHead>
@@ -133,6 +143,7 @@ export default async function ProgramasPage({
                   <Image src={p.logo} alt={p.nombre} width={56} height={48} className="h-9 w-auto" />
                 </TableCell>
                 <TableCell className="font-medium">{p.nombre}</TableCell>
+                <TableCell className="text-muted-foreground">{p.descripcion ?? '—'}</TableCell>
                 <TableCell className="tabular-nums">{p.caja_ahorro ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {p.ruc ?? '—'} / {p.rtp ?? '—'}
@@ -161,7 +172,7 @@ export default async function ProgramasPage({
             ))}
             {programas.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={8} className="h-16 text-center text-sm text-muted-foreground">
                   Sin programas cargados.
                 </TableCell>
               </TableRow>

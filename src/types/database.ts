@@ -1485,6 +1485,7 @@ export type Database = {
           activo: boolean
           caja_ahorro: string | null
           created_at: string
+          descripcion: string | null
           fecha_inicio: string | null
           fecha_vencimiento: string | null
           id: string
@@ -1499,6 +1500,7 @@ export type Database = {
           activo?: boolean
           caja_ahorro?: string | null
           created_at?: string
+          descripcion?: string | null
           fecha_inicio?: string | null
           fecha_vencimiento?: string | null
           id?: string
@@ -1513,6 +1515,7 @@ export type Database = {
           activo?: boolean
           caja_ahorro?: string | null
           created_at?: string
+          descripcion?: string | null
           fecha_inicio?: string | null
           fecha_vencimiento?: string | null
           id?: string

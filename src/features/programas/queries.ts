@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 export type Programa = {
   id: string
   nombre: string
+  descripcion: string | null
   caja_ahorro: string | null
   logo: string
   ruc: string | null

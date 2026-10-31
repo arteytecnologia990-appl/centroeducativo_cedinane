@@ -16,6 +16,7 @@ export async function crearPrograma(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const datos = {
     nombre,
+    descripcion: String(formData.get('descripcion') ?? '').trim() || null,
     caja_ahorro: String(formData.get('caja_ahorro') ?? '').trim() || null,
     logo: String(formData.get('logo') ?? '/logos/cedinane.png'),
     ruc: String(formData.get('ruc') ?? '').trim() || null,
