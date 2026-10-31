@@ -31,6 +31,17 @@ export async function crearCargo(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/definiciones/cargos')
 }
 
+export async function editarCargo(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  const nombre = String(formData.get('nombre') ?? '').trim()
+  if (!id || !nombre) return
+  const descripcion = String(formData.get('descripcion') ?? '').trim() || null
+
+  const supabase = await createClient()
+  await supabase.from('cargos').update({ nombre, descripcion }).eq('id', id)
+  revalidatePath('/dashboard/definiciones/cargos')
+}
+
 export async function moverCargo(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '')
   const programaId = String(formData.get('programa_id') ?? '').trim() || null
