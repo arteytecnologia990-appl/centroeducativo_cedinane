@@ -52,6 +52,17 @@ export async function moverCargo(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/definiciones/cargos')
 }
 
+export async function toggleCargo(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  const { data } = await supabase.from('cargos').select('activo').eq('id', id).maybeSingle()
+  if (!data) return
+  await supabase.from('cargos').update({ activo: !data.activo }).eq('id', id)
+  revalidatePath('/dashboard/definiciones/cargos')
+}
+
 export async function eliminarCargo(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '')
   if (!id) return

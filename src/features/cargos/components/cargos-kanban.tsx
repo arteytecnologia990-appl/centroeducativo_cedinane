@@ -1,8 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { Building2, Check, EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react'
-import { crearCargo, editarCargo, eliminarCargo, moverCargo } from '@/features/cargos/cargos'
+import { useState, useTransition } from 'react'
+import { Building2, Check, EllipsisVertical, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  crearCargo,
+  editarCargo,
+  eliminarCargo,
+  moverCargo,
+  toggleCargo,
+} from '@/features/cargos/cargos'
 
 type Cargo = { id: string; nombre: string; descripcion: string | null; programa_id: string | null; activo: boolean }
 type Programa = { id: string; nombre: string }
@@ -13,18 +19,51 @@ const claseInput =
 export function CargosKanban({ cargos, programas }: { cargos: Cargo[]; programas: Programa[] }) {
   const [menu, setMenu] = useState<string | null>(null)
   const [editando, setEditando] = useState<Cargo | null>(null)
+  const [sobre, setSobre] = useState<string | null>(null)
+  const [arrastrando, setArrastrando] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
 
   const columnas = [
     ...programas.map((p) => ({ id: p.id, nombre: p.nombre, cargos: cargos.filter((c) => c.programa_id === p.id) })),
     { id: '', nombre: 'Sin programa', cargos: cargos.filter((c) => !c.programa_id) },
   ]
 
+  function soltar(e: React.DragEvent, programaId: string) {
+    e.preventDefault()
+    setSobre(null)
+    setArrastrando(null)
+    const id = e.dataTransfer.getData('text/plain')
+    if (!id) return
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('id', id)
+      fd.set('programa_id', programaId)
+      await moverCargo(fd)
+    })
+  }
+
+  function alternarActivo(cargo: Cargo) {
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('id', cargo.id)
+      await toggleCargo(fd)
+    })
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {columnas.map((col) => (
         <section
           key={col.id || 'sin'}
-          className="flex flex-col rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-sm"
+          onDragOver={(e) => {
+            e.preventDefault()
+            setSobre(col.id)
+          }}
+          onDragLeave={() => setSobre(null)}
+          onDrop={(e) => soltar(e, col.id)}
+          className={`flex flex-col rounded-2xl border bg-card/70 p-4 shadow-sm backdrop-blur-sm transition-colors ${
+            sobre === col.id ? 'border-primary/60 bg-primary/5' : 'border-border/60'
+          }`}
         >
           <div className="mb-3 flex items-center gap-2">
             <span className="rounded-lg bg-primary/10 p-1.5 text-primary">
@@ -40,14 +79,26 @@ export function CargosKanban({ cargos, programas }: { cargos: Cargo[]; programas
             {col.cargos.map((c) => (
               <article
                 key={c.id}
-                className="relative rounded-xl border border-border/60 bg-background/60 p-3 transition-colors hover:border-primary/40"
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', c.id)
+                  e.dataTransfer.effectAllowed = 'move'
+                  setArrastrando(c.id)
+                }}
+                onDragEnd={() => setArrastrando(null)}
+                className={`group relative cursor-grab rounded-xl border border-border/60 bg-background/60 p-3 transition-all hover:border-primary/40 active:cursor-grabbing ${
+                  arrastrando === c.id ? 'opacity-40' : ''
+                }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="truncate text-sm font-medium text-foreground">{c.nombre}</h3>
-                    {c.descripcion ? (
-                      <p className="truncate text-xs text-muted-foreground">{c.descripcion}</p>
-                    ) : null}
+                  <div className="flex min-w-0 items-start gap-1.5">
+                    <GripVertical className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-medium text-foreground">{c.nombre}</h3>
+                      {c.descripcion ? (
+                        <p className="truncate text-xs text-muted-foreground">{c.descripcion}</p>
+                      ) : null}
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -59,14 +110,19 @@ export function CargosKanban({ cargos, programas }: { cargos: Cargo[]; programas
                   </button>
                 </div>
 
-                <span
-                  className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                    c.activo ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                <button
+                  type="button"
+                  title={c.activo ? 'Clic para inactivar' : 'Clic para activar'}
+                  onClick={() => alternarActivo(c)}
+                  className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
+                    c.activo
+                      ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
+                      : 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
                   }`}
                 >
                   <span className="size-1.5 rounded-full bg-current" />
-                  {c.activo ? 'Activo' : 'Borrador'}
-                </span>
+                  {c.activo ? 'Activo' : 'Inactivo'}
+                </button>
 
                 {menu === c.id ? (
                   <div className="absolute right-2 top-10 z-20 w-56 rounded-xl border border-border bg-popover p-1 shadow-xl">
