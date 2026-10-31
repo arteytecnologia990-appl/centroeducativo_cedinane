@@ -339,6 +339,7 @@ export type Database = {
           descripcion: string | null
           id: string
           nombre: string
+          programa_id: string | null
         }
         Insert: {
           activo?: boolean
@@ -346,6 +347,7 @@ export type Database = {
           descripcion?: string | null
           id?: string
           nombre: string
+          programa_id?: string | null
         }
         Update: {
           activo?: boolean
@@ -353,8 +355,17 @@ export type Database = {
           descripcion?: string | null
           id?: string
           nombre?: string
+          programa_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cargos_programa_id_fkey"
+            columns: ["programa_id"]
+            isOneToOne: false
+            referencedRelation: "programas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cobro_pagos: {
         Row: {
