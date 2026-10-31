@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { listarPersonas, obtenerPersona } from '@/features/personas/queries/personas'
 import { listarHorarios } from '@/features/horarios/queries'
 import { listarProgramas } from '@/features/programas/queries'
+import { listarCargos } from '@/features/cargos/cargos'
 import { DIAS } from '@/features/horarios/schemas'
 import { PersonaForm } from '@/features/personas/components/persona-form'
 import { RolesEditor } from '@/features/personas/components/roles-editor'
@@ -18,6 +19,7 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
   const roles = (persona.persona_roles ?? []) as { id: string; rol_negocio: string }[]
   const horarios = await listarHorarios(id)
   const programas = await listarProgramas()
+  const cargos = await listarCargos()
   const empleados = (await listarPersonas({ rol: 'empleado', page: 1, porPagina: 500 })).personas.map((e) => ({
     id: e.id,
     nombre: `${e.nombres} ${e.apellidos}`,
@@ -47,7 +49,13 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
 
       {/* key: remonta el formulario cuando cambian los datos, para que los inputs
           no controlados reciban su defaultValue una sola vez (evita el warning de Base UI). */}
-      <PersonaForm key={persona.updated_at} persona={persona} programas={programas} empleados={empleados} />
+      <PersonaForm
+        key={persona.updated_at}
+        persona={persona}
+        programas={programas}
+        empleados={empleados}
+        cargos={cargos}
+      />
 
       <section className="max-w-2xl space-y-3">
         <div className="flex items-center justify-between gap-3">

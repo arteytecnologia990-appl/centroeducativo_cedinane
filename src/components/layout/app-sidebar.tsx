@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import {
   Banknote,
+  Briefcase,
   Building2,
   Calculator,
   CalendarRange,
@@ -48,7 +49,10 @@ const GRUPOS: Grupo[] = [
   {
     id: 'definiciones',
     label: 'Definiciones',
-    items: [{ href: '/dashboard/definiciones/sesiones', label: 'Sesiones', Icon: Layers }],
+    items: [
+      { href: '/dashboard/definiciones/sesiones', label: 'Sesiones', Icon: Layers },
+      { href: '/dashboard/definiciones/cargos', label: 'Cargos', Icon: Briefcase },
+    ],
   },
   {
     id: 'talento',

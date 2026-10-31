@@ -115,11 +115,13 @@ export function PersonaForm({
   rolInicial,
   programas,
   empleados,
+  cargos,
 }: {
   persona?: PersonaEditable
   rolInicial?: string
   programas?: { id: string; nombre: string }[]
   empleados?: { id: string; nombre: string }[]
+  cargos?: { id: string; nombre: string }[]
 }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -239,11 +241,14 @@ export function PersonaForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="cargo">Cargo</Label>
-            <Input id="cargo" name="cargo" defaultValue={p?.cargo ?? ''} placeholder="Ej.: Docente Titular - Sede 1" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="programa">Programa</Label>
-            <Input id="programa" name="programa" defaultValue={p?.programa ?? ''} placeholder="Ej.: TOI, HPA…" />
+            <select id="cargo" name="cargo" defaultValue={p?.cargo ?? ''} className={claseSelect}>
+              <option value="">—</option>
+              {(cargos ?? []).map((c) => (
+                <option key={c.id} value={c.nombre}>
+                  {c.nombre}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="formacion_academica">Formación académica</Label>
