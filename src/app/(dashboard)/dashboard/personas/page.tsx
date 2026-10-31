@@ -9,7 +9,8 @@ const FILTROS = [
   { valor: '', etiqueta: 'Todos' },
   { valor: 'empleado', etiqueta: 'Empleados' },
   { valor: 'alumno', etiqueta: 'Alumnos' },
-  { valor: 'paciente', etiqueta: 'Pacientes' },
+  { valor: 'usuario', etiqueta: 'Usuarios' },
+  { valor: 'participante', etiqueta: 'Participantes' },
   { valor: 'tutor', etiqueta: 'Tutores' },
   { valor: 'proveedor', etiqueta: 'Proveedores' },
   { valor: 'cliente', etiqueta: 'Clientes' },
@@ -80,7 +81,7 @@ export default async function PersonasPage({
         </div>
       </div>
 
-      {/* Filtros por rol (Empleados, Alumnos, Pacientes…) */}
+      {/* Filtros por rol (Empleados, Alumnos, Usuarios…) */}
       <div className="flex flex-wrap gap-1.5">
         {FILTROS.map((f) => {
           const activo = rol === f.valor

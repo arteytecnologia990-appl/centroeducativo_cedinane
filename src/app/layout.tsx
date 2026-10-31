@@ -25,7 +25,7 @@ const karla = Karla({ variable: "--font-karla", subsets: ["latin"], display: "sw
 const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"], display: "swap", preload: false })
 
 export const metadata: Metadata = {
-  title: "Centro Educativo",
+  title: "ASOCEDINANE",
   description: "Sistema de gestión de un centro educativo y terapéutico",
 }
 

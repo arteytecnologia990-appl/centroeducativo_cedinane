@@ -175,7 +175,7 @@ export function AppSidebar() {
             <Image src="/logos/cedinane.png" alt="" width={26} height={26} className="size-[26px] rounded object-contain" />
           </button>
           {colapsado ? null : (
-            <span className="truncate font-heading font-semibold text-foreground">Centro Educativo</span>
+            <span className="truncate font-heading font-semibold text-foreground">ASOCEDINANE</span>
           )}
         </div>
 

@@ -117,7 +117,7 @@ export async function listarAlumnosPacientes(): Promise<{ id: string; nombre: st
   const { data: roles } = await supabase
     .from('persona_roles')
     .select('persona_id')
-    .in('rol_negocio', ['alumno', 'paciente'])
+    .in('rol_negocio', ['alumno', 'usuario'])
   const ids = [...new Set((roles ?? []).map((r) => r.persona_id))]
   if (ids.length === 0) return []
   const { data } = await supabase

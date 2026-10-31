@@ -8,7 +8,7 @@ export function Logo({ className }: { className?: string }) {
       <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground">
         <GraduationCap className="size-5" />
       </span>
-      <span className="font-heading text-base font-semibold text-foreground">Centro Educativo</span>
+      <span className="font-heading text-base font-semibold text-foreground">ASOCEDINANE</span>
     </div>
   )
 }
