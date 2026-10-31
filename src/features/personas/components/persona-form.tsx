@@ -60,6 +60,7 @@ type PersonaEditable = {
     matricula?: number | null
   } | null
   persona_roles?: { rol_negocio: string }[] | null
+  persona_programas?: { programa_id: string }[] | null
 }
 
 const claseSelect =
@@ -235,6 +236,27 @@ export function PersonaForm({
         <Textarea id="observaciones" name="observaciones" rows={3} defaultValue={persona?.observaciones ?? ''} />
       </div>
 
+      <div className="space-y-1.5">
+        <Label>Programa(s)</Label>
+        <div className="flex flex-wrap gap-4 rounded-lg border border-border p-3">
+          {(programas ?? []).map((pr) => (
+            <label key={pr.id} className="flex items-center gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                name="programa_ids"
+                value={pr.id}
+                defaultChecked={(persona?.persona_programas ?? []).some((x) => x.programa_id === pr.id)}
+                className="size-4 rounded border-input accent-primary"
+              />
+              {pr.nombre}
+            </label>
+          ))}
+          {(programas ?? []).length === 0 ? (
+            <span className="text-sm text-muted-foreground">Sin programas cargados.</span>
+          ) : null}
+        </div>
+      </div>
+
       {esPersonal ? (
       <fieldset className="space-y-4 rounded-lg border border-border p-4">
         <legend className="px-1 text-sm font-medium text-foreground">Datos laborales</legend>
@@ -350,17 +372,6 @@ export function PersonaForm({
           <div className="space-y-1.5">
             <Label htmlFor="caja_ahorro">Caja de ahorro</Label>
             <Input id="caja_ahorro" name="caja_ahorro" defaultValue={p?.caja_ahorro ?? ''} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="programa_id">Programa</Label>
-            <select id="programa_id" name="programa_id" defaultValue={p?.programa_id ?? ''} className={claseSelect}>
-              <option value="">—</option>
-              {(programas ?? []).map((pr) => (
-                <option key={pr.id} value={pr.id}>
-                  {pr.nombre}
-                </option>
-              ))}
-            </select>
           </div>
           <div className="space-y-1.5">
             <Label>Antigüedad en la institución</Label>

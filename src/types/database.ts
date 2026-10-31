@@ -1198,6 +1198,36 @@ export type Database = {
           },
         ]
       }
+      persona_programas: {
+        Row: {
+          persona_id: string
+          programa_id: string
+        }
+        Insert: {
+          persona_id: string
+          programa_id: string
+        }
+        Update: {
+          persona_id?: string
+          programa_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "persona_programas_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "persona_programas_programa_id_fkey"
+            columns: ["programa_id"]
+            isOneToOne: false
+            referencedRelation: "programas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       persona_relaciones: {
         Row: {
           created_at: string

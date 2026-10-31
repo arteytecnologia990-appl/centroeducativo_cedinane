@@ -44,6 +44,7 @@ function datosDesdeFormData(formData: FormData): PersonaInput {
     caja_ahorro: String(formData.get('caja_ahorro') ?? ''),
     programa_id: String(formData.get('programa_id') ?? ''),
     superior_id: String(formData.get('superior_id') ?? ''),
+    programa_ids: formData.getAll('programa_ids').map(String).filter(Boolean),
     pin: String(formData.get('pin') ?? ''),
     nacionalidad: String(formData.get('nacionalidad') ?? ''),
     turno_alumno: String(formData.get('turno_alumno') ?? ''),
@@ -116,6 +117,13 @@ async function guardarPersonal(supabase: Cliente, personaId: string, v: PersonaI
     await supabase.from('personal').update(datos).eq('id', existente.id)
   } else if (hayDatos) {
     await supabase.from('personal').insert({ persona_id: personaId, ...datos })
+  }
+
+  await supabase.from('persona_programas').delete().eq('persona_id', personaId)
+  if (v.programa_ids.length > 0) {
+    await supabase
+      .from('persona_programas')
+      .insert(v.programa_ids.map((programaId) => ({ persona_id: personaId, programa_id: programaId })))
   }
 }
 
