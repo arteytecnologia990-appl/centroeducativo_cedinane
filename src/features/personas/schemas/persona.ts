@@ -9,7 +9,7 @@ export const ROLES_NEGOCIO = [
   'alumno',
   'usuario',
   'participante',
-  'tutor',
+  'responsable',
   'proveedor',
   'cliente',
 ] as const
@@ -22,7 +22,7 @@ export const ETIQUETA_ROL: Record<RolNegocio, string> = {
   alumno: 'Alumno',
   usuario: 'Usuario',
   participante: 'Participante',
-  tutor: 'Tutor',
+  responsable: 'Responsable',
   proveedor: 'Proveedor',
   cliente: 'Cliente',
 }

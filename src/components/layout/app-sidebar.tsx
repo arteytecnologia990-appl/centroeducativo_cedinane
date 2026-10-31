@@ -41,6 +41,11 @@ const GRUPOS: Grupo[] = [
     items: [{ href: '/dashboard/personas', label: 'Personas', Icon: Users }],
   },
   {
+    id: 'programas',
+    label: 'Programas',
+    items: [{ href: '/dashboard/programas', label: 'Programas', Icon: Landmark }],
+  },
+  {
     id: 'definiciones',
     label: 'Definiciones',
     items: [{ href: '/dashboard/definiciones/sesiones', label: 'Sesiones', Icon: Layers }],
@@ -54,7 +59,6 @@ const GRUPOS: Grupo[] = [
       { href: '/kiosco-asistencia', label: 'Kiosco', Icon: Monitor },
       { href: '/dashboard/horas-pagables', label: 'Horas pagables', Icon: Banknote },
       { href: '/dashboard/salarios', label: 'Liquidaciones', Icon: Calculator },
-      { href: '/dashboard/programas', label: 'Programas', Icon: Landmark },
     ],
   },
   {

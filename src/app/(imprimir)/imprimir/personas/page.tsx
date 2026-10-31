@@ -10,7 +10,7 @@ const TITULOS: Record<string, string> = {
   alumno: 'Listado de Alumnos',
   usuario: 'Listado de Usuarios',
   participante: 'Listado de Participantes',
-  tutor: 'Listado de Tutores',
+  responsable: 'Listado de Responsables',
   proveedor: 'Listado de Proveedores',
   cliente: 'Listado de Clientes',
 }

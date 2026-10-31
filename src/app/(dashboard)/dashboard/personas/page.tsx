@@ -11,7 +11,7 @@ const FILTROS = [
   { valor: 'alumno', etiqueta: 'Alumnos' },
   { valor: 'usuario', etiqueta: 'Usuarios' },
   { valor: 'participante', etiqueta: 'Participantes' },
-  { valor: 'tutor', etiqueta: 'Tutores' },
+  { valor: 'responsable', etiqueta: 'Responsables' },
   { valor: 'proveedor', etiqueta: 'Proveedores' },
   { valor: 'cliente', etiqueta: 'Clientes' },
 ]
