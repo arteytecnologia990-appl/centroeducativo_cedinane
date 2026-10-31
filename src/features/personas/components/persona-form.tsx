@@ -33,6 +33,7 @@ type PersonalEditable = {
   regimen?: string | null
   caja_ahorro?: string | null
   programa_id?: string | null
+  superior_id?: string | null
   tiene_ci?: boolean | null
   tiene_cv?: boolean | null
   tiene_cd?: boolean | null
@@ -113,10 +114,12 @@ export function PersonaForm({
   persona,
   rolInicial,
   programas,
+  empleados,
 }: {
   persona?: PersonaEditable
   rolInicial?: string
   programas?: { id: string; nombre: string }[]
+  empleados?: { id: string; nombre: string }[]
 }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -360,6 +363,19 @@ export function PersonaForm({
               {antiguedad}
             </div>
             <input type="hidden" name="antiguedad_institucion" value={antiguedad === '—' ? '' : antiguedad} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="superior_id">Superior inmediato</Label>
+            <select id="superior_id" name="superior_id" defaultValue={p?.superior_id ?? ''} className={claseSelect}>
+              <option value="">—</option>
+              {(empleados ?? [])
+                .filter((e) => e.id !== persona?.id)
+                .map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.nombre}
+                  </option>
+                ))}
+            </select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="registro_profesional">Registro / Matrícula</Label>

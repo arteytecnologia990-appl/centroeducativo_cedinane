@@ -1304,6 +1304,7 @@ export type Database = {
           sector: string | null
           sede_id: string | null
           sueldo: number | null
+          superior_id: string | null
           tiene_cd: boolean
           tiene_ci: boolean
           tiene_cv: boolean
@@ -1331,6 +1332,7 @@ export type Database = {
           sector?: string | null
           sede_id?: string | null
           sueldo?: number | null
+          superior_id?: string | null
           tiene_cd?: boolean
           tiene_ci?: boolean
           tiene_cv?: boolean
@@ -1358,6 +1360,7 @@ export type Database = {
           sector?: string | null
           sede_id?: string | null
           sueldo?: number | null
+          superior_id?: string | null
           tiene_cd?: boolean
           tiene_ci?: boolean
           tiene_cv?: boolean

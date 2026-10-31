@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { obtenerPersona } from '@/features/personas/queries/personas'
+import { listarPersonas, obtenerPersona } from '@/features/personas/queries/personas'
 import { listarHorarios } from '@/features/horarios/queries'
 import { listarProgramas } from '@/features/programas/queries'
 import { DIAS } from '@/features/horarios/schemas'
@@ -18,6 +18,10 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
   const roles = (persona.persona_roles ?? []) as { id: string; rol_negocio: string }[]
   const horarios = await listarHorarios(id)
   const programas = await listarProgramas()
+  const empleados = (await listarPersonas({ rol: 'empleado', page: 1, porPagina: 500 })).personas.map((e) => ({
+    id: e.id,
+    nombre: `${e.nombres} ${e.apellidos}`,
+  }))
   const etiquetaDia = (d: number) => DIAS.find((x) => Number(x.valor) === d)?.etiqueta ?? `Día ${d}`
 
   return (
@@ -43,7 +47,7 @@ export default async function PersonaPage({ params }: { params: Promise<{ id: st
 
       {/* key: remonta el formulario cuando cambian los datos, para que los inputs
           no controlados reciban su defaultValue una sola vez (evita el warning de Base UI). */}
-      <PersonaForm key={persona.updated_at} persona={persona} programas={programas} />
+      <PersonaForm key={persona.updated_at} persona={persona} programas={programas} empleados={empleados} />
 
       <section className="max-w-2xl space-y-3">
         <div className="flex items-center justify-between gap-3">
