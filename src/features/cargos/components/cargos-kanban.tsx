@@ -43,7 +43,8 @@ export function CargosKanban({ cargos, programas }: { cargos: Cargo[]; programas
     cargos.filter(
       (c) =>
         (c.programa_id ?? '') === programaId &&
-        (!c.parent_id || !cargos.some((p) => p.id === c.parent_id))
+        (!c.parent_id ||
+          !cargos.some((p) => p.id === c.parent_id && (p.programa_id ?? '') === programaId))
     )
   const hijosDe = (parentId: string) => cargos.filter((c) => c.parent_id === parentId)
 
