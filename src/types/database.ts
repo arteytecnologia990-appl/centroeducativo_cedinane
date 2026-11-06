@@ -339,6 +339,8 @@ export type Database = {
           descripcion: string | null
           id: string
           nombre: string
+          orden: number
+          parent_id: string | null
           programa_id: string | null
         }
         Insert: {
@@ -347,6 +349,8 @@ export type Database = {
           descripcion?: string | null
           id?: string
           nombre: string
+          orden?: number
+          parent_id?: string | null
           programa_id?: string | null
         }
         Update: {
@@ -355,9 +359,18 @@ export type Database = {
           descripcion?: string | null
           id?: string
           nombre?: string
+          orden?: number
+          parent_id?: string | null
           programa_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cargos_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cargos_programa_id_fkey"
             columns: ["programa_id"]

@@ -8,6 +8,8 @@ export type Cargo = {
   nombre: string
   descripcion: string | null
   programa_id: string | null
+  parent_id: string | null
+  orden: number
   activo: boolean
 }
 
@@ -15,7 +17,8 @@ export async function listarCargos(): Promise<Cargo[]> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('cargos')
-    .select('id, nombre, descripcion, programa_id, activo')
+    .select('id, nombre, descripcion, programa_id, parent_id, orden, activo')
+    .order('orden')
     .order('nombre')
   return (data ?? []) as Cargo[]
 }
@@ -42,13 +45,15 @@ export async function editarCargo(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/definiciones/cargos')
 }
 
+/** Mueve un cargo a un programa y, opcionalmente, lo anida bajo otro cargo (parent_id). */
 export async function moverCargo(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '')
   const programaId = String(formData.get('programa_id') ?? '').trim() || null
-  if (!id) return
+  const parentId = String(formData.get('parent_id') ?? '').trim() || null
+  if (!id || id === parentId) return
 
   const supabase = await createClient()
-  await supabase.from('cargos').update({ programa_id: programaId }).eq('id', id)
+  await supabase.from('cargos').update({ programa_id: programaId, parent_id: parentId }).eq('id', id)
   revalidatePath('/dashboard/definiciones/cargos')
 }
 
