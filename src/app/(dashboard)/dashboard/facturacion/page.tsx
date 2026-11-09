@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { Banknote, Eye, FileText } from 'lucide-react'
+import { Banknote, CalendarDays, Eye, FileText } from 'lucide-react'
 import { listarCobros, listarFacturas, listarSaldos, normalizarDocumento } from '@/features/facturacion/queries'
 import { Volver } from '@/components/layout/volver'
+import { ScrollADia } from '@/components/layout/scroll-a-dia'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const guaranies = (n: number) => new Intl.NumberFormat('es-PY').format(n)
@@ -23,16 +24,45 @@ const TABS = [
 export default async function FacturacionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; dia?: string }>
 }) {
   const params = await searchParams
   const tab = TABS.some((t) => t.id === params.tab) ? (params.tab as string) : 'pendientes'
+  const hoyISO = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
+  const dia = params.dia && /^\d{4}-\d{2}-\d{2}$/.test(params.dia) ? params.dia : hoyISO
 
   const [saldos, facturas, cobros] = await Promise.all([listarSaldos(), listarFacturas(), listarCobros()])
   const totalSaldo = saldos.reduce((s, c) => s + c.saldo, 0)
-  const pendientes = facturas.filter((f) => f.saldo > 0)
-  const cobradas = facturas.filter((f) => f.saldo <= 0)
+
+  const [anioDia, mesDia] = dia.split('-').map(Number)
+  const mesAnterior = new Date(Date.UTC(anioDia, mesDia - 2, 1, 12)).toISOString().slice(0, 7)
+  const mesSiguiente = new Date(Date.UTC(anioDia, mesDia, 1, 12)).toISOString().slice(0, 7)
+  const nombreMes = new Date(`${dia}T12:00:00Z`).toLocaleDateString('es-PY', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+  const dias = Array.from({ length: 31 }, (_, i) => {
+    const d = new Date(`${dia}T12:00:00Z`)
+    d.setUTCDate(d.getUTCDate() + i - 15)
+    const iso = d.toISOString().slice(0, 10)
+    const semana = d.toLocaleDateString('es-PY', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
+    return { iso, label: semana.charAt(0).toUpperCase() + semana.slice(1), num: d.getUTCDate() }
+  })
+  const fechaDia = (f: string | null) => (f ?? '').slice(0, 10)
+  const facturasDelDia = facturas.filter((f) => fechaDia(f.fecha_emision) === dia)
+  const facturasPorDia = new Map<string, number>()
+  for (const f of facturas) {
+    const k = fechaDia(f.fecha_emision)
+    if (k) facturasPorDia.set(k, (facturasPorDia.get(k) ?? 0) + Number(f.monto_total))
+  }
+  const totalDia = facturasDelDia.reduce((s, f) => s + Number(f.monto_total), 0)
+
+  const pendientes = facturasDelDia.filter((f) => f.saldo > 0)
+  const cobradas = facturasDelDia.filter((f) => f.saldo <= 0)
   const totalPendiente = pendientes.reduce((s, f) => s + f.saldo, 0)
+
+  const hrefTab = (t: string) => `/dashboard/facturacion?tab=${t}&dia=${dia}`
 
   return (
     <div className="space-y-6">
@@ -42,8 +72,8 @@ export default async function FacturacionPage({
         <div>
           <h1 className="font-heading text-2xl font-semibold text-foreground">Facturación</h1>
           <p className="text-sm text-muted-foreground">
-            {facturas.length} DTE(s) · {pendientes.length} pendiente(s) por {guaranies(totalPendiente)} · saldo total{' '}
-            {guaranies(totalSaldo)}
+            {facturasDelDia.length} DTE(s) del día · {pendientes.length} pendiente(s) por {guaranies(totalPendiente)} ·
+            saldo total {guaranies(totalSaldo)}
           </p>
         </div>
         <Link
@@ -54,14 +84,77 @@ export default async function FacturacionPage({
         </Link>
       </div>
 
+      <section className="rounded-lg border border-border bg-card p-3">
+        <ScrollADia dia={dia} />
+        <div className="mb-2 flex items-center gap-2">
+          <Link
+            href={`/dashboard/facturacion?tab=${tab}&dia=${mesAnterior}-01`}
+            className="inline-flex size-7 items-center justify-center rounded-md border border-border text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label="Mes anterior"
+          >
+            −
+          </Link>
+          <p className="flex-1 text-center text-sm font-semibold capitalize text-foreground">{nombreMes}</p>
+          <Link
+            href={`/dashboard/facturacion?tab=${tab}&dia=${mesSiguiente}-01`}
+            className="inline-flex size-7 items-center justify-center rounded-md border border-border text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label="Mes siguiente"
+          >
+            +
+          </Link>
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {dias.map((d) => {
+            const activo = d.iso === dia
+            const esHoy = d.iso === hoyISO
+            const monto = facturasPorDia.get(d.iso) ?? 0
+            return (
+              <Link
+                key={d.iso}
+                id={esHoy ? 'dia-hoy' : undefined}
+                href={`/dashboard/facturacion?tab=${tab}&dia=${d.iso}`}
+                className={`relative flex min-w-[76px] shrink-0 flex-col items-center rounded-md border px-1.5 py-1 text-center transition-colors ${
+                  activo
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                    : esHoy
+                      ? 'border-primary/60 text-primary hover:bg-primary/10'
+                      : 'border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+              >
+                <span className="text-[10px] font-medium uppercase">{d.label}</span>
+                <span className="text-sm font-semibold tabular-nums">{d.num}</span>
+                <span className={`text-[10px] tabular-nums ${monto > 0 ? 'font-medium' : 'opacity-50'}`}>
+                  {monto > 0 ? guaranies(monto) : '—'}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+        <div className="mt-2 flex justify-center">
+          <Link
+            href={`/dashboard/facturacion?tab=${tab}&dia=${hoyISO}`}
+            title="Ir a hoy"
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-primary/60 px-2.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            <CalendarDays className="size-3.5" />
+            Ir a hoy
+          </Link>
+        </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          {facturasDelDia.length} DTE(s) del día · Total:{' '}
+          <strong className="text-foreground">{guaranies(totalDia)}</strong>
+        </p>
+      </section>
+
       <div className="flex flex-wrap gap-1 border-b border-border">
         {TABS.map((t) => {
           const activo = t.id === tab
-          const cant = t.id === 'pendientes' ? pendientes.length : t.id === 'cobradas' ? cobradas.length : saldos.length
+          const cant =
+            t.id === 'pendientes' ? pendientes.length : t.id === 'cobradas' ? cobradas.length : saldos.length
           return (
             <Link
               key={t.id}
-              href={`/dashboard/facturacion?tab=${t.id}`}
+              href={hrefTab(t.id)}
               className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
                 activo
                   ? 'border-primary text-primary'
@@ -130,7 +223,7 @@ export default async function FacturacionPage({
                 {pendientes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="h-20 text-center text-sm text-muted-foreground">
-                      No hay facturas pendientes. 🎉
+                      No hay facturas pendientes para este día.
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -178,7 +271,7 @@ export default async function FacturacionPage({
                 {cobradas.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-20 text-center text-sm text-muted-foreground">
-                      Todavía no hay facturas cobradas.
+                      No hay facturas cobradas para este día.
                     </TableCell>
                   </TableRow>
                 ) : null}
