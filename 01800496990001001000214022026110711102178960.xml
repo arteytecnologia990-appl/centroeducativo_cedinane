@@ -1,0 +1,163 @@
+<rDE xmlns="http://ekuatia.set.gov.py/sifen/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ekuatia.set.gov.py/sifen/xsd siRecepDE_Ekuatiai_v150.xsd">
+    <dVerFor>150</dVerFor>
+    
+<DE Id="01800496990001001000214022026110711102178960">
+        <dDVId>0</dDVId>
+        <dFecFirma>2026-11-07T10:39:31</dFecFirma>
+        <dSisFact>2</dSisFact>
+        <gOpeDE>
+            <iTipEmi>1</iTipEmi>
+            <dDesTipEmi>Normal</dDesTipEmi>
+            <dCodSeg>110217896</dCodSeg>
+        </gOpeDE>
+        <gTimb>
+            <iTiDE>1</iTiDE>
+            <dDesTiDE>Factura electrónica</dDesTiDE>
+            <dNumTim>18541048</dNumTim>
+            <dEst>001</dEst>
+            <dPunExp>001</dPunExp>
+            <dNumDoc>0002140</dNumDoc>
+            <dFeIniT>2025-12-24</dFeIniT>
+        </gTimb>
+        <gDatGralOpe>
+            <dFeEmiDE>2026-11-07T10:39:31</dFeEmiDE>
+            <gOpeCom>
+                <iTipTra>2</iTipTra>
+                <dDesTipTra>Prestación de servicios</dDesTipTra>
+                <iTImp>1</iTImp>
+                <dDesTImp>IVA</dDesTImp>
+                <cMoneOpe>PYG</cMoneOpe>
+                <dDesMoneOpe>Guaraní</dDesMoneOpe>
+                <gOblAfe>
+                    <cOblAfe>211</cOblAfe>
+                    <dDesOblAfe>IMPUESTO AL VALOR AGREGADO - GRAVADAS Y EXONERADAS - EXPORTADORES</dDesOblAfe>
+                </gOblAfe>
+                <gOblAfe>
+                    <cOblAfe>700</cOblAfe>
+                    <dDesOblAfe>IMPUESTO A LA RENTA EMPRESARIAL - RÉGIMEN GENERAL</dDesOblAfe>
+                </gOblAfe>
+            </gOpeCom>
+            <gEmis>
+                <dRucEm>80049699</dRucEm>
+                <dDVEmi>0</dDVEmi>
+                <iTipCont>2</iTipCont>
+                <dNomEmi>ASOCIACION CIVIL SIN FINES DE LUCRO DE CAPACIDAD RESTRINGIDA "CENTRO DE DESARROLLO INTEGRAL PARA NIÑOS Y ADOLESCENTES CON NECESIDADES EDUCATIVAS ESPECIALES (CEDINANE)  </dNomEmi>
+                <dDirEmi>CALLE, TTE. CAÑETE Y AUDITORES DEL CHACO</dDirEmi>
+                <dNumCas>0</dNumCas>
+                <cDepEmi>1</cDepEmi>
+                <dDesDepEmi>CAPITAL</dDesDepEmi>
+                <cCiuEmi>1</cCiuEmi>
+                <dDesCiuEmi>ASUNCION (DISTRITO)</dDesCiuEmi>
+                <dTelEmi>(021)299001</dTelEmi>
+                <dEmailE>CEDINANE@GMAIL.COM</dEmailE>
+                <gActEco>
+                    <cActEco>86909</cActEco>
+                    <dDesActEco>Otras actividades relacionadas con la salud humana</dDesActEco>
+                </gActEco>
+                <gActEco>
+                    <cActEco>94999</cActEco>
+                    <dDesActEco>Actividades de las sociedades literarias, cívicas y sociales y otras organizaciones n.c.p.</dDesActEco>
+                </gActEco>
+            </gEmis>
+            <gDatRec>
+                <iNatRec>1</iNatRec>
+                <iTiOpe>2</iTiOpe>
+                <cPaisRec>PRY</cPaisRec>
+                <dDesPaisRe>Paraguay</dDesPaisRe>
+                <iTiContRec>1</iTiContRec>
+                <dRucRec>2078569</dRucRec>
+                <dDVRec>0</dDVRec>
+                <dNomRec>ALBERTO TOMAS CABALLERO SANCHEZ</dNomRec>
+            </gDatRec>
+        </gDatGralOpe>
+        <gDtipDE>
+            <gCamFE>
+                <iIndPres>2</iIndPres>
+                <dDesIndPres>Operación electrónica</dDesIndPres>
+            </gCamFE>
+            <gCamCond>
+                <iCondOpe>1</iCondOpe>
+                <dDCondOpe>Contado</dDCondOpe>
+                <gPaConEIni>
+                    <iTiPago>1</iTiPago>
+                    <dDesTiPag>Efectivo</dDesTiPag>
+                    <dMonTiPag>360000</dMonTiPag>
+                    <cMoneTiPag>PYG</cMoneTiPag>
+                    <dDMoneTiPag>Guaraní</dDMoneTiPag>
+                </gPaConEIni>
+            </gCamCond>
+            <gCamItem>
+                <dDesProSer>Sesión Psicopedagogía 07/11 Usuario: Rodolfo Caballero</dDesProSer>
+                <cUniMed>77</cUniMed>
+                <dDesUniMed>UNI</dDesUniMed>
+                <dCantProSer>2</dCantProSer>
+                <gValorItem>
+                    <dPUniProSer>120000</dPUniProSer>
+                    <dTotBruOpeItem>240000</dTotBruOpeItem>
+                    <gValorRestaItem>
+                        <dDescItem>0</dDescItem>
+                        <dTotOpeItem>240000</dTotOpeItem>
+                    </gValorRestaItem>
+                </gValorItem>
+                <gCamIVA>
+                    <iAfecIVA>1</iAfecIVA>
+                    <dDesAfecIVA>Gravado IVA</dDesAfecIVA>
+                    <dPropIVA>100</dPropIVA>
+                    <dTasaIVA>10</dTasaIVA>
+                    <dBasGravIVA>218182</dBasGravIVA>
+                    <dLiqIVAItem>21818</dLiqIVAItem>
+                    <dBasExe>0</dBasExe>
+                </gCamIVA>
+            </gCamItem>
+            <gCamItem>
+                <dDesProSer>Sesión Psicopedagogía 07/11 Usuario: Emma Caballero</dDesProSer>
+                <cUniMed>77</cUniMed>
+                <dDesUniMed>UNI</dDesUniMed>
+                <dCantProSer>1</dCantProSer>
+                <gValorItem>
+                    <dPUniProSer>120000</dPUniProSer>
+                    <dTotBruOpeItem>120000</dTotBruOpeItem>
+                    <gValorRestaItem>
+                        <dDescItem>0</dDescItem>
+                        <dTotOpeItem>120000</dTotOpeItem>
+                    </gValorRestaItem>
+                </gValorItem>
+                <gCamIVA>
+                    <iAfecIVA>1</iAfecIVA>
+                    <dDesAfecIVA>Gravado IVA</dDesAfecIVA>
+                    <dPropIVA>100</dPropIVA>
+                    <dTasaIVA>10</dTasaIVA>
+                    <dBasGravIVA>109091</dBasGravIVA>
+                    <dLiqIVAItem>10909</dLiqIVAItem>
+                    <dBasExe>0</dBasExe>
+                </gCamIVA>
+            </gCamItem>
+        </gDtipDE>
+        <gTotSub>
+            <dSubExe>0</dSubExe>
+            <dSubExo>0</dSubExo>
+            <dSub5>0</dSub5>
+            <dSub10>360000</dSub10>
+            <dTotOpe>360000</dTotOpe>
+            <dTotDesc>0</dTotDesc>
+            <dTotDescGlotem>0</dTotDescGlotem>
+            <dTotAntItem>0</dTotAntItem>
+            <dTotAnt>0</dTotAnt>
+            <dPorcDescTotal>0</dPorcDescTotal>
+            <dDescTotal>0</dDescTotal>
+            <dAnticipo>0</dAnticipo>
+            <dRedon>0</dRedon>
+            <dTotGralOpe>360000</dTotGralOpe>
+            <dIVA5>0</dIVA5>
+            <dIVA10>32727</dIVA10>
+            <dLiqTotIVA5>0</dLiqTotIVA5>
+            <dLiqTotIVA10>0</dLiqTotIVA10>
+            <dTotIVA>32727</dTotIVA>
+            <dBaseGrav5>0</dBaseGrav5>
+            <dBaseGrav10>327273</dBaseGrav10>
+            <dTBasGraIVA>327273</dTBasGraIVA>
+        </gTotSub>
+    </DE>
+<dsig:Signature xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" Id="id-c890e33c1876cbd76626453514b23d80"><dsig:SignedInfo><dsig:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><dsig:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><dsig:Reference Id="Id-b2ca08ab-cb78-42d0-beeb-b1706eb297aa" URI="#01800496990001001000214022026110711102178960"><dsig:Transforms><dsig:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></dsig:Transforms><dsig:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><dsig:DigestValue>4PTVNlEZCZ5CRiGMEzQn9A+fmD1SuNnvs42nHZ6kwXA=</dsig:DigestValue></dsig:Reference></dsig:SignedInfo><dsig:SignatureValue Id="value-id-c890e33c1876cbd76626453514b23d80">EcPLuOGL7XCMQhfhmsIHlIvkXIH8uZ7/TkEx0ZR9iSJ1WF6jru07hIsMQXkwOvQRxTYh3AQZN3JjcsQ+NOKA8TE4ld+p/WtNi+N4et8G/xOE5pH+W2Two352RZxWoGnnUILoabPIgMg4TScuLz5N8nTh9wOEBGE0Y6cpWIuXlrSHvESC0KaHeM552YeGq6co/fTIQOFuHNZDwutgOYdgZHKxouIXSSr8AUoZttZQTD5BgBb2V/24d3yUgJXjIHwwR9mv17oL4/s7e/RgMNvS1y1LrG79uYvoOxc8imdCMblfnOwft6I2jpuWlq+P1qTugqXqcOBl4vTiCYD/0zdjIg==</dsig:SignatureValue><dsig:KeyInfo><dsig:X509Data><dsig:X509Certificate>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</dsig:X509Certificate></dsig:X509Data></dsig:KeyInfo></dsig:Signature><gCamFuFD><dCarQR>https://ekuatia.set.gov.py/consultas/qr?nVersion=150&amp;Id=01800496990001001000214022026110711102178960&amp;dFeEmiDE=323032362d31312d30375431303a33393a3331&amp;dRucRec=2078569&amp;dTotGralOpe=360000&amp;dTotIVA=32727&amp;cItems=2&amp;DigestValue=345054564e6c455a435a35435269474d457a516e39412b666d443153754e6e767334326e485a366b7758413d&amp;IdCSC=0001&amp;cHashQR=c23182d507a29e553716d94f2d5a8aaa551ceb23d575d4e7028a08c353ecb15e</dCarQR></gCamFuFD>
+<dProtAut>3725900426</dProtAut>
+<xContEv></xContEv></rDE>
