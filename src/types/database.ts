@@ -569,6 +569,47 @@ export type Database = {
           },
         ]
       }
+      factura_items: {
+        Row: {
+          base_gravada: number
+          cantidad: number
+          descripcion: string
+          factura_cdc: string
+          id: string
+          iva: number
+          orden: number
+          precio_unitario: number
+        }
+        Insert: {
+          base_gravada?: number
+          cantidad?: number
+          descripcion: string
+          factura_cdc: string
+          id?: string
+          iva?: number
+          orden?: number
+          precio_unitario?: number
+        }
+        Update: {
+          base_gravada?: number
+          cantidad?: number
+          descripcion?: string
+          factura_cdc?: string
+          id?: string
+          iva?: number
+          orden?: number
+          precio_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factura_items_factura_cdc_fkey"
+            columns: ["factura_cdc"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["cdc"]
+          },
+        ]
+      }
       facturas: {
         Row: {
           cdc: string

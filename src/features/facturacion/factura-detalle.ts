@@ -1,5 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 
+export type FacturaItem = {
+  id: string
+  descripcion: string
+  cantidad: number
+  precio_unitario: number
+  base_gravada: number
+  iva: number
+  orden: number
+}
+
 export type FacturaDetalle = {
   cdc: string
   numero_documento: string | null
@@ -14,10 +24,20 @@ export type FacturaDetalle = {
   monto_gravado_5: number | null
   iva_5: number | null
   exento: number | null
+  items: FacturaItem[]
 }
 
 export async function obtenerFactura(cdc: string): Promise<FacturaDetalle | null> {
   const supabase = await createClient()
-  const { data } = await supabase.from('facturas').select('*').eq('cdc', cdc).maybeSingle()
-  return (data as FacturaDetalle | null) ?? null
+  const [{ data: factura }, { data: items }] = await Promise.all([
+    supabase.from('facturas').select('*').eq('cdc', cdc).maybeSingle(),
+    supabase.from('factura_items').select('*').eq('factura_cdc', cdc).order('orden'),
+  ])
+
+  if (!factura) return null
+
+  return {
+    ...(factura as Omit<FacturaDetalle, 'items'>),
+    items: (items ?? []) as FacturaItem[],
+  }
 }

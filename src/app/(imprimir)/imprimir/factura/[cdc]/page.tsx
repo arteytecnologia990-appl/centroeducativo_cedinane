@@ -53,7 +53,30 @@ export default async function FacturaPreviewPage({ params }: { params: Promise<{
           </div>
         </div>
 
-        <table className="w-full border-t border-slate-300 text-sm">
+        {f.items.length > 0 ? (
+          <table className="w-full border-t border-slate-300 text-sm">
+            <thead>
+              <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+                <th className="py-1.5 text-left font-medium">Descripción</th>
+                <th className="py-1.5 text-right font-medium">Cant.</th>
+                <th className="py-1.5 text-right font-medium">Precio</th>
+                <th className="py-1.5 text-right font-medium">IVA</th>
+              </tr>
+            </thead>
+            <tbody>
+              {f.items.map((it) => (
+                <tr key={it.id} className="border-t border-slate-200 align-top">
+                  <td className="py-1.5 pr-2">{it.descripcion}</td>
+                  <td className="py-1.5 text-right tabular-nums">{it.cantidad}</td>
+                  <td className="py-1.5 text-right tabular-nums">{guaranies(Number(it.precio_unitario))}</td>
+                  <td className="py-1.5 text-right tabular-nums">{guaranies(Number(it.iva))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : null}
+
+        <table className="mt-3 w-full border-t border-slate-300 text-sm">
           <tbody>
             <tr>
               <td className="py-1.5 text-slate-600">Gravado 10 %</td>
