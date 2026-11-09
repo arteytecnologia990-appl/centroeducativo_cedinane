@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Banknote, CalendarDays, Eye } from 'lucide-react'
+import { Banknote, CalendarDays, Eye, FileText } from 'lucide-react'
 import { listarCobros, listarFacturas, listarSaldos, normalizarDocumento } from '@/features/facturacion/queries'
 import { Volver } from '@/components/layout/volver'
 import { ScrollADia } from '@/components/layout/scroll-a-dia'
@@ -174,6 +174,14 @@ export default async function FacturacionPage({
                         className="text-muted-foreground transition-colors hover:text-foreground"
                       >
                         <Eye className="size-4" />
+                      </Link>
+                      <Link
+                        href={`/imprimir/factura/${f.cdc}`}
+                        title="Ver / imprimir factura"
+                        aria-label="Ver / imprimir factura"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <FileText className="size-4" />
                       </Link>
                     </div>
                   </TableCell>
