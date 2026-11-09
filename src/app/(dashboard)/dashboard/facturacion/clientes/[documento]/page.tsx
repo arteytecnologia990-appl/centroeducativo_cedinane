@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 import { obtenerCliente } from '@/features/facturacion/queries'
+import { CobroForm } from '@/features/facturacion/components/cobro-form'
+import { listarBancos } from '@/features/bancos/queries'
 import { Volver } from '@/components/layout/volver'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
@@ -17,6 +19,8 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
   const { documento } = await params
   const cliente = await obtenerCliente(decodeURIComponent(documento))
   if (cliente.facturas.length === 0 && cliente.cobros.length === 0) notFound()
+  const bancos = await listarBancos()
+  const hoy = new Date().toISOString().slice(0, 10)
 
   return (
     <div className="space-y-6">
@@ -34,6 +38,16 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
           <p className="font-heading text-2xl font-semibold text-foreground">{guaranies(cliente.saldo)}</p>
         </div>
       </div>
+
+      <section id="cobro" className="space-y-3 scroll-mt-4">
+        <h2 className="font-heading text-lg font-semibold text-foreground">Registrar cobro</h2>
+        <CobroForm
+          documento={cliente.documento}
+          bancos={bancos}
+          hoy={hoy}
+          next={`/dashboard/facturacion/clientes/${cliente.documento}`}
+        />
+      </section>
 
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold text-foreground">Facturas</h2>

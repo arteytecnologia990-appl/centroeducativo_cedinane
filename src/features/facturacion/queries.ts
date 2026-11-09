@@ -59,12 +59,21 @@ export async function listarSaldos(): Promise<ClienteSaldo[]> {
 
 export async function listarFacturas() {
   const supabase = await createClient()
-  const { data } = await supabase
-    .from('facturas')
-    .select('*')
-    .order('fecha_emision', { ascending: false })
-    .limit(200)
-  return data ?? []
+  const [{ data }, { data: cobros }] = await Promise.all([
+    supabase.from('facturas').select('*').order('fecha_emision', { ascending: false }).limit(200),
+    supabase.from('cobros').select('factura_cdc, monto').not('factura_cdc', 'is', null),
+  ])
+
+  const cobradoPorFactura = new Map<string, number>()
+  for (const c of cobros ?? []) {
+    if (!c.factura_cdc) continue
+    cobradoPorFactura.set(c.factura_cdc, (cobradoPorFactura.get(c.factura_cdc) ?? 0) + Number(c.monto))
+  }
+
+  return (data ?? []).map((f) => {
+    const pagado = cobradoPorFactura.get(f.cdc) ?? 0
+    return { ...f, cobrado: pagado, saldo: Number(f.monto_total ?? 0) - pagado }
+  })
 }
 
 export async function listarCobros() {
