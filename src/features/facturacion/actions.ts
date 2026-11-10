@@ -298,6 +298,13 @@ async function sincronizarIngresoDeFactura(
 
   if (!ingreso) return
 
+  await supabase
+    .from('ingreso_facturas')
+    .upsert(
+      { ingreso_id: ingreso.id, factura_cdc: facturaCdc },
+      { onConflict: 'ingreso_id,factura_cdc', ignoreDuplicates: true }
+    )
+
   const { data: items } = await supabase
     .from('factura_items')
     .select('*')
