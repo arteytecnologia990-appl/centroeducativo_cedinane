@@ -245,8 +245,76 @@ export async function crearCobro(formData: FormData): Promise<void> {
 
   await supabase.from('cobro_pagos').insert(pagos.map((p) => ({ ...p, cobro_id: cobro.id })))
 
+  if (facturaCdc) {
+    await sincronizarIngresoDeFactura(supabase, facturaCdc, pagos.length > 1 ? 'mixto' : pagos[0].forma_pago)
+  }
+
   revalidatePath('/dashboard/facturacion')
+  revalidatePath('/dashboard/ingresos')
   redirect(next ? `${next}?cobrado=1` : '/dashboard/ingresos?cobrado=1')
+}
+
+/**
+ * Cada cobro de factura crea (o actualiza) el ingreso correspondiente,
+ * para ver todo unificado en la sección Ingresos.
+ */
+async function sincronizarIngresoDeFactura(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  facturaCdc: string,
+  formaPago: string
+) {
+  const { data: factura } = await supabase
+    .from('facturas')
+    .select('cdc, documento_receptor, nombre_informado, monto_total')
+    .eq('cdc', facturaCdc)
+    .maybeSingle()
+
+  if (!factura) return
+
+  const { data: existente } = await supabase
+    .from('ingresos')
+    .select('id')
+    .eq('factura_cdc', facturaCdc)
+    .limit(1)
+    .maybeSingle()
+
+  if (existente) {
+    await supabase.from('ingresos').update({ met_pago: formaPago }).eq('id', existente.id)
+    return
+  }
+
+  const { data: ingreso } = await supabase
+    .from('ingresos')
+    .insert({
+      usuario: factura.nombre_informado ?? factura.documento_receptor ?? '—',
+      documento: factura.documento_receptor,
+      terapia: 'Servicios facturados (DTE)',
+      total: Number(factura.monto_total ?? 0),
+      met_pago: formaPago,
+      factura_cdc: facturaCdc,
+    })
+    .select('id')
+    .single()
+
+  if (!ingreso) return
+
+  const { data: items } = await supabase
+    .from('factura_items')
+    .select('*')
+    .eq('factura_cdc', facturaCdc)
+    .order('orden')
+
+  if (items && items.length > 0) {
+    await supabase.from('ingreso_items').insert(
+      items.map((i) => ({
+        ingreso_id: ingreso.id,
+        terapia: i.descripcion,
+        precio_unitario: Number(i.precio_unitario),
+        cantidad: Number(i.cantidad),
+        total: Number(i.base_gravada) + Number(i.iva),
+      }))
+    )
+  }
 }
 
 const limpiarXml = (v: string | null): string | null => {
