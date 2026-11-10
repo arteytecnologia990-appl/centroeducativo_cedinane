@@ -178,7 +178,15 @@ export default async function IngresoDetallePage({
                     {ingreso.cobros.map((c) => (
                       <TableRow key={c.id}>
                         <TableCell className="tabular-nums">{c.fecha.slice(0, 10)}</TableCell>
-                        <TableCell className="capitalize">{c.forma_pago}</TableCell>
+                        <TableCell className="capitalize">
+                          {c.forma_pago !== 'mixto'
+                            ? c.forma_pago
+                            : c.pagos.length > 0
+                              ? c.pagos
+                                  .map((p) => `${p.forma_pago} ${guaranies(p.monto)}`)
+                                  .join(' · ')
+                              : 'mixto'}
+                        </TableCell>
                         <TableCell className="tabular-nums text-muted-foreground">
                           {c.nro_transferencia ?? '—'}
                         </TableCell>

@@ -100,6 +100,7 @@ export type IngresoCobro = {
   forma_pago: string
   referencia: string | null
   nro_transferencia: string | null
+  pagos: { forma_pago: string; monto: number }[]
 }
 
 export async function obtenerIngreso(id: string) {
@@ -118,6 +119,14 @@ export async function obtenerIngreso(id: string) {
         .order('fecha', { ascending: false })
     : { data: [] as IngresoCobro[] }
 
+  const idsCobros = (cobros ?? []).map((c) => c.id)
+  const { data: pagos } = idsCobros.length > 0
+    ? await supabase
+        .from('cobro_pagos')
+        .select('cobro_id, forma_pago, monto')
+        .in('cobro_id', idsCobros)
+    : { data: [] as { cobro_id: string; forma_pago: string; monto: number }[] }
+
   return {
     ...ingreso,
     items: (items ?? []).map((i) => ({
@@ -128,7 +137,13 @@ export async function obtenerIngreso(id: string) {
       cantidad: Number(i.cantidad),
       total: Number(i.total),
     })) as IngresoItem[],
-    cobros: (cobros ?? []).map((c) => ({ ...c, monto: Number(c.monto) })) as IngresoCobro[],
+    cobros: (cobros ?? []).map((c) => ({
+      ...c,
+      monto: Number(c.monto),
+      pagos: (pagos ?? [])
+        .filter((p) => p.cobro_id === c.id)
+        .map((p) => ({ forma_pago: p.forma_pago, monto: Number(p.monto) })),
+    })) as IngresoCobro[],
   }
 }
 
