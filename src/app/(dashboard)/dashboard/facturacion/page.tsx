@@ -37,13 +37,6 @@ export default async function FacturacionPage({
     year: 'numeric',
     timeZone: 'UTC',
   })
-  const dias = Array.from({ length: 31 }, (_, i) => {
-    const d = new Date(`${dia}T12:00:00Z`)
-    d.setUTCDate(d.getUTCDate() + i - 15)
-    const iso = d.toISOString().slice(0, 10)
-    const semana = d.toLocaleDateString('es-PY', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
-    return { iso, label: semana.charAt(0).toUpperCase() + semana.slice(1), num: d.getUTCDate() }
-  })
   const fechaDia = (f: string | null) => (f ?? '').slice(0, 10)
 
   const facturasDelDia = facturas.filter((f) => fechaDia(f.fecha_emision) === dia)
@@ -64,6 +57,15 @@ export default async function FacturacionPage({
     else acc.cobrado += 1
     infoPorDia.set(k, acc)
   }
+
+  // Mostrar todos los días que tienen facturas + hoy + el día seleccionado
+  const dias = Array.from(new Set([...infoPorDia.keys(), hoyISO, dia]))
+    .sort()
+    .map((iso) => {
+      const d = new Date(`${iso}T12:00:00Z`)
+      const semana = d.toLocaleDateString('es-PY', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
+      return { iso, label: semana.charAt(0).toUpperCase() + semana.slice(1), num: d.getUTCDate() }
+    })
 
   return (
     <div className="space-y-6">
