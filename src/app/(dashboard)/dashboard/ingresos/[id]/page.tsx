@@ -160,13 +160,48 @@ export default async function IngresoDetallePage({
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold text-foreground">Cobro</h2>
         {vinculadas.length > 0 ? (
-          <CobroForm
-            documento={ingreso.documento ?? ''}
-            bancos={bancos}
-            hoy={hoy}
-            next={`/dashboard/ingresos/${ingreso.id}`}
-            facturaCdc={ingreso.factura_cdc ?? vinculadas[0].cdc}
-          />
+          <>
+            {ingreso.cobros.length > 0 ? (
+              <div className="overflow-hidden rounded-lg border border-success/40">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Medio</TableHead>
+                      <TableHead>N° transf.</TableHead>
+                      <TableHead>Referencia</TableHead>
+                      <TableHead className="text-right">Monto</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {ingreso.cobros.map((c) => (
+                      <TableRow key={c.id}>
+                        <TableCell className="tabular-nums">{c.fecha.slice(0, 10)}</TableCell>
+                        <TableCell className="capitalize">{c.forma_pago}</TableCell>
+                        <TableCell className="tabular-nums text-muted-foreground">
+                          {c.nro_transferencia ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{c.referencia ?? '—'}</TableCell>
+                        <TableCell className="text-right font-medium tabular-nums text-success">
+                          {guaranies(c.monto)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="flex justify-end border-t border-success/30 px-4 py-2 text-sm text-success">
+                  Total cobrado: <strong className="ml-1 tabular-nums">{guaranies(cobrado)}</strong>
+                </div>
+              </div>
+            ) : null}
+            <CobroForm
+              documento={ingreso.documento ?? ''}
+              bancos={bancos}
+              hoy={hoy}
+              next={`/dashboard/ingresos/${ingreso.id}`}
+              facturaCdc={ingreso.factura_cdc ?? vinculadas[0].cdc}
+            />
+          </>
         ) : (
           <p className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
             Vinculá al menos una factura para habilitar el cobro.

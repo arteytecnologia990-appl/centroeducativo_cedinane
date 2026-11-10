@@ -93,6 +93,15 @@ export type IngresoItem = {
   total: number
 }
 
+export type IngresoCobro = {
+  id: string
+  fecha: string
+  monto: number
+  forma_pago: string
+  referencia: string | null
+  nro_transferencia: string | null
+}
+
 export async function obtenerIngreso(id: string) {
   const supabase = await createClient()
   const [{ data: ingreso }, { data: items }] = await Promise.all([
@@ -100,6 +109,15 @@ export async function obtenerIngreso(id: string) {
     supabase.from('ingreso_items').select('*').eq('ingreso_id', id).order('id', { ascending: true }),
   ])
   if (!ingreso) return null
+
+  const { data: cobros } = ingreso.factura_cdc
+    ? await supabase
+        .from('cobros')
+        .select('id, fecha, monto, forma_pago, referencia, nro_transferencia')
+        .eq('factura_cdc', ingreso.factura_cdc)
+        .order('fecha', { ascending: false })
+    : { data: [] as IngresoCobro[] }
+
   return {
     ...ingreso,
     items: (items ?? []).map((i) => ({
@@ -110,6 +128,7 @@ export async function obtenerIngreso(id: string) {
       cantidad: Number(i.cantidad),
       total: Number(i.total),
     })) as IngresoItem[],
+    cobros: (cobros ?? []).map((c) => ({ ...c, monto: Number(c.monto) })) as IngresoCobro[],
   }
 }
 
