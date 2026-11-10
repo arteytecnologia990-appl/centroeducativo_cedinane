@@ -90,9 +90,11 @@ export default async function IngresoDetallePage({
               ))}
               {ingreso.items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
-                    Sin detalle.
-                  </TableCell>
+                  <TableCell className="font-medium">Servicios facturados (DTE)</TableCell>
+                  <TableCell className="text-muted-foreground">—</TableCell>
+                  <TableCell className="text-right tabular-nums">{guaranies(Number(ingreso.total))}</TableCell>
+                  <TableCell className="text-right tabular-nums">1</TableCell>
+                  <TableCell className="text-right tabular-nums">{guaranies(Number(ingreso.total))}</TableCell>
                 </TableRow>
               ) : null}
             </TableBody>
