@@ -175,27 +175,24 @@ export default async function IngresoDetallePage({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {ingreso.cobros.map((c) => (
-                      <TableRow key={c.id}>
-                        <TableCell className="tabular-nums">{c.fecha.slice(0, 10)}</TableCell>
-                        <TableCell className="capitalize">
-                          {c.forma_pago !== 'mixto'
-                            ? c.forma_pago
-                            : c.pagos.length > 0
-                              ? c.pagos
-                                  .map((p) => `${p.forma_pago} ${guaranies(p.monto)}`)
-                                  .join(' · ')
-                              : 'mixto'}
-                        </TableCell>
-                        <TableCell className="tabular-nums text-muted-foreground">
-                          {c.nro_transferencia ?? '—'}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{c.referencia ?? '—'}</TableCell>
-                        <TableCell className="text-right font-medium tabular-nums text-success">
-                          {guaranies(c.monto)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {ingreso.cobros.flatMap((c) => {
+                      const pagos = c.pagos.length > 0 ? c.pagos : [{ forma_pago: c.forma_pago, monto: c.monto }]
+                      return pagos.map((p, i) => (
+                        <TableRow key={`${c.id}-${i}`}>
+                          <TableCell className="tabular-nums">{i === 0 ? c.fecha.slice(0, 10) : ''}</TableCell>
+                          <TableCell className="capitalize">{p.forma_pago}</TableCell>
+                          <TableCell className="tabular-nums text-muted-foreground">
+                            {i === 0 ? (c.nro_transferencia ?? '—') : ''}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {i === 0 ? (c.referencia ?? '—') : ''}
+                          </TableCell>
+                          <TableCell className="text-right font-medium tabular-nums text-success">
+                            {guaranies(p.monto)}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    })}
                   </TableBody>
                 </Table>
                 <div className="flex justify-end border-t border-success/30 px-4 py-2 text-sm text-success">
