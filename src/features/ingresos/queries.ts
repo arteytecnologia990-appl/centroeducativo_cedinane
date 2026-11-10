@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizarDocumento } from '@/features/facturacion/queries'
 
 export type Ingreso = {
@@ -141,7 +142,8 @@ export async function listarFacturasCliente(documento: string) {
 }
 
 export async function listarFacturasVinculadas(ingresoId: string) {
-  const supabase = await createClient()
+  // service_role: los vínculos se crean vía sincronización (no dependen de RLS del usuario)
+  const supabase = createAdminClient()
   const { data: links } = await supabase.from('ingreso_facturas').select('factura_cdc').eq('ingreso_id', ingresoId)
   const cdcs = (links ?? []).map((l) => l.factura_cdc)
   if (cdcs.length === 0) return []
