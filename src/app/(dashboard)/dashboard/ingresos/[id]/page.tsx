@@ -27,6 +27,7 @@ export default async function IngresoDetallePage({
   const vinculadasCdc = new Set(vinculadas.map((v) => v.cdc))
   const facturado = vinculadas.reduce((s, f) => s + Number(f.monto_total), 0)
   const diferencia = Number(ingreso.total) - facturado
+  const cobrado = ingreso.cobros.reduce((s, c) => s + c.monto, 0)
   const facturasDisponibles = facturas.filter(
     (f) => Number(f.monto_total) <= diferencia && !vinculadasCdc.has(f.cdc)
   )
