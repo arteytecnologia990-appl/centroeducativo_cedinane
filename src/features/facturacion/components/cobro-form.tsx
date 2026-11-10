@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 const claseInput =
-  'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
+  'h-8 w-full rounded-lg border border-border bg-muted/40 px-2.5 text-sm text-foreground outline-none transition-colors hover:border-foreground/25 focus-visible:border-ring focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-ring/50 dark:border-input dark:bg-input/40 dark:hover:border-foreground/30 dark:focus-visible:bg-input/20'
 
 type Cuenta = { id: string; numero: string; tipo: string }
 type Banco = { id: string; nombre: string; cuentas: Cuenta[] }
