@@ -46,6 +46,7 @@ export default async function ClientePage({ params }: { params: Promise<{ docume
           bancos={bancos}
           hoy={hoy}
           next={`/dashboard/facturacion/clientes/${cliente.documento}`}
+          facturaCdc={cliente.facturas[0]?.cdc ?? null}
         />
       </section>
 
