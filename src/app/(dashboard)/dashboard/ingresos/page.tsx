@@ -1,5 +1,6 @@
 import { listarAlumnosPacientes, listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
-import { listarFacturas, normalizarDocumento } from '@/features/facturacion/queries'
+import { listarSaldos, listarCobros, listarFacturas, normalizarDocumento } from '@/features/facturacion/queries'
+import { crearIngresoDesdeFactura } from '@/features/ingresos/actions-factura'
 import { listarSesiones } from '@/features/definiciones/queries'
 import { listarEmpleadosSalario } from '@/features/salarios/queries'
 import Link from 'next/link'
@@ -32,6 +33,8 @@ export default async function IngresosPage({
   const total = ingresos.reduce((s, i) => s + i.total, 0)
 
   const facturas = await listarFacturas()
+  const saldosCliente = await listarSaldos()
+  const ultimosCobros = await listarCobros()
   const ingresoPorCdc = new Map(ingresos.filter((i) => i.factura_cdc).map((i) => [i.factura_cdc as string, i.id]))
   const dtePendientes = facturas.filter((f) => f.saldo > 0)
   const dteCobradas = facturas.filter((f) => f.saldo <= 0)
@@ -298,7 +301,12 @@ export default async function IngresosPage({
                           Ver ingreso
                         </Link>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Sin ingreso</span>
+                        <form action={crearIngresoDesdeFactura}>
+                          <input type="hidden" name="cdc" value={f.cdc} />
+                          <button type="submit" className="text-xs text-warning hover:underline">
+                            + Crear ingreso
+                          </button>
+                        </form>
                       )}
                     </TableCell>
                     <TableCell>
@@ -375,7 +383,12 @@ export default async function IngresosPage({
                           Ver ingreso
                         </Link>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Sin ingreso</span>
+                        <form action={crearIngresoDesdeFactura}>
+                          <input type="hidden" name="cdc" value={f.cdc} />
+                          <button type="submit" className="text-xs text-warning hover:underline">
+                            + Crear ingreso
+                          </button>
+                        </form>
                       )}
                     </TableCell>
                     <TableCell>
@@ -394,6 +407,87 @@ export default async function IngresosPage({
                 <TableRow>
                   <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
                     Todavía no hay facturas cobradas.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-heading text-lg font-semibold text-foreground">Saldos por cliente</h2>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Documento</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead className="text-right">Facturas</TableHead>
+                <TableHead className="text-right">Facturado</TableHead>
+                <TableHead className="text-right">Cobrado</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="w-20">Cobrar</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {saldosCliente.map((s) => (
+                <TableRow key={s.documento}>
+                  <TableCell className="tabular-nums">{s.documento}</TableCell>
+                  <TableCell className="font-medium">{s.nombre ?? '—'}</TableCell>
+                  <TableCell className="text-right tabular-nums">{s.cantidad}</TableCell>
+                  <TableCell className="text-right tabular-nums">{guaranies(s.facturado)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{guaranies(s.cobrado)}</TableCell>
+                  <TableCell className="text-right font-medium tabular-nums">{guaranies(s.saldo)}</TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/dashboard/facturacion/clientes/${s.documento}#cobro`}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Cobrar
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {saldosCliente.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
+                    Sin DTEs importados.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-heading text-lg font-semibold text-foreground">Últimos cobros</h2>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Documento</TableHead>
+                <TableHead>Forma</TableHead>
+                <TableHead>Referencia</TableHead>
+                <TableHead className="text-right">Monto</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ultimosCobros.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell className="tabular-nums">{(c.fecha ?? '').slice(0, 10)}</TableCell>
+                  <TableCell className="tabular-nums">{c.documento_receptor}</TableCell>
+                  <TableCell className="capitalize">{c.forma_pago}</TableCell>
+                  <TableCell className="text-muted-foreground">{c.referencia ?? '—'}</TableCell>
+                  <TableCell className="text-right tabular-nums">{guaranies(Number(c.monto))}</TableCell>
+                </TableRow>
+              ))}
+              {ultimosCobros.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
+                    Sin cobros registrados.
                   </TableCell>
                 </TableRow>
               ) : null}
