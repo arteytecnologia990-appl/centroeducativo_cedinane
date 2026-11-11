@@ -1,5 +1,5 @@
 import { listarAlumnosPacientes, listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
-import { listarSaldos, listarCobros, listarFacturas, normalizarDocumento } from '@/features/facturacion/queries'
+import { listarCobros, listarFacturas, normalizarDocumento } from '@/features/facturacion/queries'
 import { crearIngresoDesdeFactura } from '@/features/ingresos/actions-factura'
 import { listarSesiones } from '@/features/definiciones/queries'
 import { listarEmpleadosSalario } from '@/features/salarios/queries'
@@ -33,7 +33,6 @@ export default async function IngresosPage({
   const total = ingresos.reduce((s, i) => s + i.total, 0)
 
   const facturas = await listarFacturas()
-  const saldosCliente = await listarSaldos()
   const ultimosCobros = await listarCobros()
   const ingresoPorCdc = new Map(ingresos.filter((i) => i.factura_cdc).map((i) => [i.factura_cdc as string, i.id]))
   const hoy = new Date().toISOString().slice(0, 10)
@@ -41,7 +40,16 @@ export default async function IngresosPage({
   const dia = params.dia && /^\d{4}-\d{2}-\d{2}$/.test(params.dia) ? params.dia : hoyISO
 
   const facturasDelDia = facturas.filter((f) => (f.fecha_emision ?? '').slice(0, 10) === dia)
-  const cobrosDelDia = ultimosCobros.filter((c) => (c.fecha ?? '').slice(0, 10) === dia)
+  const facturadoPorDia = new Map<string, number>()
+  for (const f of facturas) {
+    const k = (f.fecha_emision ?? '').slice(0, 10)
+    if (k) facturadoPorDia.set(k, (facturadoPorDia.get(k) ?? 0) + Number(f.monto_total))
+  }
+  const cobradoPorDia = new Map<string, number>()
+  for (const c of ultimosCobros) {
+    const k = (c.fecha ?? '').slice(0, 10)
+    if (k) cobradoPorDia.set(k, (cobradoPorDia.get(k) ?? 0) + Number(c.monto))
+  }
   const dtePendientes = facturasDelDia.filter((f) => f.saldo > 0)
   const dteCobradas = facturasDelDia.filter((f) => f.saldo <= 0)
   const totalDtePendiente = dtePendientes.reduce((s, f) => s + f.saldo, 0)
@@ -115,13 +123,14 @@ export default async function IngresosPage({
           {dias.map((d) => {
             const activo = d.iso === dia
             const esHoy = d.iso === hoyISO
-            const monto = ingresosPorDia.get(d.iso) ?? 0
+            const facturado = facturadoPorDia.get(d.iso) ?? 0
+            const cobradoDia = cobradoPorDia.get(d.iso) ?? 0
             return (
               <Link
                 key={d.iso}
                 id={esHoy ? 'dia-hoy' : undefined}
                 href={`/dashboard/ingresos?dia=${d.iso}`}
-                className={`relative flex min-w-[76px] shrink-0 flex-col items-center rounded-md border px-1.5 py-1 text-center transition-colors ${
+                className={`relative flex min-w-[92px] shrink-0 flex-col items-center rounded-md border px-1.5 py-1 text-center transition-colors ${
                   activo
                     ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                     : esHoy
@@ -131,8 +140,15 @@ export default async function IngresosPage({
               >
                 <span className="text-[10px] font-medium uppercase">{d.label}</span>
                 <span className="text-sm font-semibold tabular-nums">{d.num}</span>
-                <span className={`text-[10px] tabular-nums ${monto > 0 ? 'font-medium' : 'opacity-50'}`}>
-                  {monto > 0 ? guaranies(monto) : '—'}
+                <span
+                  className={`text-[10px] tabular-nums ${activo ? '' : facturado > 0 ? 'font-medium' : 'opacity-40'}`}
+                >
+                  F {facturado > 0 ? guaranies(facturado) : '—'}
+                </span>
+                <span
+                  className={`text-[10px] tabular-nums ${activo ? '' : cobradoDia > 0 ? 'font-medium text-success' : 'opacity-40'}`}
+                >
+                  C {cobradoDia > 0 ? guaranies(cobradoDia) : '—'}
                 </span>
               </Link>
             )
@@ -433,86 +449,6 @@ export default async function IngresosPage({
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">Saldos por cliente</h2>
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Documento</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead className="text-right">Facturas</TableHead>
-                <TableHead className="text-right">Facturado</TableHead>
-                <TableHead className="text-right">Cobrado</TableHead>
-                <TableHead className="text-right">Saldo</TableHead>
-                <TableHead className="w-20">Cobrar</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {saldosCliente.map((s) => (
-                <TableRow key={s.documento}>
-                  <TableCell className="tabular-nums">{s.documento}</TableCell>
-                  <TableCell className="font-medium">{s.nombre ?? '—'}</TableCell>
-                  <TableCell className="text-right tabular-nums">{s.cantidad}</TableCell>
-                  <TableCell className="text-right tabular-nums">{guaranies(s.facturado)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{guaranies(s.cobrado)}</TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">{guaranies(s.saldo)}</TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/dashboard/facturacion/clientes/${s.documento}#cobro`}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Cobrar
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {saldosCliente.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
-                    Sin DTEs importados.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">Últimos cobros</h2>
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Documento</TableHead>
-                <TableHead>Forma</TableHead>
-                <TableHead>Referencia</TableHead>
-                <TableHead className="text-right">Monto</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cobrosDelDia.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="tabular-nums">{(c.fecha ?? '').slice(0, 10)}</TableCell>
-                  <TableCell className="tabular-nums">{c.documento_receptor}</TableCell>
-                  <TableCell className="capitalize">{c.forma_pago}</TableCell>
-                  <TableCell className="text-muted-foreground">{c.referencia ?? '—'}</TableCell>
-                  <TableCell className="text-right tabular-nums">{guaranies(Number(c.monto))}</TableCell>
-                </TableRow>
-              ))}
-              {cobrosDelDia.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
-                    Sin cobros registrados.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
     </div>
   )
 }
