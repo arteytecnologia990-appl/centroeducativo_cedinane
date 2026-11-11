@@ -1,8 +1,9 @@
 import { listarAlumnosPacientes, listarClientesConFacturas, listarIngresos } from '@/features/ingresos/queries'
+import { listarFacturas, normalizarDocumento } from '@/features/facturacion/queries'
 import { listarSesiones } from '@/features/definiciones/queries'
 import { listarEmpleadosSalario } from '@/features/salarios/queries'
 import Link from 'next/link'
-import { CalendarDays } from 'lucide-react'
+import { CalendarDays, FileText } from 'lucide-react'
 import { eliminarIngreso } from '@/features/ingresos/actions'
 import { IngresoForm } from '@/features/ingresos/components/ingreso-form'
 import { CobroModal } from '@/features/ingresos/components/cobro-modal'
@@ -29,6 +30,12 @@ export default async function IngresosPage({
   ])
   const profesionales = empleados.map((e) => ({ id: e.id, nombre: `${e.nombres} ${e.apellidos}` }))
   const total = ingresos.reduce((s, i) => s + i.total, 0)
+
+  const facturas = await listarFacturas()
+  const ingresoPorCdc = new Map(ingresos.filter((i) => i.factura_cdc).map((i) => [i.factura_cdc as string, i.id]))
+  const dtePendientes = facturas.filter((f) => f.saldo > 0)
+  const dteCobradas = facturas.filter((f) => f.saldo <= 0)
+  const totalDtePendiente = dtePendientes.reduce((s, f) => s + f.saldo, 0)
   const hoy = new Date().toISOString().slice(0, 10)
   const hoyISO = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
   const dia = params.dia && /^\d{4}-\d{2}-\d{2}$/.test(params.dia) ? params.dia : hoyISO
@@ -227,6 +234,173 @@ export default async function IngresosPage({
           </TableBody>
         </Table>
       </div>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="font-heading text-lg font-semibold text-foreground">Facturas (DTE)</h2>
+            <p className="text-xs text-muted-foreground">
+              {facturas.length} XML importado(s) · {dtePendientes.length} pendiente(s) por{' '}
+              {guaranies(totalDtePendiente)} · {dteCobradas.length} cobrada(s)
+            </p>
+          </div>
+          <Link
+            href="/dashboard/facturacion/importar"
+            className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Importar XML
+          </Link>
+        </div>
+
+        <div className="overflow-hidden rounded-xl border border-destructive/40 bg-destructive/5">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-destructive/30 px-4 py-2">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-destructive">
+              <span className="size-2 rounded-full bg-destructive" />
+              Pendientes de cobro
+              <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[11px] tabular-nums">
+                {dtePendientes.length}
+              </span>
+            </h3>
+            <span className="text-sm text-destructive">
+              Total: <strong className="tabular-nums">{guaranies(totalDtePendiente)}</strong>
+            </span>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>N°</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead className="text-right">Monto</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead>Ingreso</TableHead>
+                <TableHead className="w-36">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {dtePendientes.map((f) => {
+                const ingresoId = ingresoPorCdc.get(f.cdc)
+                return (
+                  <TableRow key={f.cdc}>
+                    <TableCell className="tabular-nums">{f.numero_documento ?? '—'}</TableCell>
+                    <TableCell className="font-medium">{f.nombre_informado ?? '—'}</TableCell>
+                    <TableCell className="tabular-nums">{(f.fecha_emision ?? '').slice(0, 10)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{guaranies(Number(f.monto_total))}</TableCell>
+                    <TableCell className="text-right font-semibold tabular-nums text-destructive">
+                      {guaranies(f.saldo)}
+                    </TableCell>
+                    <TableCell>
+                      {ingresoId ? (
+                        <Link
+                          href={`/dashboard/ingresos/${ingresoId}`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Ver ingreso
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Sin ingreso</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/dashboard/facturacion/clientes/${normalizarDocumento(f.documento_receptor)}#cobro`}
+                          className="inline-flex h-7 items-center rounded-md bg-primary px-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                        >
+                          Cobrar
+                        </Link>
+                        <Link
+                          href={`/imprimir/factura/${f.cdc}`}
+                          title="Ver / imprimir factura"
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <FileText className="size-4" />
+                        </Link>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+              {dtePendientes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
+                    Sin facturas pendientes. 🎉
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="overflow-hidden rounded-xl border border-success/40 bg-success/5">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-success/30 px-4 py-2">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-success">
+              <span className="size-2 rounded-full bg-success" />
+              Cobradas
+              <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] tabular-nums">
+                {dteCobradas.length}
+              </span>
+            </h3>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>N°</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead className="text-right">Monto</TableHead>
+                <TableHead className="text-right">Cobrado</TableHead>
+                <TableHead>Ingreso</TableHead>
+                <TableHead className="w-16">Ver</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {dteCobradas.map((f) => {
+                const ingresoId = ingresoPorCdc.get(f.cdc)
+                return (
+                  <TableRow key={f.cdc}>
+                    <TableCell className="tabular-nums">{f.numero_documento ?? '—'}</TableCell>
+                    <TableCell className="font-medium">{f.nombre_informado ?? '—'}</TableCell>
+                    <TableCell className="tabular-nums">{(f.fecha_emision ?? '').slice(0, 10)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{guaranies(Number(f.monto_total))}</TableCell>
+                    <TableCell className="text-right font-semibold tabular-nums text-success">
+                      {guaranies(f.cobrado)}
+                    </TableCell>
+                    <TableCell>
+                      {ingresoId ? (
+                        <Link
+                          href={`/dashboard/ingresos/${ingresoId}`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Ver ingreso
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Sin ingreso</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/imprimir/factura/${f.cdc}`}
+                        title="Ver / imprimir factura"
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <FileText className="size-4" />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+              {dteCobradas.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-16 text-center text-sm text-muted-foreground">
+                    Todavía no hay facturas cobradas.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
     </div>
   )
 }
