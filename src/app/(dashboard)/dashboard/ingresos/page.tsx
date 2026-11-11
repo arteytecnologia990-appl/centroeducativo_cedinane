@@ -36,12 +36,15 @@ export default async function IngresosPage({
   const saldosCliente = await listarSaldos()
   const ultimosCobros = await listarCobros()
   const ingresoPorCdc = new Map(ingresos.filter((i) => i.factura_cdc).map((i) => [i.factura_cdc as string, i.id]))
-  const dtePendientes = facturas.filter((f) => f.saldo > 0)
-  const dteCobradas = facturas.filter((f) => f.saldo <= 0)
-  const totalDtePendiente = dtePendientes.reduce((s, f) => s + f.saldo, 0)
   const hoy = new Date().toISOString().slice(0, 10)
   const hoyISO = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' })
   const dia = params.dia && /^\d{4}-\d{2}-\d{2}$/.test(params.dia) ? params.dia : hoyISO
+
+  const facturasDelDia = facturas.filter((f) => (f.fecha_emision ?? '').slice(0, 10) === dia)
+  const cobrosDelDia = ultimosCobros.filter((c) => (c.fecha ?? '').slice(0, 10) === dia)
+  const dtePendientes = facturasDelDia.filter((f) => f.saldo > 0)
+  const dteCobradas = facturasDelDia.filter((f) => f.saldo <= 0)
+  const totalDtePendiente = dtePendientes.reduce((s, f) => s + f.saldo, 0)
   const [anioDia, mesDia] = dia.split('-').map(Number)
   const mesAnterior = new Date(Date.UTC(anioDia, mesDia - 2, 1, 12)).toISOString().slice(0, 7)
   const mesSiguiente = new Date(Date.UTC(anioDia, mesDia, 1, 12)).toISOString().slice(0, 7)
@@ -200,7 +203,22 @@ export default async function IngresosPage({
                 <TableCell className="text-right tabular-nums">{guaranies(c.saldo)}</TableCell>
                 <TableCell className="capitalize text-muted-foreground">{c.met_pago ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">
-                  {c.factura_cdc ? `${c.factura_cdc.slice(0, 12)}…` : 'Pendiente'}
+                  {c.factura_cdc ? (
+                    <Link
+                      href={`/dashboard/ingresos/${c.id}`}
+                      className="text-xs text-primary hover:underline"
+                      title={c.factura_cdc}
+                    >
+                      {c.factura_cdc.slice(0, 12)}…
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/dashboard/ingresos/${c.id}`}
+                      className="text-xs text-warning hover:underline"
+                    >
+                      Asignar XML
+                    </Link>
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -243,7 +261,7 @@ export default async function IngresosPage({
           <div>
             <h2 className="font-heading text-lg font-semibold text-foreground">Facturas (DTE)</h2>
             <p className="text-xs text-muted-foreground">
-              {facturas.length} XML importado(s) · {dtePendientes.length} pendiente(s) por{' '}
+              {facturasDelDia.length} DTE(s) del día · {dtePendientes.length} pendiente(s) por{' '}
               {guaranies(totalDtePendiente)} · {dteCobradas.length} cobrada(s)
             </p>
           </div>
@@ -475,7 +493,7 @@ export default async function IngresosPage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ultimosCobros.map((c) => (
+              {cobrosDelDia.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="tabular-nums">{(c.fecha ?? '').slice(0, 10)}</TableCell>
                   <TableCell className="tabular-nums">{c.documento_receptor}</TableCell>
@@ -484,7 +502,7 @@ export default async function IngresosPage({
                   <TableCell className="text-right tabular-nums">{guaranies(Number(c.monto))}</TableCell>
                 </TableRow>
               ))}
-              {ultimosCobros.length === 0 ? (
+              {cobrosDelDia.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
                     Sin cobros registrados.

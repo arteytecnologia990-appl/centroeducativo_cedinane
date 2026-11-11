@@ -69,10 +69,10 @@ const GRUPOS: Grupo[] = [
     id: 'finanzas',
     label: 'Finanzas',
     items: [
-      { href: '/dashboard/ingresos', label: 'Ingresos', Icon: Wallet },
+      { href: '/dashboard/ingresos', label: 'Ingresos y Facturación', Icon: Wallet },
       { href: '/dashboard/caja', label: 'Caja', Icon: Landmark, pronto: true },
       { href: '/dashboard/egresos', label: 'Egresos', Icon: Receipt, pronto: true },
-      { href: '/dashboard/facturacion', label: 'Facturación', Icon: FileText },
+      { href: '/dashboard/facturacion/importar', label: 'Importar XML', Icon: FileText },
       { href: '/dashboard/bancos', label: 'Bancos', Icon: Building2 },
     ],
   },
